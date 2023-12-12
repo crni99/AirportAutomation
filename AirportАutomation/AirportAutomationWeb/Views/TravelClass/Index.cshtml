@@ -1,0 +1,42 @@
+﻿@model AirportAutomationWeb.Dtos.Response.PagedResponse<AirportАutomationWeb.Dtos.TravelClass.TravelClassDto>
+
+@{
+	ViewBag.Title = "Travel Class";
+}
+
+<div class="form-horizontal">
+	<div class="form-group">
+		@if (Model != null)
+		{
+			<hr />
+			<table class="table table-responsive table-striped">
+				<thead>
+					<tr>
+						<th>
+							@Html.DisplayNameFor(model => model.Data.First().Id)
+						</th>
+						<th>
+							@Html.DisplayNameFor(model => model.Data.First().Type)
+						</th>
+					</tr>
+				</thead>
+				@foreach (var item in Model.Data)
+				{
+					<tr>
+						<td>
+							@Html.DisplayFor(modelItem => item.Id)
+						</td>
+						<td>
+							@Html.DisplayFor(modelItem => item.Type)
+						</td>
+					</tr>
+				}
+			</table>
+		}
+		else
+		{
+			@await Html.PartialAsync("_DataNotFound")
+		}
+	</div>
+</div>
+

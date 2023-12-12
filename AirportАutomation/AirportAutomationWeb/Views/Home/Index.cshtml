@@ -1,0 +1,38 @@
+﻿@model AirportAutomationWeb.Authentication.User
+
+@{
+	ViewBag.Title = "Home";
+}
+
+<div class="form-horizontal">
+	<div class="form-group">
+		<h1>Airport Automation</h1>
+		<p>The time is @DateTime.Now</p>
+	</div>
+</div>
+
+<div class="row">
+	<div class="col-md-4">
+		<form asp-action="Authenticate" method="post">
+			<div asp-validation-summary="ModelOnly" class="text-danger"></div>
+			<div class="form-group pb-3">
+				<label asp-for="UserName" class="control-label"></label>
+				<input asp-for="UserName" class="form-control" required />
+				<span asp-validation-for="UserName" class="text-danger"></span>
+			</div>
+			<div class="form-group pb-4">
+				<label asp-for="Password" class="control-label"></label>
+				<input asp-for="Password" type="password" class="form-control" required />
+				<span asp-validation-for="Password" class="text-danger"></span>
+			</div>
+			<div class="form-group">
+				<input type="submit" value="Sign In" class="btn btn-primary" />
+			</div>
+		</form>
+	</div>
+</div>
+<br />
+@if (TempData["AlertMessage"] != null)
+{
+	@await Html.PartialAsync("_AlertPartial", TempData)
+}

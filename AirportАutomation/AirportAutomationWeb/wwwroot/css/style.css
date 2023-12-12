@@ -1,0 +1,37 @@
+﻿.pagination-container {
+    display: inline-flex;
+    position: fixed;
+    bottom: 75px;
+    padding: 10px;
+    text-align: center;
+}
+
+.footer-text {
+    text-align: center;
+}
+
+tr {
+    height: 50px;
+}
+
+.pagination-container-absolute {
+    position: absolute;
+    bottom: 60px;
+    background-color: #ffffff;
+    padding: 10px 0;
+    z-index: 1000;
+}
+
+body {
+    padding-bottom: 60px;
+}
+
+@media (min-width: 769px) {
+    .form-column-align {
+        margin-top: 5rem;
+    }
+}
+
+.clickable-row {
+    cursor: pointer;
+}
