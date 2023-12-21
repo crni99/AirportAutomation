@@ -27,9 +27,13 @@ In this project, I have undertaken the challenge of developing a full-fledged We
 - Ensuring API security involves robust authentication and authorization mechanisms.
 - CORS is carefully configured to permit legitimate cross-origin requests while maintaining security against unauthorized access.
 
-## Versioning and Documenting API:
+## Versioning and Documenting API with Swagger:
 - Managing API versions to maintain backward compatibility.
 - Documenting the API endpoints for easy consumption by developers.
+
+## Logging and Exception Handling for Error Management:
+- Implementing comprehensive logging and exception handling mechanisms to track system activities, record errors, and manage unforeseen scenarios within the application.
+- This integrated approach ensures better visibility into the application's behavior, simplifies troubleshooting efforts and contributes to the overall maintainability and reliability of the API.
 
 ## API Rate Limiting:
 - Implementing a rate limiter is crucial for Protecting API Resources by preventing abuse, fortifying the system against DDoS Attacks, and Enhancing API Performance.
