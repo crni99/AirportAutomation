@@ -22,7 +22,7 @@ namespace AirportАutomationApi.Services
 
 			if (pageSize < 1)
 			{
-				_logger.LogInformation($"Invalid page size: Page size should be a positive integer between 1 and {maxPageSize}.");
+				_logger.LogInformation("Invalid page size: Page size should be a positive integer between 1 and {maxPageSize}.", maxPageSize);
 				return (false, 0, new BadRequestObjectResult($"Invalid page size. It should be between 1 and {maxPageSize}."));
 			}
 

@@ -13,62 +13,44 @@ namespace AirportAutomationWeb.Controllers
 		private readonly IHttpCallService _httpCallService;
 		private readonly IAlertService _alertService;
 		private readonly IMapper _mapper;
-		private readonly ILogger<FlightController> _logger;
 
-		public FlightController(IHttpCallService httpCallService, IAlertService alertService, IMapper mapper, ILogger<FlightController> logger)
+		public FlightController(IHttpCallService httpCallService, IAlertService alertService, IMapper mapper)
 		{
 			_httpCallService = httpCallService;
 			_alertService = alertService;
 			_mapper = mapper;
-			_logger = logger;
 		}
 
 		[HttpGet]
 		public async Task<IActionResult> Index(int page = 1, int pageSize = 10)
 		{
-			try
+			if (page < 1)
 			{
-				if (page < 1)
-				{
-					_alertService.SetAlertMessage(TempData, "invalid_page_number", false);
-					return RedirectToAction("Index");
-				}
-				var response = await _httpCallService.GetDataList<Flight>(page, pageSize);
-				if (response == null)
-				{
-					return View();
-				}
-				var pagedResponse = _mapper.Map<PagedResponse<FlightDto>>(response);
-				return View(pagedResponse);
+				_alertService.SetAlertMessage(TempData, "invalid_page_number", false);
+				return RedirectToAction("Index");
 			}
-			catch (Exception ex)
+			var response = await _httpCallService.GetDataList<Flight>(page, pageSize);
+			if (response == null)
 			{
-				_logger.LogError(ex, "An error occurred while getting data: {ErrorMessage}", ex.Message);
-				return new BadRequestObjectResult(new BaseResponse(false, $"An error occurred while getting data."));
+				return View();
 			}
+			var pagedResponse = _mapper.Map<PagedResponse<FlightDto>>(response);
+			return View(pagedResponse);
 		}
 
 		[HttpGet]
 		[Route("{id}")]
 		public async Task<IActionResult> Details(int id)
 		{
-			try
+			var response = await _httpCallService.GetData<Flight>(id);
+			if (response is null)
 			{
-				var response = await _httpCallService.GetData<Flight>(id);
-				if (response is null)
-				{
-					_alertService.SetAlertMessage(TempData, "data_not_found", false);
-					return RedirectToAction("Index");
-				}
-				else
-				{
-					return View(_mapper.Map<FlightDto>(response));
-				}
+				_alertService.SetAlertMessage(TempData, "data_not_found", false);
+				return RedirectToAction("Index");
 			}
-			catch (Exception ex)
+			else
 			{
-				_logger.LogError(ex, "An error occurred while getting data: {ErrorMessage}", ex.Message);
-				return new BadRequestObjectResult(new BaseResponse(false, $"An error occurred while getting data."));
+				return View(_mapper.Map<FlightDto>(response));
 			}
 		}
 
@@ -76,21 +58,13 @@ namespace AirportAutomationWeb.Controllers
 		[Route("GetFlightsBetweenDates")]
 		public async Task<IActionResult> GetFlightsBetweenDates([FromQuery] string startDate, [FromQuery] string endDate)
 		{
-			try
+			if (string.IsNullOrEmpty(startDate) && string.IsNullOrEmpty(endDate))
 			{
-				if (string.IsNullOrEmpty(startDate) && string.IsNullOrEmpty(endDate))
-				{
-					_alertService.SetAlertMessage(TempData, "missing_field", false);
-					return RedirectToAction("Index");
-				}
-				var response = await _httpCallService.GetDataBetweenDates<Flight>(startDate, endDate);
-				return Json(response);
+				_alertService.SetAlertMessage(TempData, "missing_field", false);
+				return RedirectToAction("Index");
 			}
-			catch (Exception ex)
-			{
-				_logger.LogError(ex, "An error occurred while getting data: {ErrorMessage}", ex.Message);
-				throw;
-			}
+			var response = await _httpCallService.GetDataBetweenDates<Flight>(startDate, endDate);
+			return Json(response);
 		}
 
 		[HttpGet]
@@ -105,24 +79,16 @@ namespace AirportAutomationWeb.Controllers
 		[ValidateAntiForgeryToken]
 		public async Task<IActionResult> CreateFlight(FlightCreateDto flightCreateDto)
 		{
-			try
+			var flight = _mapper.Map<Flight>(flightCreateDto);
+			var response = await _httpCallService.CreateData<Flight>(flight);
+			if (response is null)
 			{
-				var flight = _mapper.Map<Flight>(flightCreateDto);
-				var response = await _httpCallService.CreateData<Flight>(flight);
-				if (response is null)
-				{
-					_alertService.SetAlertMessage(TempData, "create_data_failed", false);
-					return RedirectToAction("Create");
-				}
-				else
-				{
-					return RedirectToAction("Details", new { id = response.Id });
-				}
+				_alertService.SetAlertMessage(TempData, "create_data_failed", false);
+				return RedirectToAction("Create");
 			}
-			catch (Exception ex)
+			else
 			{
-				_logger.LogError(ex, "An error occurred while creating data: {ErrorMessage}", ex.Message);
-				return new BadRequestObjectResult(new BaseResponse(false, $"An error occurred while creating data."));
+				return RedirectToAction("Details", new { id = response.Id });
 			}
 		}
 
@@ -130,23 +96,15 @@ namespace AirportAutomationWeb.Controllers
 		[Route("Edit/{id}")]
 		public async Task<IActionResult> Edit(int id)
 		{
-			try
+			var response = await _httpCallService.GetData<Flight>(id);
+			if (response is null)
 			{
-				var response = await _httpCallService.GetData<Flight>(id);
-				if (response is null)
-				{
-					_alertService.SetAlertMessage(TempData, "data_not_found", false);
-					return RedirectToAction("Details", new { id });
-				}
-				else
-				{
-					return View(_mapper.Map<FlightDto>(response));
-				}
+				_alertService.SetAlertMessage(TempData, "data_not_found", false);
+				return RedirectToAction("Details", new { id });
 			}
-			catch (Exception ex)
+			else
 			{
-				_logger.LogError(ex, "An error occurred while getting data: {ErrorMessage}", ex.Message);
-				return new BadRequestObjectResult(new BaseResponse(false, $"An error occurred while getting data."));
+				return View(_mapper.Map<FlightDto>(response));
 			}
 		}
 
@@ -155,25 +113,17 @@ namespace AirportAutomationWeb.Controllers
 		[ValidateAntiForgeryToken]
 		public async Task<IActionResult> EditFlight(FlightDto flightDto)
 		{
-			try
+			var flight = _mapper.Map<Flight>(flightDto);
+			var response = await _httpCallService.EditData<Flight>(flight, flight.Id);
+			if (response)
 			{
-				var flight = _mapper.Map<Flight>(flightDto);
-				var response = await _httpCallService.EditData<Flight>(flight, flight.Id);
-				if (response)
-				{
-					_alertService.SetAlertMessage(TempData, "edit_data_success", true);
-					return RedirectToAction("Details", new { id = flightDto.Id });
-				}
-				else
-				{
-					_alertService.SetAlertMessage(TempData, "edit_data_failed", false);
-					return RedirectToAction("Edit", new { id = flightDto.Id });
-				}
+				_alertService.SetAlertMessage(TempData, "edit_data_success", true);
+				return RedirectToAction("Details", new { id = flightDto.Id });
 			}
-			catch (Exception ex)
+			else
 			{
-				_logger.LogError(ex, "An error occurred while editing data: {ErrorMessage}", ex.Message);
-				return new BadRequestObjectResult(new BaseResponse(false, $"An error occurred while editing data."));
+				_alertService.SetAlertMessage(TempData, "edit_data_failed", false);
+				return RedirectToAction("Edit", new { id = flightDto.Id });
 			}
 		}
 
@@ -181,24 +131,16 @@ namespace AirportAutomationWeb.Controllers
 		[Route("Delete/{id}")]
 		public async Task<IActionResult> Delete(int id)
 		{
-			try
+			var response = await _httpCallService.DeleteData<Flight>(id);
+			if (response)
 			{
-				var response = await _httpCallService.DeleteData<Flight>(id);
-				if (response)
-				{
-					_alertService.SetAlertMessage(TempData, "delete_data_success", true);
-					return RedirectToAction("Index");
-				}
-				else
-				{
-					_alertService.SetAlertMessage(TempData, "delete_data_failed", false);
-					return RedirectToAction("Details", new { id });
-				}
+				_alertService.SetAlertMessage(TempData, "delete_data_success", true);
+				return RedirectToAction("Index");
 			}
-			catch (Exception ex)
+			else
 			{
-				_logger.LogError(ex, "An error occurred while deleting data: {ErrorMessage}", ex.Message);
-				return new BadRequestObjectResult(new BaseResponse(false, $"An error occurred while deleting data."));
+				_alertService.SetAlertMessage(TempData, "delete_data_failed", false);
+				return RedirectToAction("Details", new { id });
 			}
 		}
 
@@ -206,20 +148,12 @@ namespace AirportAutomationWeb.Controllers
 		[Route("GetFlights")]
 		public async Task<IActionResult> GetFlights(int page = 1, int pageSize = 10)
 		{
-			try
+			var response = await _httpCallService.GetDataList<Flight>(page, pageSize);
+			if (response == null || response.Data == null || !response.Data.Any())
 			{
-				var response = await _httpCallService.GetDataList<Flight>(page, pageSize);
-				if (response == null || response.Data == null || !response.Data.Any())
-				{
-					return Json(new { success = false, data = response });
-				}
-				return Json(new { success = true, data = response });
+				return Json(new { success = false, data = response });
 			}
-			catch (Exception ex)
-			{
-				_logger.LogError(ex, "An error occurred while getting data: {ErrorMessage}", ex.Message);
-				throw;
-			}
+			return Json(new { success = true, data = response });
 		}
 
 	}

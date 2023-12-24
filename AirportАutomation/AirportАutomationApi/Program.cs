@@ -1,5 +1,6 @@
 ﻿using AirportAutomationApi.Binders;
 using AirportAutomationApi.Data;
+using AirportAutomationServices.Middlewares;
 using AirportАutomationApi.Helpers;
 using AspNetCoreRateLimit;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -157,6 +158,7 @@ app.UseHttpsRedirection();
 app.UseCors("_AllowAll");
 app.UseIpRateLimiting();
 app.UseAuthentication();
+app.UseMiddleware<GlobalExceptionHandler>();
 app.UseAuthorization();
 
 app.MapControllers();

@@ -54,29 +54,21 @@ namespace AirportAutomationApi.Controllers
 		[ProducesResponseType(401)]
 		public async Task<ActionResult<PagedResponse<AirlineDto>>> GetAirlines([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
 		{
-			try
+			var (isValid, correctedPageSize, result) = _paginationValidationService.ValidatePaginationParameters(page, pageSize, maxPageSize);
+			if (!isValid)
 			{
-				var (isValid, correctedPageSize, result) = _paginationValidationService.ValidatePaginationParameters(page, pageSize, maxPageSize);
-				if (!isValid)
-				{
-					return result;
-				}
-				var airlines = await _airlineService.GetAirlines(page, correctedPageSize);
-				if (airlines is null || !airlines.Any())
-				{
-					_logger.LogInformation("Airlines not found.");
-					return NoContent();
-				}
-				var totalItems = _airlineService.AirlinesCount();
-				var data = _mapper.Map<IEnumerable<AirlineDto>>(airlines);
-				var response = new PagedResponse<AirlineDto>(data, page, correctedPageSize, totalItems);
-				return Ok(response);
+				return result;
 			}
-			catch (Exception ex)
+			var airlines = await _airlineService.GetAirlines(page, correctedPageSize);
+			if (airlines is null || !airlines.Any())
 			{
-				_logger.LogError(ex, "Error getting airlines list.");
-				throw;
+				_logger.LogInformation("Airlines not found.");
+				return NoContent();
 			}
+			var totalItems = _airlineService.AirlinesCount();
+			var data = _mapper.Map<IEnumerable<AirlineDto>>(airlines);
+			var response = new PagedResponse<AirlineDto>(data, page, correctedPageSize, totalItems);
+			return Ok(response);
 		}
 
 		/// <summary>
@@ -85,30 +77,23 @@ namespace AirportAutomationApi.Controllers
 		/// <param name="id"></param>
 		/// <returns>A single airline that match the specified id.</returns>
 		/// <response code="200">Returns a single airline if any is found.</response>
-		/// <response code="204">If no airline is found.</response>
+		/// <response code="404">If no airline is found.</response>
 		/// <response code="401">If user do not have permission to access the requested resource.</response>
 		[HttpGet("{id}")]
 		[ProducesResponseType(200, Type = typeof(AirlineDto))]
-		[ProducesResponseType(204)]
+		[ProducesResponseType(404)]
 		[ProducesResponseType(401)]
 		public async Task<ActionResult<AirlineDto>> GetAirline(int id)
 		{
-			try
+
+			if (!_airlineService.AirlineExists(id))
 			{
-				if (!_airlineService.AirlineExists(id))
-				{
-					_logger.LogInformation("Airline with id {id} not found.", id);
-					return NotFound();
-				}
-				var airline = await _airlineService.GetAirline(id);
-				var airlineDto = _mapper.Map<AirlineDto>(airline);
-				return Ok(airlineDto);
+				_logger.LogInformation("Airline with id {id} not found.", id);
+				return NotFound();
 			}
-			catch (Exception ex)
-			{
-				_logger.LogError(ex, "Error getting airline with id: {RequestId} .", id);
-				throw;
-			}
+			var airline = await _airlineService.GetAirline(id);
+			var airlineDto = _mapper.Map<AirlineDto>(airline);
+			return Ok(airlineDto);
 		}
 
 		/// <summary>
@@ -117,30 +102,22 @@ namespace AirportAutomationApi.Controllers
 		/// <param name="name">The name to search for.</param>
 		/// <returns>A list of airlines that match the specified name.</returns>
 		/// <response code="200">Returns a list of airlines if any are found.</response>
-		/// <response code="204">If no airlines are found.</response>
+		/// <response code="404">If no airlines are found.</response>
 		/// <response code="401">If user do not have permission to access the requested resource.</response>
 		[HttpGet("byName/{name}")]
 		[ProducesResponseType(200, Type = typeof(IEnumerable<AirlineDto>))]
-		[ProducesResponseType(204)]
+		[ProducesResponseType(404)]
 		[ProducesResponseType(401)]
 		public async Task<ActionResult<IEnumerable<AirlineDto>>> GetAirlinesByName(string name)
 		{
-			try
+			var airlines = await _airlineService.GetAirlinesByName(name);
+			if (airlines is null || airlines.Count == 0)
 			{
-				var airlines = await _airlineService.GetAirlinesByName(name);
-				if (airlines is null || airlines.Count == 0)
-				{
-					_logger.LogInformation("Airline with name {AirlineName} not found.", name);
-					return NotFound();
-				}
-				var airlinesDto = _mapper.Map<IEnumerable<AirlineDto>>(airlines);
-				return Ok(airlinesDto);
+				_logger.LogInformation("Airline with name {AirlineName} not found.", name);
+				return NotFound();
 			}
-			catch (Exception ex)
-			{
-				_logger.LogInformation(ex, "Airline with name {AirlineName} not found.", name);
-				throw;
-			}
+			var airlinesDto = _mapper.Map<IEnumerable<AirlineDto>>(airlines);
+			return Ok(airlinesDto);
 		}
 
 		/// <summary>
@@ -148,7 +125,7 @@ namespace AirportAutomationApi.Controllers
 		/// </summary>
 		/// <param name="airlineCreateDto"></param>
 		/// <returns>The created airline.</returns>
-		/// <response code="200">Returns the created airline if successful.</response>
+		/// <response code="201">Returns the created airline if successful.</response>
 		/// <response code="400">If the request is invalid or if there's a validation error.</response>
 		/// <response code="401">If user do not have permission to access the requested resource.</response>
 		[HttpPost]
@@ -157,17 +134,9 @@ namespace AirportAutomationApi.Controllers
 		[ProducesResponseType(401)]
 		public async Task<ActionResult<Airline>> PostAirline(AirlineCreateDto airlineCreateDto)
 		{
-			try
-			{
-				var airline = _mapper.Map<Airline>(airlineCreateDto);
-				await _airlineService.PostAirline(airline);
-				return CreatedAtAction("GetAirline", new { id = airline.Id }, airline);
-			}
-			catch (Exception ex)
-			{
-				_logger.LogError(ex, $"Error creating airline.");
-				throw;
-			}
+			var airline = _mapper.Map<Airline>(airlineCreateDto);
+			await _airlineService.PostAirline(airline);
+			return CreatedAtAction("GetAirline", new { id = airline.Id }, airline);
 		}
 
 		/// <summary>
@@ -176,8 +145,8 @@ namespace AirportAutomationApi.Controllers
 		/// <param name="id">The ID of the airline to update.</param>
 		/// <param name="airlineDto">The updated airline data.</param>
 		/// <response code="204">No content. The update was successful.</response>
-		/// <response code="404">If the request is invalid or if there's a validation error.</response>
-		/// <response code="204">If the airline with the specified ID is not found.</response>
+		/// <response code="400">If the request is invalid or if there's a validation error.</response>
+		/// <response code="404">If the airline with the specified ID is not found.</response>
 		/// <response code="401">If user do not have permission to access the requested resource.</response>
 		[HttpPut("{id}")]
 		[ProducesResponseType(204)]
@@ -186,28 +155,20 @@ namespace AirportAutomationApi.Controllers
 		[ProducesResponseType(401)]
 		public async Task<IActionResult> PutAirline(int id, AirlineDto airlineDto)
 		{
-			try
+			if (id != airlineDto.Id)
 			{
-				if (id != airlineDto.Id)
-				{
-					_logger.LogInformation("Airline with id {id} is different from provided Airline and its id.", id);
-					return BadRequest();
-				}
+				_logger.LogInformation("Airline with id {id} is different from provided Airline and its id.", id);
+				return BadRequest();
+			}
 
-				if (!_airlineService.AirlineExists(id))
-				{
-					_logger.LogInformation("Airline with id {id} not found.", id);
-					return NotFound();
-				}
-				var airline = _mapper.Map<Airline>(airlineDto);
-				await _airlineService.PutAirline(airline);
-				return NoContent();
-			}
-			catch (Exception ex)
+			if (!_airlineService.AirlineExists(id))
 			{
-				_logger.LogError(ex, "Error updating airline with id: {id} .", id);
-				throw;
+				_logger.LogInformation("Airline with id {id} not found.", id);
+				return NotFound();
 			}
+			var airline = _mapper.Map<Airline>(airlineDto);
+			await _airlineService.PutAirline(airline);
+			return NoContent();
 		}
 
 		/// <summary>
@@ -224,32 +185,24 @@ namespace AirportAutomationApi.Controllers
 		///     "value": "NewName"
 		/// }
 		/// </remarks>
-		/// <response code="204">No content. The partial update was successful.</response>
+		/// <response code="200">The partial update was successful.</response>
 		/// <response code="400">If the request is invalid or if there's a validation error.</response>
 		/// <response code="404">If the airline with the specified ID is not found.</response>
 		/// <response code="401">If user do not have permission to access the requested resource.</response>
 		[HttpPatch("{id}")]
-		[ProducesResponseType(204)]
+		[ProducesResponseType(200)]
 		[ProducesResponseType(400)]
 		[ProducesResponseType(404)]
 		[ProducesResponseType(401)]
 		public async Task<IActionResult> PatchAirline(int id, [FromBody] JsonPatchDocument airlineDocument)
 		{
-			try
+			if (!_airlineService.AirlineExists(id))
 			{
-				if (!_airlineService.AirlineExists(id))
-				{
-					_logger.LogInformation("Airline with id {id} not found.", id);
-					return NotFound();
-				}
-				var updatedAirline = await _airlineService.PatchAirline(id, airlineDocument);
-				return Ok(updatedAirline);
+				_logger.LogInformation("Airline with id {id} not found.", id);
+				return NotFound();
 			}
-			catch (Exception ex)
-			{
-				_logger.LogError(ex, "Error patching airline with id: {id} .", id);
-				throw;
-			}
+			var updatedAirline = await _airlineService.PatchAirline(id, airlineDocument);
+			return Ok(updatedAirline);
 		}
 
 		/// <summary>
@@ -257,7 +210,7 @@ namespace AirportAutomationApi.Controllers
 		/// </summary>
 		/// <param name="id">The ID of the airline to delete.</param>
 		/// <response code="204">No content. The deletion was successful.</response>
-		/// <response code="204">If the airline with the specified ID is not found.</response>
+		/// <response code="404">If the airline with the specified ID is not found.</response>
 		/// <response code="401">If user do not have permission to access the requested resource.</response>
 		/// <response code="409">Conflict. If the passenger cannot be deleted because it is being referenced by other entities.</response>
 		[HttpDelete("{id}")]
@@ -267,28 +220,21 @@ namespace AirportAutomationApi.Controllers
 		[ProducesResponseType(409)]
 		public async Task<IActionResult> DeleteAirline(int id)
 		{
-			try
+
+			if (!_airlineService.AirlineExists(id))
 			{
-				if (!_airlineService.AirlineExists(id))
-				{
-					_logger.LogInformation("Airline with id {id} not found.", id);
-					return NotFound();
-				}
-				bool deleted = await _airlineService.DeleteAirline(id);
-				if (deleted)
-				{
-					return NoContent();
-				}
-				else
-				{
-					_logger.LogInformation("Airline with id {id} is being referenced by other entities and cannot be deleted.", id);
-					return Conflict("Airline cannot be deleted because it is being referenced by other entities.");
-				}
+				_logger.LogInformation("Airline with id {id} not found.", id);
+				return NotFound();
 			}
-			catch (Exception ex)
+			bool deleted = await _airlineService.DeleteAirline(id);
+			if (deleted)
 			{
-				_logger.LogError(ex, "Error deleting airline with id: {id} .", id);
-				throw;
+				return NoContent();
+			}
+			else
+			{
+				_logger.LogInformation("Airline with id {id} is being referenced by other entities and cannot be deleted.", id);
+				return Conflict("Airline cannot be deleted because it is being referenced by other entities.");
 			}
 		}
 

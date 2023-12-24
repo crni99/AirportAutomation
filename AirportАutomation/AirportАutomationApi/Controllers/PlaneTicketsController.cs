@@ -54,29 +54,21 @@ namespace AirportAutomationApi.Controllers
 		[ProducesResponseType(401)]
 		public async Task<ActionResult<PagedResponse<PlaneTicketDto>>> GetPlaneTickets([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
 		{
-			try
+			var (isValid, correctedPageSize, result) = _paginationValidationService.ValidatePaginationParameters(page, pageSize, maxPageSize);
+			if (!isValid)
 			{
-				var (isValid, correctedPageSize, result) = _paginationValidationService.ValidatePaginationParameters(page, pageSize, maxPageSize);
-				if (!isValid)
-				{
-					return result;
-				}
-				var planeTickets = await _planeTicketService.GetPlaneTickets(page, correctedPageSize);
-				if (planeTickets is null || !planeTickets.Any())
-				{
-					_logger.LogInformation("Plane tickets not found.");
-					return NoContent();
-				}
-				var totalItems = _planeTicketService.PlaneTicketsCount();
-				var data = _mapper.Map<IEnumerable<PlaneTicketDto>>(planeTickets);
-				var response = new PagedResponse<PlaneTicketDto>(data, page, correctedPageSize, totalItems);
-				return Ok(response);
+				return result;
 			}
-			catch (Exception ex)
+			var planeTickets = await _planeTicketService.GetPlaneTickets(page, correctedPageSize);
+			if (planeTickets is null || !planeTickets.Any())
 			{
-				_logger.LogError(ex, "Error getting plane tickets list.");
-				throw;
+				_logger.LogInformation("Plane tickets not found.");
+				return NoContent();
 			}
+			var totalItems = _planeTicketService.PlaneTicketsCount();
+			var data = _mapper.Map<IEnumerable<PlaneTicketDto>>(planeTickets);
+			var response = new PagedResponse<PlaneTicketDto>(data, page, correctedPageSize, totalItems);
+			return Ok(response);
 		}
 
 		/// <summary>
@@ -98,27 +90,19 @@ namespace AirportAutomationApi.Controllers
 			[FromQuery] int? minPrice = null,
 			[FromQuery] int? maxPrice = null)
 		{
-			try
+			if (!minPrice.HasValue && !maxPrice.HasValue)
 			{
-				if (!minPrice.HasValue && !maxPrice.HasValue)
-				{
-					_logger.LogInformation("Both min price and max price are missing in the request.");
-					return BadRequest("Both min price and max price are missing in the request.");
-				}
-				var planeTickets = await _planeTicketService.GetPlaneTicketsForPrice(minPrice, maxPrice);
-				if (planeTickets is null || !planeTickets.Any())
-				{
-					_logger.LogInformation("Plane tickets not found.");
-					return NoContent();
-				}
-				var planeTicketsDto = _mapper.Map<IEnumerable<PlaneTicketDto>>(planeTickets);
-				return Ok(planeTicketsDto);
+				_logger.LogInformation("Both min price and max price are missing in the request.");
+				return BadRequest("Both min price and max price are missing in the request.");
 			}
-			catch (Exception ex)
+			var planeTickets = await _planeTicketService.GetPlaneTicketsForPrice(minPrice, maxPrice);
+			if (planeTickets is null || !planeTickets.Any())
 			{
-				_logger.LogError(ex, "Error getting plane tickets list.");
-				throw;
+				_logger.LogInformation("Plane tickets not found.");
+				return NoContent();
 			}
+			var planeTicketsDto = _mapper.Map<IEnumerable<PlaneTicketDto>>(planeTickets);
+			return Ok(planeTicketsDto);
 		}
 
 		/// <summary>
@@ -135,22 +119,14 @@ namespace AirportAutomationApi.Controllers
 		[ProducesResponseType(401)]
 		public async Task<ActionResult<PlaneTicketDto>> GetPlaneTicket(int id)
 		{
-			try
+			if (!_planeTicketService.PlaneTicketExists(id))
 			{
-				if (!_planeTicketService.PlaneTicketExists(id))
-				{
-					_logger.LogInformation("Plane ticket with id {id} not found.", id);
-					return NotFound();
-				}
-				var planeTicket = await _planeTicketService.GetPlaneTicket(id);
-				var planeTicketDto = _mapper.Map<PlaneTicketDto>(planeTicket);
-				return Ok(planeTicketDto);
+				_logger.LogInformation("Plane ticket with id {id} not found.", id);
+				return NotFound();
 			}
-			catch (Exception ex)
-			{
-				_logger.LogError(ex, "Error getting plane ticket with id: {id} .", id);
-				throw;
-			}
+			var planeTicket = await _planeTicketService.GetPlaneTicket(id);
+			var planeTicketDto = _mapper.Map<PlaneTicketDto>(planeTicket);
+			return Ok(planeTicketDto);
 		}
 
 		/// <summary>
@@ -158,7 +134,7 @@ namespace AirportAutomationApi.Controllers
 		/// </summary>
 		/// <param name="planeTicketCreateDto"></param>
 		/// <returns>The created plane ticket.</returns>
-		/// <response code="200">Returns the created plane ticket if successful.</response>
+		/// <response code="201">Returns the created plane ticket if successful.</response>
 		/// <response code="400">If the request is invalid or if there's a validation error.</response>
 		/// <response code="401">If user do not have permission to access the requested resource.</response>
 		[HttpPost]
@@ -196,27 +172,19 @@ namespace AirportAutomationApi.Controllers
 		[ProducesResponseType(401)]
 		public async Task<IActionResult> PutPlaneTicket(int id, PlaneTicketUpdateDto planeTicketUpdateDto)
 		{
-			try
+			if (id != planeTicketUpdateDto.Id)
 			{
-				if (id != planeTicketUpdateDto.Id)
-				{
-					_logger.LogInformation("Plane Ticket with id {id} is different from provided Plane Ticket and his id.", id);
-					return BadRequest();
-				}
-				if (!_planeTicketService.PlaneTicketExists(id))
-				{
-					_logger.LogInformation("Plane ticket with id {id} not found.", id);
-					return NotFound();
-				}
-				var planeTicket = _mapper.Map<PlaneTicket>(planeTicketUpdateDto);
-				await _planeTicketService.PutPlaneTicket(planeTicket);
-				return NoContent();
+				_logger.LogInformation("Plane Ticket with id {id} is different from provided Plane Ticket and his id.", id);
+				return BadRequest();
 			}
-			catch (Exception ex)
+			if (!_planeTicketService.PlaneTicketExists(id))
 			{
-				_logger.LogError(ex, "Error updating plane ticket with id: {id} .", id);
-				throw;
+				_logger.LogInformation("Plane ticket with id {id} not found.", id);
+				return NotFound();
 			}
+			var planeTicket = _mapper.Map<PlaneTicket>(planeTicketUpdateDto);
+			await _planeTicketService.PutPlaneTicket(planeTicket);
+			return NoContent();
 		}
 
 		/// <summary>
@@ -244,21 +212,13 @@ namespace AirportAutomationApi.Controllers
 		[ProducesResponseType(401)]
 		public async Task<IActionResult> PatchPlaneTicket(int id, [FromBody] JsonPatchDocument planeTicketDocument)
 		{
-			try
+			if (!_planeTicketService.PlaneTicketExists(id))
 			{
-				if (!_planeTicketService.PlaneTicketExists(id))
-				{
-					_logger.LogInformation("Plane Ticket with id {id} not found.", id);
-					return NotFound();
-				}
-				var updatedPatchPlane = await _planeTicketService.PatchPlaneTicket(id, planeTicketDocument);
-				return Ok(updatedPatchPlane);
+				_logger.LogInformation("Plane Ticket with id {id} not found.", id);
+				return NotFound();
 			}
-			catch (Exception ex)
-			{
-				_logger.LogError(ex, "Error patching plane ticket with id: {id} .", id);
-				throw;
-			}
+			var updatedPatchPlane = await _planeTicketService.PatchPlaneTicket(id, planeTicketDocument);
+			return Ok(updatedPatchPlane);
 		}
 
 		/// <summary>
@@ -274,21 +234,13 @@ namespace AirportAutomationApi.Controllers
 		[ProducesResponseType(401)]
 		public async Task<IActionResult> DeletePlaneTicket(int id)
 		{
-			try
+			if (!_planeTicketService.PlaneTicketExists(id))
 			{
-				if (!_planeTicketService.PlaneTicketExists(id))
-				{
-					_logger.LogInformation("Plane ticket with id {id} not found.", id);
-					return NotFound();
-				}
-				await _planeTicketService.DeletePlaneTicket(id);
-				return NoContent();
+				_logger.LogInformation("Plane ticket with id {id} not found.", id);
+				return NotFound();
 			}
-			catch (Exception ex)
-			{
-				_logger.LogError(ex, "Error deleting plane ticket with id: {id} .", id);
-				throw;
-			}
+			await _planeTicketService.DeletePlaneTicket(id);
+			return NoContent();
 		}
 
 	}

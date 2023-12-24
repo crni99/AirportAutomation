@@ -53,29 +53,21 @@ namespace AirportAutomationApi.Controllers
 		[ProducesResponseType(401)]
 		public async Task<ActionResult<PagedResponse<PilotDto>>> GetPilots([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
 		{
-			try
+			var (isValid, correctedPageSize, result) = _paginationValidationService.ValidatePaginationParameters(page, pageSize, maxPageSize);
+			if (!isValid)
 			{
-				var (isValid, correctedPageSize, result) = _paginationValidationService.ValidatePaginationParameters(page, pageSize, maxPageSize);
-				if (!isValid)
-				{
-					return result;
-				}
-				var pilots = await _pilotService.GetPilots(page, correctedPageSize);
-				if (pilots is null || !pilots.Any())
-				{
-					_logger.LogInformation("Pilots not found.");
-					return NoContent();
-				}
-				var totalItems = _pilotService.PilotsCount();
-				var data = _mapper.Map<IEnumerable<PilotDto>>(pilots);
-				var response = new PagedResponse<PilotDto>(data, page, correctedPageSize, totalItems);
-				return Ok(response);
+				return result;
 			}
-			catch (Exception ex)
+			var pilots = await _pilotService.GetPilots(page, correctedPageSize);
+			if (pilots is null || !pilots.Any())
 			{
-				_logger.LogError(ex, "Error getting pilots list.");
-				throw;
+				_logger.LogInformation("Pilots not found.");
+				return NoContent();
 			}
+			var totalItems = _pilotService.PilotsCount();
+			var data = _mapper.Map<IEnumerable<PilotDto>>(pilots);
+			var response = new PagedResponse<PilotDto>(data, page, correctedPageSize, totalItems);
+			return Ok(response);
 		}
 
 		/// <summary>
@@ -92,22 +84,14 @@ namespace AirportAutomationApi.Controllers
 		[ProducesResponseType(401)]
 		public async Task<ActionResult<PilotDto>> GetPilot(int id)
 		{
-			try
+			if (!_pilotService.PilotExists(id))
 			{
-				if (!_pilotService.PilotExists(id))
-				{
-					_logger.LogInformation("Pilot with id {id} not found.", id);
-					return NotFound();
-				}
-				var pilot = await _pilotService.GetPilot(id);
-				var pilotDto = _mapper.Map<PilotDto>(pilot);
-				return Ok(pilotDto);
+				_logger.LogInformation("Pilot with id {id} not found.", id);
+				return NotFound();
 			}
-			catch (Exception ex)
-			{
-				_logger.LogError(ex, "Error getting pilot with id: {id} .", id);
-				throw;
-			}
+			var pilot = await _pilotService.GetPilot(id);
+			var pilotDto = _mapper.Map<PilotDto>(pilot);
+			return Ok(pilotDto);
 		}
 
 		/// <summary>
@@ -127,27 +111,19 @@ namespace AirportAutomationApi.Controllers
 			[FromQuery] string? firstName = null,
 			[FromQuery] string? lastName = null)
 		{
-			try
+			if (string.IsNullOrEmpty(firstName) && string.IsNullOrEmpty(lastName))
 			{
-				if (string.IsNullOrEmpty(firstName) && string.IsNullOrEmpty(lastName))
-				{
-					_logger.LogInformation("Both first name and last name are missing in the request.");
-					return BadRequest("Both first name and last name are missing in the request.");
-				}
-				var pilots = await _pilotService.GetPilotsByName(firstName, lastName);
-				if (pilots == null || pilots.Count == 0)
-				{
-					_logger.LogInformation("Pilots not found.");
-					return NotFound();
-				}
-				var pilotsDto = _mapper.Map<IEnumerable<PilotDto>>(pilots);
-				return Ok(pilotsDto);
+				_logger.LogInformation("Both first name and last name are missing in the request.");
+				return BadRequest("Both first name and last name are missing in the request.");
 			}
-			catch (Exception ex)
+			var pilots = await _pilotService.GetPilotsByName(firstName, lastName);
+			if (pilots == null || pilots.Count == 0)
 			{
-				_logger.LogError(ex, "Error getting pilot with first name: {firstName} or last name: {lastName}.", firstName, lastName);
-				throw;
+				_logger.LogInformation("Pilots not found.");
+				return NotFound();
 			}
+			var pilotsDto = _mapper.Map<IEnumerable<PilotDto>>(pilots);
+			return Ok(pilotsDto);
 		}
 
 		/// <summary>
@@ -155,7 +131,7 @@ namespace AirportAutomationApi.Controllers
 		/// </summary>
 		/// <param name="pilotCreateDto"></param>
 		/// <returns>The created pilot.</returns>
-		/// <response code="200">Returns the created pilot if successful.</response>
+		/// <response code="201">Returns the created pilot if successful.</response>
 		/// <response code="400">If the request is invalid or if there's a validation error.</response>
 		/// <response code="401">If user do not have permission to access the requested resource.</response>
 		[HttpPost]
@@ -164,17 +140,9 @@ namespace AirportAutomationApi.Controllers
 		[ProducesResponseType(401)]
 		public async Task<ActionResult<Pilot>> PostPilot(PilotCreateDto pilotCreateDto)
 		{
-			try
-			{
-				var pilot = _mapper.Map<Pilot>(pilotCreateDto);
-				await _pilotService.PostPilot(pilot);
-				return CreatedAtAction("GetPilot", new { id = pilot.Id }, pilot);
-			}
-			catch (Exception ex)
-			{
-				_logger.LogError(ex, "Error creating pilot.");
-				throw;
-			}
+			var pilot = _mapper.Map<Pilot>(pilotCreateDto);
+			await _pilotService.PostPilot(pilot);
+			return CreatedAtAction("GetPilot", new { id = pilot.Id }, pilot);
 		}
 
 		/// <summary>
@@ -193,27 +161,19 @@ namespace AirportAutomationApi.Controllers
 		[ProducesResponseType(401)]
 		public async Task<IActionResult> PutPilot(int id, PilotDto pilotDto)
 		{
-			try
+			if (id != pilotDto.Id)
 			{
-				if (id != pilotDto.Id)
-				{
-					_logger.LogInformation("Pilot with id {id} is different from provided Pilot and his id.", id);
-					return BadRequest();
-				}
-				if (!_pilotService.PilotExists(id))
-				{
-					_logger.LogInformation("Pilot with id {id} not found.", id);
-					return NotFound();
-				}
-				var pilot = _mapper.Map<Pilot>(pilotDto);
-				await _pilotService.PutPilot(pilot);
-				return NoContent();
+				_logger.LogInformation("Pilot with id {id} is different from provided Pilot and his id.", id);
+				return BadRequest();
 			}
-			catch (Exception ex)
+			if (!_pilotService.PilotExists(id))
 			{
-				_logger.LogError(ex, "Error updating pilot with id: {id} .", id);
-				throw;
+				_logger.LogInformation("Pilot with id {id} not found.", id);
+				return NotFound();
 			}
+			var pilot = _mapper.Map<Pilot>(pilotDto);
+			await _pilotService.PutPilot(pilot);
+			return NoContent();
 		}
 
 		/// <summary>
@@ -241,21 +201,13 @@ namespace AirportAutomationApi.Controllers
 		[ProducesResponseType(401)]
 		public async Task<IActionResult> PatchPilot(int id, [FromBody] JsonPatchDocument pilotDocument)
 		{
-			try
+			if (!_pilotService.PilotExists(id))
 			{
-				if (!_pilotService.PilotExists(id))
-				{
-					_logger.LogInformation("Pilot with id {id} not found.", id);
-					return NotFound();
-				}
-				var updatedPilot = await _pilotService.PatchPilot(id, pilotDocument);
-				return Ok(updatedPilot);
+				_logger.LogInformation("Pilot with id {id} not found.", id);
+				return NotFound();
 			}
-			catch (Exception ex)
-			{
-				_logger.LogError(ex, "Error patching pilot with id: {id} .", id);
-				throw;
-			}
+			var updatedPilot = await _pilotService.PatchPilot(id, pilotDocument);
+			return Ok(updatedPilot);
 		}
 
 		/// <summary>
@@ -273,28 +225,20 @@ namespace AirportAutomationApi.Controllers
 		[ProducesResponseType(409)]
 		public async Task<IActionResult> DeletePilot(int id)
 		{
-			try
+			if (!_pilotService.PilotExists(id))
 			{
-				if (!_pilotService.PilotExists(id))
-				{
-					_logger.LogInformation("Pilot with id {id} not found.", id);
-					return NotFound();
-				}
-				bool deleted = await _pilotService.DeletePilot(id);
-				if (deleted)
-				{
-					return NoContent();
-				}
-				else
-				{
-					_logger.LogInformation("Pilot with id {id} is being referenced by other entities and cannot be deleted.", id);
-					return Conflict("Pilot cannot be deleted because it is being referenced by other entities.");
-				}
+				_logger.LogInformation("Pilot with id {id} not found.", id);
+				return NotFound();
 			}
-			catch (Exception ex)
+			bool deleted = await _pilotService.DeletePilot(id);
+			if (deleted)
 			{
-				_logger.LogError(ex, "Error deleting pilot with id: {id} .", id);
-				throw;
+				return NoContent();
+			}
+			else
+			{
+				_logger.LogInformation("Pilot with id {id} is being referenced by other entities and cannot be deleted.", id);
+				return Conflict("Pilot cannot be deleted because it is being referenced by other entities.");
 			}
 		}
 

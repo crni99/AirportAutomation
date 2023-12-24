@@ -10,37 +10,27 @@ namespace AirportAutomationWeb.Controllers
 	public class HomeController : Controller
 	{
 		private readonly IHttpCallService _httpCallService;
-		private readonly ILogger<HomeController> _logger;
 		private readonly IAlertService _alertService;
 
-		public HomeController(IHttpCallService httpCallService, ILogger<HomeController> logger, IAlertService alertService)
+		public HomeController(IHttpCallService httpCallService, IAlertService alertService)
 		{
 			_httpCallService = httpCallService;
-			_logger = logger;
 			_alertService = alertService;
 		}
 
 		[HttpGet]
 		public IActionResult Index(bool logout = false)
 		{
-			try
+			if (logout)
 			{
-				if (logout)
-				{
-					_alertService.SetAlertMessage(TempData, "logout_success", true);
-				}
-				string token = _httpCallService.GetToken();
-				if (!string.IsNullOrEmpty(token))
-				{
-					return Redirect("TravelClass");
-				}
-				return View("Index");
+				_alertService.SetAlertMessage(TempData, "logout_success", true);
 			}
-			catch (Exception ex)
+			string token = _httpCallService.GetToken();
+			if (!string.IsNullOrEmpty(token))
 			{
-				_logger.LogError(ex, "An error occurred while getting data: {ErrorMessage}", ex.Message);
-				return new BadRequestObjectResult(new BaseResponse(false, $"An error occurred while getting data."));
+				return Redirect("TravelClass");
 			}
+			return View("Index");
 		}
 
 		[HttpPost]
@@ -50,21 +40,13 @@ namespace AirportAutomationWeb.Controllers
 		{
 			if (ModelState.IsValid)
 			{
-				try
+				var response = await _httpCallService.Authenticate(user);
+				if (!response)
 				{
-					var response = await _httpCallService.Authenticate(user);
-					if (!response)
-					{
-						_alertService.SetAlertMessage(TempData, "login_failed", false);
-						return Redirect("/");
-					}
-					return Redirect("TravelClass");
+					_alertService.SetAlertMessage(TempData, "login_failed", false);
+					return Redirect("/");
 				}
-				catch (Exception ex)
-				{
-					_logger.LogError(ex, "An error occurred while getting data: {ErrorMessage}", ex.Message);
-					return new BadRequestObjectResult(new BaseResponse(false, $"An error occurred while getting data."));
-				}
+				return Redirect("TravelClass");
 			}
 			else { return RedirectToAction("Index"); }
 		}
@@ -73,16 +55,8 @@ namespace AirportAutomationWeb.Controllers
 		[Route("SignOut")]
 		public IActionResult SignOut()
 		{
-			try
-			{
-				bool removed = _httpCallService.RemoveToken();
-				return (removed) ? Json(new { success = true }) : Json(new { success = false });
-			}
-			catch (Exception ex)
-			{
-				_logger.LogError(ex, "An error occurred while getting data: {ErrorMessage}", ex.Message);
-				return new BadRequestObjectResult(new BaseResponse(false, $"An error occurred while getting data."));
-			}
+			bool removed = _httpCallService.RemoveToken();
+			return (removed) ? Json(new { success = true }) : Json(new { success = false });
 		}
 	}
 }

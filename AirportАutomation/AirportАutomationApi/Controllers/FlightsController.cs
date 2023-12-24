@@ -54,29 +54,21 @@ namespace AirportAutomationApi.Controllers
 		[ProducesResponseType(401)]
 		public async Task<ActionResult<PagedResponse<FlightDto>>> GetFlights([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
 		{
-			try
+			var (isValid, correctedPageSize, result) = _paginationValidationService.ValidatePaginationParameters(page, pageSize, maxPageSize);
+			if (!isValid)
 			{
-				var (isValid, correctedPageSize, result) = _paginationValidationService.ValidatePaginationParameters(page, pageSize, maxPageSize);
-				if (!isValid)
-				{
-					return result;
-				}
-				var flights = await _flightService.GetFlights(page, correctedPageSize);
-				if (flights is null || !flights.Any())
-				{
-					_logger.LogInformation("Flights not found.");
-					return NoContent();
-				}
-				var totalItems = _flightService.FlightsCount();
-				var data = _mapper.Map<IEnumerable<FlightDto>>(flights);
-				var response = new PagedResponse<FlightDto>(data, page, correctedPageSize, totalItems);
-				return Ok(response);
+				return result;
 			}
-			catch (Exception ex)
+			var flights = await _flightService.GetFlights(page, correctedPageSize);
+			if (flights is null || !flights.Any())
 			{
-				_logger.LogError(ex, "Error getting flights list.");
-				throw;
+				_logger.LogInformation("Flights not found.");
+				return NoContent();
 			}
+			var totalItems = _flightService.FlightsCount();
+			var data = _mapper.Map<IEnumerable<FlightDto>>(flights);
+			var response = new PagedResponse<FlightDto>(data, page, correctedPageSize, totalItems);
+			return Ok(response);
 		}
 
 		/// <summary>
@@ -93,22 +85,14 @@ namespace AirportAutomationApi.Controllers
 		[ProducesResponseType(401)]
 		public async Task<ActionResult<FlightDto>> GetFlight(int id)
 		{
-			try
+			if (!_flightService.FlightExists(id))
 			{
-				if (!_flightService.FlightExists(id))
-				{
-					_logger.LogInformation("Flight with id {id} not found.", id);
-					return NotFound();
-				}
-				var flight = await _flightService.GetFlight(id);
-				var flightDto = _mapper.Map<FlightDto>(flight);
-				return Ok(flightDto);
+				_logger.LogInformation("Flight with id {id} not found.", id);
+				return NotFound();
 			}
-			catch (Exception ex)
-			{
-				_logger.LogError(ex, "Error getting flight with id: {id} .", id);
-				throw;
-			}
+			var flight = await _flightService.GetFlight(id);
+			var flightDto = _mapper.Map<FlightDto>(flight);
+			return Ok(flightDto);
 		}
 
 		/// <summary>
@@ -128,27 +112,19 @@ namespace AirportAutomationApi.Controllers
 			[FromQuery] DateOnly? startDate = null,
 			[FromQuery] DateOnly? endDate = null)
 		{
-			try
+			if (!startDate.HasValue && !endDate.HasValue)
 			{
-				if (!startDate.HasValue && !endDate.HasValue)
-				{
-					_logger.LogInformation("Both start date and end date are missing in the request.");
-					return BadRequest("Both start date and end date are missing in the request.");
-				}
-				var flights = await _flightService.GetFlightsBetweenDates(startDate, endDate);
-				if (flights == null || flights.Count == 0)
-				{
-					_logger.LogInformation("Flights not found.");
-					return NotFound();
-				}
-				var flightsDto = _mapper.Map<IEnumerable<FlightDto>>(flights);
-				return Ok(flightsDto);
+				_logger.LogInformation("Both start date and end date are missing in the request.");
+				return BadRequest("Both start date and end date are missing in the request.");
 			}
-			catch (Exception ex)
+			var flights = await _flightService.GetFlightsBetweenDates(startDate, endDate);
+			if (flights == null || flights.Count == 0)
 			{
-				_logger.LogError(ex, "Error getting flights between {startDate} and {endDate}.", startDate, endDate);
-				throw;
+				_logger.LogInformation("Flights not found.");
+				return NotFound();
 			}
+			var flightsDto = _mapper.Map<IEnumerable<FlightDto>>(flights);
+			return Ok(flightsDto);
 		}
 
 		/// <summary>
@@ -156,7 +132,7 @@ namespace AirportAutomationApi.Controllers
 		/// </summary>
 		/// <param name="flightCreateDto"></param>
 		/// <returns>The created flight.</returns>
-		/// <response code="200">Returns the created flight if successful.</response>
+		/// <response code="201">Returns the created flight if successful.</response>
 		/// <response code="400">If the request is invalid or if there's a validation error.</response>
 		/// <response code="401">If user do not have permission to access the requested resource.</response>
 		[HttpPost]
@@ -165,17 +141,9 @@ namespace AirportAutomationApi.Controllers
 		[ProducesResponseType(401)]
 		public async Task<ActionResult<Flight>> PostFlight(FlightCreateDto flightCreateDto)
 		{
-			try
-			{
-				var flight = _mapper.Map<Flight>(flightCreateDto);
-				await _flightService.PostFlight(flight);
-				return CreatedAtAction("GetFlight", new { id = flight.Id }, flight);
-			}
-			catch (Exception ex)
-			{
-				_logger.LogError(ex, "Error creating flight.");
-				throw;
-			}
+			var flight = _mapper.Map<Flight>(flightCreateDto);
+			await _flightService.PostFlight(flight);
+			return CreatedAtAction("GetFlight", new { id = flight.Id }, flight);
 		}
 
 		/// <summary>
@@ -194,27 +162,19 @@ namespace AirportAutomationApi.Controllers
 		[ProducesResponseType(401)]
 		public async Task<IActionResult> PutFlight(int id, FlightUpdateDto flightUpdateDto)
 		{
-			try
+			if (id != flightUpdateDto.Id)
 			{
-				if (id != flightUpdateDto.Id)
-				{
-					_logger.LogInformation("Flight with id {id} is different from provided Flight and his id.", id);
-					return BadRequest();
-				}
-				if (!_flightService.FlightExists(id))
-				{
-					_logger.LogInformation("Flight with id {id} not found.", id);
-					return NotFound();
-				}
-				var flight = _mapper.Map<Flight>(flightUpdateDto);
-				await _flightService.PutFlight(flight);
-				return NoContent();
+				_logger.LogInformation("Flight with id {id} is different from provided Flight and his id.", id);
+				return BadRequest();
 			}
-			catch (Exception ex)
+			if (!_flightService.FlightExists(id))
 			{
-				_logger.LogError(ex, "Error updating flight with id: {id} .", id);
-				throw;
+				_logger.LogInformation("Flight with id {id} not found.", id);
+				return NotFound();
 			}
+			var flight = _mapper.Map<Flight>(flightUpdateDto);
+			await _flightService.PutFlight(flight);
+			return NoContent();
 		}
 
 		/// <summary>
@@ -242,21 +202,13 @@ namespace AirportAutomationApi.Controllers
 		[ProducesResponseType(401)]
 		public async Task<IActionResult> PatchFlight(int id, [FromBody] JsonPatchDocument flightDocument)
 		{
-			try
+			if (!_flightService.FlightExists(id))
 			{
-				if (!_flightService.FlightExists(id))
-				{
-					_logger.LogInformation("Flight with id {id} not found.", id);
-					return NotFound();
-				}
-				var updatedFlight = await _flightService.PatchFlight(id, flightDocument);
-				return Ok(updatedFlight);
+				_logger.LogInformation("Flight with id {id} not found.", id);
+				return NotFound();
 			}
-			catch (Exception ex)
-			{
-				_logger.LogError(ex, "Error patching flight with id: {id} .", id);
-				throw;
-			}
+			var updatedFlight = await _flightService.PatchFlight(id, flightDocument);
+			return Ok(updatedFlight);
 		}
 
 		/// <summary>
@@ -274,28 +226,20 @@ namespace AirportAutomationApi.Controllers
 		[ProducesResponseType(409)]
 		public async Task<IActionResult> DeleteFlight(int id)
 		{
-			try
+			if (!_flightService.FlightExists(id))
 			{
-				if (!_flightService.FlightExists(id))
-				{
-					_logger.LogInformation("Flight with id {id} not found.", id);
-					return NotFound();
-				}
-				bool deleted = await _flightService.DeleteFlight(id);
-				if (deleted)
-				{
-					return NoContent();
-				}
-				else
-				{
-					_logger.LogInformation("Flight with id {id} is being referenced by other entities and cannot be deleted.", id);
-					return Conflict("Flight cannot be deleted because it is being referenced by other entities.");
-				}
+				_logger.LogInformation("Flight with id {id} not found.", id);
+				return NotFound();
 			}
-			catch (Exception ex)
+			bool deleted = await _flightService.DeleteFlight(id);
+			if (deleted)
 			{
-				_logger.LogError(ex, "Error deleting flight with id: {id} .", id);
-				throw;
+				return NoContent();
+			}
+			else
+			{
+				_logger.LogInformation("Flight with id {id} is being referenced by other entities and cannot be deleted.", id);
+				return Conflict("Flight cannot be deleted because it is being referenced by other entities.");
 			}
 		}
 

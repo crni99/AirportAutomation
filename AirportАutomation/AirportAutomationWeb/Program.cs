@@ -1,9 +1,26 @@
-﻿using AirportAutomationWeb.Converters;
+﻿using AirportAutomationServices.Middlewares;
+using AirportAutomationWeb.Converters;
 using AirportАutomationWeb.Binders;
 using AirportАutomationWeb.Converters;
+using Serilog;
+using Serilog.Events;
+
+Log.Logger = new LoggerConfiguration()
+	.MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
+	.MinimumLevel.Is(LogEventLevel.Information)
+	.WriteTo.Logger(lc => lc
+		.Filter.ByIncludingOnly(le => le.Level >= LogEventLevel.Information)
+		.WriteTo.Console()
+	)
+	.WriteTo.Logger(lc => lc
+		.Filter.ByIncludingOnly(le => le.Level >= LogEventLevel.Warning)
+		.WriteTo.File("Logs/AirportAutomationWeb.txt", rollingInterval: RollingInterval.Day)
+	)
+	.CreateLogger();
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Host.UseSerilog();
 builder.Services.AddCors(options =>
 {
 	options.AddPolicy("_AllowSpecificMethods", builder =>
@@ -37,8 +54,9 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseCors("_AllowSpecificMethods");
 app.UseRouting();
-app.UseSession();
 app.UseAuthorization();
+app.UseMiddleware<GlobalExceptionHandler>();
+app.UseSession();
 
 app.MapControllerRoute(
 	name: "default",

@@ -13,62 +13,44 @@ namespace AirportAutomationWeb.Controllers
 		private readonly IHttpCallService _httpCallService;
 		private readonly IAlertService _alertService;
 		private readonly IMapper _mapper;
-		private readonly ILogger<PassengerController> _logger;
 
-		public PassengerController(IHttpCallService httpCallService, IAlertService alertService, IMapper mapper, ILogger<PassengerController> logger)
+		public PassengerController(IHttpCallService httpCallService, IAlertService alertService, IMapper mapper)
 		{
 			_httpCallService = httpCallService;
 			_alertService = alertService;
 			_mapper = mapper;
-			_logger = logger;
 		}
 
 		[HttpGet]
 		public async Task<IActionResult> Index(int page = 1, int pageSize = 10)
 		{
-			try
+			if (page < 1)
 			{
-				if (page < 1)
-				{
-					_alertService.SetAlertMessage(TempData, "invalid_page_number", false);
-					return RedirectToAction("Index");
-				}
-				var response = await _httpCallService.GetDataList<Passenger>(page, pageSize);
-				if (response == null)
-				{
-					return View();
-				}
-				var pagedResponse = _mapper.Map<PagedResponse<PassengerDto>>(response);
-				return View(pagedResponse);
+				_alertService.SetAlertMessage(TempData, "invalid_page_number", false);
+				return RedirectToAction("Index");
 			}
-			catch (Exception ex)
+			var response = await _httpCallService.GetDataList<Passenger>(page, pageSize);
+			if (response == null)
 			{
-				_logger.LogError(ex, "An error occurred while getting data: {ErrorMessage}", ex.Message);
-				return new BadRequestObjectResult(new BaseResponse(false, $"An error occurred while getting data."));
+				return View();
 			}
+			var pagedResponse = _mapper.Map<PagedResponse<PassengerDto>>(response);
+			return View(pagedResponse);
 		}
 
 		[HttpGet]
 		[Route("{id}")]
 		public async Task<IActionResult> Details(int id)
 		{
-			try
+			var response = await _httpCallService.GetData<Passenger>(id);
+			if (response is null)
 			{
-				var response = await _httpCallService.GetData<Passenger>(id);
-				if (response is null)
-				{
-					_alertService.SetAlertMessage(TempData, "data_not_found", false);
-					return RedirectToAction("Index");
-				}
-				else
-				{
-					return View(_mapper.Map<PassengerDto>(response));
-				}
+				_alertService.SetAlertMessage(TempData, "data_not_found", false);
+				return RedirectToAction("Index");
 			}
-			catch (Exception ex)
+			else
 			{
-				_logger.LogError(ex, "An error occurred while getting data: {ErrorMessage}", ex.Message);
-				return new BadRequestObjectResult(new BaseResponse(false, $"An error occurred while getting data."));
+				return View(_mapper.Map<PassengerDto>(response));
 			}
 		}
 
@@ -76,21 +58,13 @@ namespace AirportAutomationWeb.Controllers
 		[Route("GetPassengersByName")]
 		public async Task<IActionResult> GetPassengersByName([FromQuery] string firstName, [FromQuery] string lastName)
 		{
-			try
+			if (string.IsNullOrEmpty(firstName) && string.IsNullOrEmpty(lastName))
 			{
-				if (string.IsNullOrEmpty(firstName) && string.IsNullOrEmpty(lastName))
-				{
-					_alertService.SetAlertMessage(TempData, "missing_field", false);
-					return RedirectToAction("Index");
-				}
-				var response = await _httpCallService.GetDataByFNameOrLName<Passenger>(firstName, lastName);
-				return Json(response);
+				_alertService.SetAlertMessage(TempData, "missing_field", false);
+				return RedirectToAction("Index");
 			}
-			catch (Exception ex)
-			{
-				_logger.LogError(ex, "An error occurred while getting data: {ErrorMessage}", ex.Message);
-				throw;
-			}
+			var response = await _httpCallService.GetDataByFNameOrLName<Passenger>(firstName, lastName);
+			return Json(response);
 		}
 
 		[HttpGet]
@@ -107,24 +81,16 @@ namespace AirportAutomationWeb.Controllers
 		{
 			if (ModelState.IsValid)
 			{
-				try
+				var passenger = _mapper.Map<Passenger>(passengerCreateDto);
+				var response = await _httpCallService.CreateData<Passenger>(passenger);
+				if (response is null)
 				{
-					var passenger = _mapper.Map<Passenger>(passengerCreateDto);
-					var response = await _httpCallService.CreateData<Passenger>(passenger);
-					if (response is null)
-					{
-						_alertService.SetAlertMessage(TempData, "create_data_failed", false);
-						return RedirectToAction("Create");
-					}
-					else
-					{
-						return RedirectToAction("Details", new { id = response.Id });
-					}
+					_alertService.SetAlertMessage(TempData, "create_data_failed", false);
+					return RedirectToAction("Create");
 				}
-				catch (Exception ex)
+				else
 				{
-					_logger.LogError(ex, "An error occurred while creating data: {ErrorMessage}", ex.Message);
-					return new BadRequestObjectResult(new BaseResponse(false, $"An error occurred while creating data."));
+					return RedirectToAction("Details", new { id = response.Id });
 				}
 			}
 			else { return RedirectToAction("Index"); }
@@ -134,23 +100,15 @@ namespace AirportAutomationWeb.Controllers
 		[Route("Edit/{id}")]
 		public async Task<IActionResult> Edit(int id)
 		{
-			try
+			var response = await _httpCallService.GetData<Passenger>(id);
+			if (response is null)
 			{
-				var response = await _httpCallService.GetData<Passenger>(id);
-				if (response is null)
-				{
-					_alertService.SetAlertMessage(TempData, "data_not_found", false);
-					return RedirectToAction("Details", new { id });
-				}
-				else
-				{
-					return View(_mapper.Map<PassengerDto>(response));
-				}
+				_alertService.SetAlertMessage(TempData, "data_not_found", false);
+				return RedirectToAction("Details", new { id });
 			}
-			catch (Exception ex)
+			else
 			{
-				_logger.LogError(ex, "An error occurred while getting data: {ErrorMessage}", ex.Message);
-				return new BadRequestObjectResult(new BaseResponse(false, $"An error occurred while getting data."));
+				return View(_mapper.Map<PassengerDto>(response));
 			}
 		}
 
@@ -161,25 +119,17 @@ namespace AirportAutomationWeb.Controllers
 		{
 			if (ModelState.IsValid)
 			{
-				try
+				var passenger = _mapper.Map<Passenger>(passengerDto);
+				var response = await _httpCallService.EditData<Passenger>(passenger, passenger.Id);
+				if (response)
 				{
-					var passenger = _mapper.Map<Passenger>(passengerDto);
-					var response = await _httpCallService.EditData<Passenger>(passenger, passenger.Id);
-					if (response)
-					{
-						_alertService.SetAlertMessage(TempData, "edit_data_success", true);
-						return RedirectToAction("Details", new { id = passengerDto.Id });
-					}
-					else
-					{
-						_alertService.SetAlertMessage(TempData, "edit_data_failed", false);
-						return RedirectToAction("Edit", new { id = passengerDto.Id });
-					}
+					_alertService.SetAlertMessage(TempData, "edit_data_success", true);
+					return RedirectToAction("Details", new { id = passengerDto.Id });
 				}
-				catch (Exception ex)
+				else
 				{
-					_logger.LogError(ex, "An error occurred while editing data: {ErrorMessage}", ex.Message);
-					return new BadRequestObjectResult(new BaseResponse(false, $"An error occurred while editing data."));
+					_alertService.SetAlertMessage(TempData, "edit_data_failed", false);
+					return RedirectToAction("Edit", new { id = passengerDto.Id });
 				}
 			}
 			else { return RedirectToAction("Index"); }
@@ -189,24 +139,16 @@ namespace AirportAutomationWeb.Controllers
 		[Route("Delete/{id}")]
 		public async Task<IActionResult> Delete(int id)
 		{
-			try
+			var response = await _httpCallService.DeleteData<Passenger>(id);
+			if (response)
 			{
-				var response = await _httpCallService.DeleteData<Passenger>(id);
-				if (response)
-				{
-					_alertService.SetAlertMessage(TempData, "delete_data_success", true);
-					return RedirectToAction("Index");
-				}
-				else
-				{
-					_alertService.SetAlertMessage(TempData, "delete_data_failed", false);
-					return RedirectToAction("Details", new { id });
-				}
+				_alertService.SetAlertMessage(TempData, "delete_data_success", true);
+				return RedirectToAction("Index");
 			}
-			catch (Exception ex)
+			else
 			{
-				_logger.LogError(ex, "An error occurred while deleting data: {ErrorMessage}", ex.Message);
-				return new BadRequestObjectResult(new BaseResponse(false, $"An error occurred while deleting data."));
+				_alertService.SetAlertMessage(TempData, "delete_data_failed", false);
+				return RedirectToAction("Details", new { id });
 			}
 		}
 
@@ -214,20 +156,12 @@ namespace AirportAutomationWeb.Controllers
 		[Route("GetPassengers")]
 		public async Task<IActionResult> GetPassengers(int page = 1, int pageSize = 10)
 		{
-			try
+			var response = await _httpCallService.GetDataList<Passenger>(page, pageSize);
+			if (response == null || response.Data == null || !response.Data.Any())
 			{
-				var response = await _httpCallService.GetDataList<Passenger>(page, pageSize);
-				if (response == null || response.Data == null || !response.Data.Any())
-				{
-					return Json(new { success = false, data = response });
-				}
-				return Json(new { success = true, data = response });
+				return Json(new { success = false, data = response });
 			}
-			catch (Exception ex)
-			{
-				_logger.LogError(ex, "An error occurred while getting data: {ErrorMessage}", ex.Message);
-				throw;
-			}
+			return Json(new { success = true, data = response });
 		}
 
 	}

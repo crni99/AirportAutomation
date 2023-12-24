@@ -46,29 +46,21 @@ namespace AirportAutomationApi.Controllers
 		[ProducesResponseType(401)]
 		public async Task<ActionResult<PagedResponse<TravelClassDto>>> GetTravelClasses([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
 		{
-			try
+			var (isValid, correctedPageSize, result) = _paginationValidationService.ValidatePaginationParameters(page, pageSize, maxPageSize);
+			if (!isValid)
 			{
-				var (isValid, correctedPageSize, result) = _paginationValidationService.ValidatePaginationParameters(page, pageSize, maxPageSize);
-				if (!isValid)
-				{
-					return result;
-				}
-				var travelClasses = await _travelClassService.GetTravelClasses(page, correctedPageSize);
-				if (travelClasses is null || !travelClasses.Any())
-				{
-					_logger.LogInformation("Travel classes not found.");
-					return NoContent();
-				}
-				var totalItems = _travelClassService.TravelClassesCount();
-				var data = _mapper.Map<IEnumerable<TravelClassDto>>(travelClasses);
-				var response = new PagedResponse<TravelClassDto>(data, page, correctedPageSize, totalItems);
-				return Ok(response);
+				return result;
 			}
-			catch (Exception ex)
+			var travelClasses = await _travelClassService.GetTravelClasses(page, correctedPageSize);
+			if (travelClasses is null || !travelClasses.Any())
 			{
-				_logger.LogError(ex, "Error getting travel classes list.");
-				throw;
+				_logger.LogInformation("Travel classes not found.");
+				return NoContent();
 			}
+			var totalItems = _travelClassService.TravelClassesCount();
+			var data = _mapper.Map<IEnumerable<TravelClassDto>>(travelClasses);
+			var response = new PagedResponse<TravelClassDto>(data, page, correctedPageSize, totalItems);
+			return Ok(response);
 		}
 
 		/// <summary>
@@ -85,24 +77,16 @@ namespace AirportAutomationApi.Controllers
 		[ProducesResponseType(401)]
 		public async Task<ActionResult<TravelClassDto>> GetTravelClass(int id)
 		{
-			try
+			if (!_travelClassService.TravelClassExists(id))
 			{
-				if (!_travelClassService.TravelClassExists(id))
-				{
-					_logger.LogInformation("Travel class with id {id} not found.", id);
-					return NotFound();
-				}
-				var travelClass = await _travelClassService.GetTravelClass(id);
-				var travelClassDto = _mapper.Map<TravelClassDto>(travelClass);
-				return Ok(travelClassDto);
+				_logger.LogInformation("Travel class with id {id} not found.", id);
+				return NotFound();
 			}
-			catch (Exception ex)
-			{
-				_logger.LogError(ex, "Error getting travel class with id: {id} .", id);
-				throw;
-			}
-
+			var travelClass = await _travelClassService.GetTravelClass(id);
+			var travelClassDto = _mapper.Map<TravelClassDto>(travelClass);
+			return Ok(travelClassDto);
 		}
+
 	}
 }
 
