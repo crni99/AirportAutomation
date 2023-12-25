@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace AirportАutomationWeb.Dtos.Pilot
 {
-	public class PilotCreateDto
+	public class PilotCreateViewModel
 	{
 		[DisplayName("First Name")]
 		[Required(ErrorMessage = "First Name is required.")]

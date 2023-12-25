@@ -9,12 +9,12 @@ namespace AirportAutomationWeb.MappingProfiles
 	{
 		public PassengerMappings()
 		{
-			CreateMap<Passenger, PassengerDto>();
-			CreateMap<Passenger, PassengerCreateDto>();
-			CreateMap<PassengerDto, Passenger>();
-			CreateMap<PassengerCreateDto, Passenger>();
+			CreateMap<Passenger, PassengerViewModel>();
+			CreateMap<Passenger, PassengerCreateViewModel>();
+			CreateMap<PassengerViewModel, Passenger>();
+			CreateMap<PassengerCreateViewModel, Passenger>();
 
-			CreateMap<PagedResponse<Passenger>, PagedResponse<PassengerDto>>();
+			CreateMap<PagedResponse<Passenger>, PagedResponse<PassengerViewModel>>();
 		}
 	}
 }

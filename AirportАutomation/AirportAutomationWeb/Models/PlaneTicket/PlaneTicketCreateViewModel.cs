@@ -5,7 +5,7 @@ using System.Text.Json.Serialization;
 
 namespace AirportАutomationWeb.Dtos.PlaneTicket
 {
-	public class PlaneTicketCreateDto
+	public class PlaneTicketCreateViewModel
 	{
 		[Required(ErrorMessage = "Price is required.")]
 		[Range(0.01, double.MaxValue, ErrorMessage = "Price must be a positive value.")]

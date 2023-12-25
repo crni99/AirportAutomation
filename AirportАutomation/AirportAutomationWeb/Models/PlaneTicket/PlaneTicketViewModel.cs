@@ -5,7 +5,7 @@ using System.ComponentModel;
 
 namespace AirportАutomationWeb.Dtos.PlaneTicket
 {
-	public class PlaneTicketDto
+	public class PlaneTicketViewModel
 	{
 		public int Id { get; set; }
 		public decimal Price { get; set; }
@@ -24,8 +24,8 @@ namespace AirportАutomationWeb.Dtos.PlaneTicket
 
 		[DisplayName("Flight Id")]
 		public int FlightId { get; set; }
-		public PassengerDto Passenger { get; set; }
-		public TravelClassDto TravelClass { get; set; }
-		public FlightDto Flight { get; set; }
+		public PassengerViewModel Passenger { get; set; }
+		public TravelClassViewModel TravelClass { get; set; }
+		public FlightViewModel Flight { get; set; }
 	}
 }

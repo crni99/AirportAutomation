@@ -26,26 +26,18 @@ namespace AirportAutomationWeb.Controllers
 		[HttpGet]
 		public async Task<IActionResult> Index(int page = 1, int pageSize = 10)
 		{
-			try
+			if (page < 1)
 			{
-				if (page < 1)
-				{
-					_alertService.SetAlertMessage(TempData, "invalid_page_number", false);
-					return RedirectToAction("Index");
-				}
-				var response = await _httpCallService.GetDataList<Airline>(page, pageSize);
-				if (response == null)
-				{
-					return View();
-				}
-				var pagedResponse = _mapper.Map<PagedResponse<AirlineDto>>(response);
-				return View(pagedResponse);
+				_alertService.SetAlertMessage(TempData, "invalid_page_number", false);
+				return RedirectToAction("Index");
 			}
-			catch (Exception ex)
+			var response = await _httpCallService.GetDataList<Airline>(page, pageSize);
+			if (response == null)
 			{
-				_logger.LogError(ex, "An error occurred while getting data: {ErrorMessage}", ex.Message);
-				return new BadRequestObjectResult(new BaseResponse(false, $"An error occurred while getting data."));
+				return View();
 			}
+			var pagedResponse = _mapper.Map<PagedResponse<AirlineViewModel>>(response);
+			return View(pagedResponse);
 		}
 
 		[HttpGet]
@@ -60,7 +52,7 @@ namespace AirportAutomationWeb.Controllers
 			}
 			else
 			{
-				return View(_mapper.Map<AirlineDto>(response));
+				return View(_mapper.Map<AirlineViewModel>(response));
 			}
 		}
 
@@ -88,7 +80,7 @@ namespace AirportAutomationWeb.Controllers
 		[HttpPost]
 		[Route("CreateAirline")]
 		[ValidateAntiForgeryToken]
-		public async Task<IActionResult> CreateAirline(AirlineCreateDto airlineCreateDto)
+		public async Task<IActionResult> CreateAirline(AirlineCreateViewModel airlineCreateDto)
 		{
 			if (ModelState.IsValid)
 			{
@@ -119,14 +111,14 @@ namespace AirportAutomationWeb.Controllers
 			}
 			else
 			{
-				return View(_mapper.Map<AirlineDto>(response));
+				return View(_mapper.Map<AirlineViewModel>(response));
 			}
 		}
 
 		[HttpPost]
 		[Route("EditAirline")]
 		[ValidateAntiForgeryToken]
-		public async Task<IActionResult> EditAirline(AirlineDto airlineDto)
+		public async Task<IActionResult> EditAirline(AirlineViewModel airlineDto)
 		{
 			if (ModelState.IsValid)
 			{

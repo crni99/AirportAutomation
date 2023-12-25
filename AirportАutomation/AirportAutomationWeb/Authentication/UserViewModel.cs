@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace AirportAutomationWeb.Authentication
 {
-	public class User
+	public class UserViewModel
 	{
 		[Required]
 		[DisplayName("Username")]

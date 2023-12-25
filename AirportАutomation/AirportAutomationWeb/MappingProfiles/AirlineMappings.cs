@@ -9,12 +9,12 @@ namespace AirportAutomationWeb.MappingProfiles
 	{
 		public AirlineMappings()
 		{
-			CreateMap<Airline, AirlineDto>();
-			CreateMap<Airline, AirlineCreateDto>();
-			CreateMap<AirlineDto, Airline>();
-			CreateMap<AirlineCreateDto, Airline>();
+			CreateMap<Airline, AirlineViewModel>();
+			CreateMap<Airline, AirlineCreateViewModel>();
+			CreateMap<AirlineViewModel, Airline>();
+			CreateMap<AirlineCreateViewModel, Airline>();
 
-			CreateMap<PagedResponse<Airline>, PagedResponse<AirlineDto>>();
+			CreateMap<PagedResponse<Airline>, PagedResponse<AirlineViewModel>>();
 		}
 	}
 }

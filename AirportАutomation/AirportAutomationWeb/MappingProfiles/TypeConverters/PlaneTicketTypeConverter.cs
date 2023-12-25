@@ -6,10 +6,10 @@ using System.Globalization;
 namespace AirportAutomationWeb.MappingProfiles.TypeConverters
 {
 	public class PlaneTicketTypeConverter :
-		ITypeConverter<PlaneTicketCreateDto, PlaneTicket>,
-		ITypeConverter<PlaneTicketDto, PlaneTicket>
+		ITypeConverter<PlaneTicketCreateViewModel, PlaneTicket>,
+		ITypeConverter<PlaneTicketViewModel, PlaneTicket>
 	{
-		public PlaneTicket Convert(PlaneTicketCreateDto source, PlaneTicket destination, ResolutionContext context)
+		public PlaneTicket Convert(PlaneTicketCreateViewModel source, PlaneTicket destination, ResolutionContext context)
 		{
 			var planeTicket = new PlaneTicket
 			{
@@ -40,7 +40,7 @@ namespace AirportAutomationWeb.MappingProfiles.TypeConverters
 			return planeTicket;
 		}
 
-		public PlaneTicket Convert(PlaneTicketDto source, PlaneTicket destination, ResolutionContext context)
+		public PlaneTicket Convert(PlaneTicketViewModel source, PlaneTicket destination, ResolutionContext context)
 		{
 			var planeTicket = new PlaneTicket
 			{

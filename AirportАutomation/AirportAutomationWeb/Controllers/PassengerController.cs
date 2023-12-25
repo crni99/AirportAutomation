@@ -34,7 +34,7 @@ namespace AirportAutomationWeb.Controllers
 			{
 				return View();
 			}
-			var pagedResponse = _mapper.Map<PagedResponse<PassengerDto>>(response);
+			var pagedResponse = _mapper.Map<PagedResponse<PassengerViewModel>>(response);
 			return View(pagedResponse);
 		}
 
@@ -50,7 +50,7 @@ namespace AirportAutomationWeb.Controllers
 			}
 			else
 			{
-				return View(_mapper.Map<PassengerDto>(response));
+				return View(_mapper.Map<PassengerViewModel>(response));
 			}
 		}
 
@@ -77,7 +77,7 @@ namespace AirportAutomationWeb.Controllers
 		[HttpPost]
 		[Route("CreatePassenger")]
 		[ValidateAntiForgeryToken]
-		public async Task<IActionResult> CreatePassenger(PassengerCreateDto passengerCreateDto)
+		public async Task<IActionResult> CreatePassenger(PassengerCreateViewModel passengerCreateDto)
 		{
 			if (ModelState.IsValid)
 			{
@@ -108,14 +108,14 @@ namespace AirportAutomationWeb.Controllers
 			}
 			else
 			{
-				return View(_mapper.Map<PassengerDto>(response));
+				return View(_mapper.Map<PassengerViewModel>(response));
 			}
 		}
 
 		[HttpPost]
 		[Route("EditPassenger")]
 		[ValidateAntiForgeryToken]
-		public async Task<IActionResult> EditPassenger(PassengerDto passengerDto)
+		public async Task<IActionResult> EditPassenger(PassengerViewModel passengerDto)
 		{
 			if (ModelState.IsValid)
 			{

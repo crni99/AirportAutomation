@@ -36,7 +36,7 @@ namespace AirportAutomationWeb.Controllers
 		[HttpPost]
 		[Route("Authenticate")]
 		[ValidateAntiForgeryToken]
-		public async Task<IActionResult> Authenticate(User user)
+		public async Task<IActionResult> Authenticate(UserViewModel user)
 		{
 			if (ModelState.IsValid)
 			{

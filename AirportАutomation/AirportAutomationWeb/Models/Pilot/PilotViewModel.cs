@@ -2,7 +2,7 @@
 
 namespace AirportАutomationWeb.Dtos.Pilot
 {
-	public class PilotDto
+	public class PilotViewModel
 	{
 		public int Id { get; set; }
 

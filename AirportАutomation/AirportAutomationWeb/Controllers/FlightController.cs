@@ -34,7 +34,7 @@ namespace AirportAutomationWeb.Controllers
 			{
 				return View();
 			}
-			var pagedResponse = _mapper.Map<PagedResponse<FlightDto>>(response);
+			var pagedResponse = _mapper.Map<PagedResponse<FlightViewModel>>(response);
 			return View(pagedResponse);
 		}
 
@@ -50,7 +50,7 @@ namespace AirportAutomationWeb.Controllers
 			}
 			else
 			{
-				return View(_mapper.Map<FlightDto>(response));
+				return View(_mapper.Map<FlightViewModel>(response));
 			}
 		}
 
@@ -77,7 +77,7 @@ namespace AirportAutomationWeb.Controllers
 		[HttpPost]
 		[Route("CreateFlight")]
 		[ValidateAntiForgeryToken]
-		public async Task<IActionResult> CreateFlight(FlightCreateDto flightCreateDto)
+		public async Task<IActionResult> CreateFlight(FlightCreateViewModel flightCreateDto)
 		{
 			var flight = _mapper.Map<Flight>(flightCreateDto);
 			var response = await _httpCallService.CreateData<Flight>(flight);
@@ -104,14 +104,14 @@ namespace AirportAutomationWeb.Controllers
 			}
 			else
 			{
-				return View(_mapper.Map<FlightDto>(response));
+				return View(_mapper.Map<FlightViewModel>(response));
 			}
 		}
 
 		[HttpPost]
 		[Route("EditFlight")]
 		[ValidateAntiForgeryToken]
-		public async Task<IActionResult> EditFlight(FlightDto flightDto)
+		public async Task<IActionResult> EditFlight(FlightViewModel flightDto)
 		{
 			var flight = _mapper.Map<Flight>(flightDto);
 			var response = await _httpCallService.EditData<Flight>(flight, flight.Id);

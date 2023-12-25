@@ -2,7 +2,7 @@
 
 namespace AirportАutomationWeb.Dtos.Destination
 {
-	public class DestinationCreateDto
+	public class DestinationCreateViewModel
 	{
 		[Required(ErrorMessage = "City is required.")]
 		[MaxLength(255, ErrorMessage = "City cannot be longer than 255 characters.")]

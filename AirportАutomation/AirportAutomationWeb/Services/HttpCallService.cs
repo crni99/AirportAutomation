@@ -43,7 +43,7 @@ namespace AirportAutomationWeb.Services
 		/// <remarks>
 		/// If the authentication is successful, the access token is stored in the session.
 		/// </remarks>
-		public async Task<bool> Authenticate(User user)
+		public async Task<bool> Authenticate(UserViewModel user)
 		{
 			string token = GetToken();
 			if (!string.IsNullOrEmpty(token))

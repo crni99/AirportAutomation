@@ -6,7 +6,7 @@ using System.Text.Json.Serialization;
 
 namespace AirportАutomationWeb.Dtos.Flight
 {
-	public class FlightCreateDto
+	public class FlightCreateViewModel
 	{
 		[DisplayName("Departure Date")]
 		[Required(ErrorMessage = "Departure Date is required.")]

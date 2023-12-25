@@ -34,7 +34,7 @@ namespace AirportAutomationWeb.Controllers
 			{
 				return View();
 			}
-			var pagedResponse = _mapper.Map<PagedResponse<PlaneTicketDto>>(response);
+			var pagedResponse = _mapper.Map<PagedResponse<PlaneTicketViewModel>>(response);
 			return View(pagedResponse);
 		}
 
@@ -50,7 +50,7 @@ namespace AirportAutomationWeb.Controllers
 			}
 			else
 			{
-				return View(_mapper.Map<PlaneTicketDto>(response));
+				return View(_mapper.Map<PlaneTicketViewModel>(response));
 			}
 		}
 
@@ -78,7 +78,7 @@ namespace AirportAutomationWeb.Controllers
 		[HttpPost]
 		[Route("CreatePlaneTicket")]
 		[ValidateAntiForgeryToken]
-		public async Task<IActionResult> CreatePlaneTicket(PlaneTicketCreateDto planeTicketCreateDto)
+		public async Task<IActionResult> CreatePlaneTicket(PlaneTicketCreateViewModel planeTicketCreateDto)
 		{
 			var planeTicket = _mapper.Map<PlaneTicket>(planeTicketCreateDto);
 			var response = await _httpCallService.CreateData<PlaneTicket>(planeTicket);
@@ -105,14 +105,14 @@ namespace AirportAutomationWeb.Controllers
 			}
 			else
 			{
-				return View(_mapper.Map<PlaneTicketDto>(response));
+				return View(_mapper.Map<PlaneTicketViewModel>(response));
 			}
 		}
 
 		[HttpPost]
 		[Route("EditPlaneTicket")]
 		[ValidateAntiForgeryToken]
-		public async Task<IActionResult> EditPlaneTicket(PlaneTicketDto planeTicketDto)
+		public async Task<IActionResult> EditPlaneTicket(PlaneTicketViewModel planeTicketDto)
 		{
 			var planeTicket = _mapper.Map<PlaneTicket>(planeTicketDto);
 			var response = await _httpCallService.EditData<PlaneTicket>(planeTicket, planeTicket.Id);

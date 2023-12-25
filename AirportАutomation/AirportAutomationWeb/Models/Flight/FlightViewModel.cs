@@ -5,7 +5,7 @@ using System.ComponentModel;
 
 namespace AirportАutomationWeb.Dtos.Flight
 {
-	public class FlightDto
+	public class FlightViewModel
 	{
 		public int Id { get; set; }
 
@@ -23,8 +23,8 @@ namespace AirportАutomationWeb.Dtos.Flight
 
 		[DisplayName("Pilot Id")]
 		public int PilotId { get; set; }
-		public AirlineDto Airline { get; set; }
-		public DestinationDto Destination { get; set; }
-		public PilotDto Pilot { get; set; }
+		public AirlineViewModel Airline { get; set; }
+		public DestinationViewModel Destination { get; set; }
+		public PilotViewModel Pilot { get; set; }
 	}
 }

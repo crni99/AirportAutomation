@@ -10,13 +10,13 @@ namespace AirportAutomationWeb.MappingProfiles
 	{
 		public PlaneTicketMappings()
 		{
-			CreateMap<PlaneTicket, PlaneTicketDto>();
-			CreateMap<PlaneTicket, PlaneTicketCreateDto>();
+			CreateMap<PlaneTicket, PlaneTicketViewModel>();
+			CreateMap<PlaneTicket, PlaneTicketCreateViewModel>();
 
-			CreateMap<PlaneTicketDto, PlaneTicket>().ConvertUsing<PlaneTicketTypeConverter>();
-			CreateMap<PlaneTicketCreateDto, PlaneTicket>().ConvertUsing<PlaneTicketTypeConverter>();
+			CreateMap<PlaneTicketViewModel, PlaneTicket>().ConvertUsing<PlaneTicketTypeConverter>();
+			CreateMap<PlaneTicketCreateViewModel, PlaneTicket>().ConvertUsing<PlaneTicketTypeConverter>();
 
-			CreateMap<PagedResponse<PlaneTicket>, PagedResponse<PlaneTicketDto>>();
+			CreateMap<PagedResponse<PlaneTicket>, PagedResponse<PlaneTicketViewModel>>();
 		}
 	}
 }

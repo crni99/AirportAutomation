@@ -1,6 +1,6 @@
 ﻿namespace AirportАutomationWeb.Dtos.Destination
 {
-	public class DestinationDto
+	public class DestinationViewModel
 	{
 		public int Id { get; set; }
 		public string City { get; set; }

@@ -5,7 +5,7 @@ namespace AirportAutomationWeb.Interfaces
 {
 	public interface IHttpCallService
 	{
-		Task<bool> Authenticate(User user);
+		Task<bool> Authenticate(UserViewModel user);
 		string GetToken();
 		bool RemoveToken();
 		Task<PagedResponse<T>> GetDataList<T>(int page, int pageSize);

@@ -34,7 +34,7 @@ namespace AirportAutomationWeb.Controllers
 			{
 				return View();
 			}
-			var pagedResponse = _mapper.Map<PagedResponse<TravelClassDto>>(response);
+			var pagedResponse = _mapper.Map<PagedResponse<TravelClassViewModel>>(response);
 			return View(pagedResponse);
 		}
 

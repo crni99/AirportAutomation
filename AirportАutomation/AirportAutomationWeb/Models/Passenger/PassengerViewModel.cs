@@ -2,7 +2,7 @@
 
 namespace AirportАutomationWeb.Dtos.Passenger
 {
-	public class PassengerDto
+	public class PassengerViewModel
 	{
 		public int Id { get; set; }
 

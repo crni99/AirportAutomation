@@ -6,10 +6,10 @@ using System.Globalization;
 namespace AirportAutomationWeb.MappingProfiles.TypeConverters
 {
 	public class FlightTypeConverter :
-		ITypeConverter<FlightCreateDto, Flight>,
-		ITypeConverter<FlightDto, Flight>
+		ITypeConverter<FlightCreateViewModel, Flight>,
+		ITypeConverter<FlightViewModel, Flight>
 	{
-		public Flight Convert(FlightCreateDto source, Flight destination, ResolutionContext context)
+		public Flight Convert(FlightCreateViewModel source, Flight destination, ResolutionContext context)
 		{
 			var flight = new Flight
 			{
@@ -46,7 +46,7 @@ namespace AirportAutomationWeb.MappingProfiles.TypeConverters
 			return flight;
 		}
 
-		public Flight Convert(FlightDto source, Flight destination, ResolutionContext context)
+		public Flight Convert(FlightViewModel source, Flight destination, ResolutionContext context)
 		{
 			var flight = new Flight
 			{
