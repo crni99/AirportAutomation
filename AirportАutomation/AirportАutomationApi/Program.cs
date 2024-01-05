@@ -1,10 +1,13 @@
 ﻿using AirportAutomationApi.Binders;
 using AirportAutomationApi.Data;
 using AirportAutomationServices.Middlewares;
+using AirportАutomationApi.HealthChecks;
 using AirportАutomationApi.Helpers;
 using AspNetCoreRateLimit;
+using HealthChecks.UI.Client;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Serilog;
@@ -82,6 +85,7 @@ builder.Services.AddSwaggerGen(setupAction =>
 	setupAction.IncludeXmlComments(filePath);
 	setupAction.UseDateOnlyTimeOnlyStringConverters();
 	setupAction.DocumentFilter<JsonPatchDocumentFilter>();
+	setupAction.DocumentFilter<HealthChecksFilter>();
 });
 
 BinderConfiguration.Binders(builder.Services);
@@ -143,6 +147,16 @@ builder.Services.AddApiVersioning(setupAction =>
 	setupAction.ReportApiVersions = true;
 });
 
+builder.Services.AddHttpClient();
+
+builder.Services
+	.AddHealthChecks()
+	.AddSqlServer(
+		builder.Configuration.GetConnectionString("Default"),
+		name: "SqlServerHealthCheck")
+	.AddCheck<DatabaseHealthCheck>(nameof(DatabaseHealthCheck))
+	.AddCheck<ApiHealthCheck>(nameof(ApiHealthCheck));
+
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
@@ -155,11 +169,21 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.MapHealthChecks("/healthcheck", new()
+{
+	ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse,
+	ResultStatusCodes =
+	{
+		[HealthStatus.Healthy] = StatusCodes.Status200OK,
+		[HealthStatus.Degraded] = StatusCodes.Status429TooManyRequests,
+		[HealthStatus.Unhealthy] = StatusCodes.Status503ServiceUnavailable
+	}
+}).RequireAuthorization();
 app.UseCors("_AllowAll");
 app.UseIpRateLimiting();
 app.UseAuthentication();
-app.UseMiddleware<GlobalExceptionHandler>();
 app.UseAuthorization();
+app.UseMiddleware<GlobalExceptionHandler>();
 
 app.MapControllers();
 

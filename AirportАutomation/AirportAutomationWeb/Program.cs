@@ -14,7 +14,7 @@ Log.Logger = new LoggerConfiguration()
 	)
 	.WriteTo.Logger(lc => lc
 		.Filter.ByIncludingOnly(le => le.Level >= LogEventLevel.Warning)
-		.WriteTo.File("Logs/AirportAutomationWeb.txt", rollingInterval: RollingInterval.Day)
+		.WriteTo.File("Logs/AirportAutomationAPI.txt", rollingInterval: RollingInterval.Day)
 	)
 	.CreateLogger();
 

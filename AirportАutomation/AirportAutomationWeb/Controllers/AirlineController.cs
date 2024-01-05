@@ -13,14 +13,12 @@ namespace AirportAutomationWeb.Controllers
 		private readonly IHttpCallService _httpCallService;
 		private readonly IAlertService _alertService;
 		private readonly IMapper _mapper;
-		private readonly ILogger<AirlineController> _logger;
 
-		public AirlineController(IHttpCallService httpCallService, IAlertService alertService, IMapper mapper, ILogger<AirlineController> logger)
+		public AirlineController(IHttpCallService httpCallService, IAlertService alertService, IMapper mapper)
 		{
 			_httpCallService = httpCallService;
 			_alertService = alertService;
 			_mapper = mapper;
-			_logger = logger;
 		}
 
 		[HttpGet]

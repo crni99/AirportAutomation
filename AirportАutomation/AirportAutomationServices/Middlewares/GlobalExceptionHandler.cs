@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 using System.ComponentModel.DataAnnotations;
 using System.Net;
 using System.Text.Json;
@@ -11,12 +11,10 @@ namespace AirportAutomationServices.Middlewares
 	public class GlobalExceptionHandler
 	{
 		private readonly RequestDelegate _next;
-		private readonly ILogger<GlobalExceptionHandler> _logger;
 
-		public GlobalExceptionHandler(RequestDelegate next, ILogger<GlobalExceptionHandler> logger)
+		public GlobalExceptionHandler(RequestDelegate next)
 		{
 			_next = next;
-			_logger = logger;
 		}
 
 		public async Task InvokeAsync(HttpContext httpContext)
@@ -35,65 +33,52 @@ namespace AirportAutomationServices.Middlewares
 		{
 			context.Response.ContentType = "application/json";
 			var response = context.Response;
-			ErrorResponseModel model = new();
+			var model = new ProblemDetails();
+			int statusCode;
 
 			switch (exception)
 			{
 				case ApplicationException:
-					model.ResponseCode = (int)HttpStatusCode.BadRequest;
-					response.StatusCode = (int)HttpStatusCode.BadRequest;
-					model.ResponseMessage = "Bad Request";
-					break;
+				case ArgumentException:
 				case ValidationException:
-					model.ResponseCode = (int)HttpStatusCode.BadRequest;
-					response.StatusCode = (int)HttpStatusCode.BadRequest;
-					model.ResponseMessage = "Validation failed.";
+				case InvalidOperationException:
+					statusCode = (int)HttpStatusCode.BadRequest;
+					model.Type = "Bad Request";
+					model.Title = "Bad Request";
+					model.Detail = exception.Message;
 					break;
-				case ArgumentException argumentException:
-					model.ResponseCode = (int)HttpStatusCode.BadRequest;
-					response.StatusCode = (int)HttpStatusCode.BadRequest;
-					model.ResponseMessage = "Bad Request. " + argumentException.Message;
-					break;
+
 				case DbUpdateException dbUpdateException when dbUpdateException.InnerException is SqlException sqlException:
-					if (sqlException.Number == 2601 || sqlException.Number == 2627)
+					statusCode = (int)HttpStatusCode.Conflict;
+					model.Type = "Conflict";
+					model.Title = "Conflict";
+					model.Detail = sqlException.Number switch
 					{
-						model.ResponseCode = (int)HttpStatusCode.Conflict;
-						response.StatusCode = (int)HttpStatusCode.Conflict;
-						model.ResponseMessage = "Conflict: Duplicate key violation.";
-					}
-					else if (sqlException.Number == 547)
-					{
-						model.ResponseCode = (int)HttpStatusCode.Conflict;
-						response.StatusCode = (int)HttpStatusCode.Conflict;
-						model.ResponseMessage = "Conflict: This entity is referenced in other records and cannot be deleted.";
-					}
-					else
-					{
-						model.ResponseCode = (int)HttpStatusCode.InternalServerError;
-						response.StatusCode = (int)HttpStatusCode.InternalServerError;
-						model.ResponseMessage = "Database error: " + sqlException.Message;
-					}
+						2601 or 2627 => "Duplicate key violation.",
+						547 => "This entity is referenced in other records and cannot be deleted.",
+						_ => "Database error: " + sqlException.Message
+					};
 					break;
-				case InvalidOperationException invalidOperationException:
-					model.ResponseCode = (int)HttpStatusCode.BadRequest;
-					response.StatusCode = (int)HttpStatusCode.BadRequest;
-					model.ResponseMessage = "Bad Request. " + invalidOperationException.Message;
-					break;
+
 				case UnauthorizedAccessException:
-					model.ResponseCode = (int)HttpStatusCode.Unauthorized;
-					response.StatusCode = (int)HttpStatusCode.Unauthorized;
-					model.ResponseMessage = "Unauthorized access..";
+					statusCode = (int)HttpStatusCode.Unauthorized;
+					model.Type = "Unauthorized access";
+					model.Title = "Unauthorized access";
 					break;
+
 				default:
-					model.ResponseCode = (int)HttpStatusCode.InternalServerError;
-					response.StatusCode = (int)HttpStatusCode.InternalServerError;
-					model.ResponseMessage = "Internal Server Error";
+					statusCode = (int)HttpStatusCode.InternalServerError;
+					model.Type = "Server error";
+					model.Title = "Server error";
+					model.Detail = "An internal server error occurred.";
 					break;
 			}
-			_logger.LogError("Response Code: {responseCode}, Message: {responseMessage} \n Stack Trace: {stackTrace}",
-				model.ResponseCode, model.ResponseMessage, exception);
+			model.Status = statusCode;
+			response.StatusCode = statusCode;
+
 			var result = JsonSerializer.Serialize(model);
 			await context.Response.WriteAsync(result);
 		}
+
 	}
 }
