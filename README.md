@@ -42,6 +42,10 @@ In this project, I have undertaken the challenge of developing a full-fledged We
 - Writing comprehensive unit tests using the xUnit framework to validate individual components of the application, ensuring that each unit functions correctly in isolation. 
 - These tests help maintain code integrity, improve software reliability, and facilitate easier debugging and refactoring.
 
+## Monitoring Application Health with HealthChecks:
+- Monitoring the health of critical components, such as databases and external dependencies, to proactively identify and address potential issues.
+- Configuring health check endpoints to offer insights into the overall well-being of the application, and integrating these checks into the Swagger documentation for visibility and ease of access.
+
 ___
 
 # AirportAutomationWEB
