@@ -151,11 +151,11 @@ builder.Services.AddHttpClient();
 
 builder.Services
 	.AddHealthChecks()
+	.AddCheck<ApiHealthCheck>("API")
 	.AddSqlServer(
 		builder.Configuration.GetConnectionString("Default"),
-		name: "SqlServerHealthCheck")
-	.AddCheck<DatabaseHealthCheck>(nameof(DatabaseHealthCheck))
-	.AddCheck<ApiHealthCheck>(nameof(ApiHealthCheck));
+		name: "SQL Server")
+	.AddCheck<DatabaseHealthCheck>("Database");
 
 var app = builder.Build();
 
@@ -169,7 +169,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-app.MapHealthChecks("/healthcheck", new()
+app.MapHealthChecks("/api/HealthCheck", new()
 {
 	ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse,
 	ResultStatusCodes =

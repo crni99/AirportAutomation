@@ -576,5 +576,38 @@ namespace AirportAutomationWeb.Services
 			httpClient.DefaultRequestHeaders.UserAgent.ParseAdd("HttpRequestsSample");
 			AddAuthorizationHeader(httpClient);
 		}
+
+		/// <summary>
+		/// Gets health check data of a specified type.
+		/// </summary>
+		/// <typeparam name="T">The type of health check data to retrieve.</typeparam>
+		/// <returns>
+		/// Returns the health check data of type <typeparamref name="T"/>.
+		/// If the retrieval fails, a default value for <typeparamref name="T"/> is returned with an error logged.
+		/// </returns>
+		public async Task<T> GetHealthCheck<T>()
+		{
+			T data = default;
+			var model = typeof(T);
+
+			string requestUri = $"{apiURL}/{model.Name}";
+
+			var httpRequestMessage = new HttpRequestMessage(HttpMethod.Get, requestUri);
+
+			using var httpClient = _httpClientFactory.CreateClient("AirportAutomationApi");
+			ConfigureHttpClient(httpClient);
+
+			var response = await httpClient.SendAsync(httpRequestMessage);
+
+			if (response.IsSuccessStatusCode)
+			{
+				data = await response.Content.ReadFromJsonAsync<T>().ConfigureAwait(false);
+			}
+			else
+			{
+				_logger.LogError("Failed to retrieve data. Status code: {StatusCode}", response.StatusCode);
+			}
+			return data;
+		}
 	}
 }
