@@ -17,7 +17,7 @@ namespace AirportAutomationApi.Repositories
 
 		public async Task<IList<Pilot>> GetPilots(int page, int pageSize)
 		{
-			var collection = _context.Pilot as IQueryable<Pilot>;
+			var collection = _context.Pilot.AsNoTracking();
 			return await collection.OrderBy(c => c.Id)
 				.Skip(pageSize * (page - 1))
 				.Take(pageSize)
@@ -31,7 +31,7 @@ namespace AirportAutomationApi.Repositories
 
 		public async Task<IList<Pilot?>> GetPilotsByName(string? firstName, string? lastName)
 		{
-			IQueryable<Pilot> query = _context.Pilot;
+			IQueryable<Pilot> query = _context.Pilot.AsNoTracking();
 
 			if (!string.IsNullOrEmpty(firstName))
 			{

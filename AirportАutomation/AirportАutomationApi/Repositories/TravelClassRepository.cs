@@ -16,7 +16,7 @@ namespace AirportAutomationApi.Repositories
 
 		public async Task<IList<TravelClass>> GetTravelClasses(int page, int pageSize)
 		{
-			var collection = _context.TravelClass as IQueryable<TravelClass>;
+			var collection = _context.TravelClass.AsNoTracking();
 			return await collection.OrderBy(c => c.Id)
 				.Skip(pageSize * (page - 1))
 				.Take(pageSize)

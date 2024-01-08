@@ -20,7 +20,8 @@ namespace AirportAutomationApi.Repositories
 			var collection = _context.PlaneTicket
 				.Include(k => k.Passenger)
 				.Include(k => k.TravelClass)
-				.Include(k => k.Flight) as IQueryable<PlaneTicket>;
+				.Include(k => k.Flight)
+				.AsNoTracking();
 
 			return await collection.OrderBy(c => c.Id)
 				.Skip(pageSize * (page - 1))
@@ -34,6 +35,7 @@ namespace AirportAutomationApi.Repositories
 				.Include(k => k.Passenger)
 				.Include(k => k.TravelClass)
 				.Include(k => k.Flight)
+				.AsNoTracking()
 				.FirstOrDefaultAsync(k => k.Id == id);
 		}
 
@@ -42,7 +44,8 @@ namespace AirportAutomationApi.Repositories
 			IQueryable<PlaneTicket> query = _context.PlaneTicket
 				.Include(k => k.Passenger)
 				.Include(k => k.TravelClass)
-				.Include(k => k.Flight);
+				.Include(k => k.Flight)
+				.AsNoTracking();
 
 			if (minPrice.HasValue)
 			{

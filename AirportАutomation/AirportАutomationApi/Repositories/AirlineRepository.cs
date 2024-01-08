@@ -17,7 +17,7 @@ namespace AirportAutomationApi.Repositories
 
 		public async Task<IList<Airline>> GetAirlines(int page, int pageSize)
 		{
-			var collection = _context.Airline as IQueryable<Airline>;
+			var collection = _context.Airline.AsNoTracking();
 			return await collection.OrderBy(c => c.Id)
 				.Skip(pageSize * (page - 1))
 				.Take(pageSize)
@@ -31,8 +31,8 @@ namespace AirportAutomationApi.Repositories
 
 		public async Task<IList<Airline?>> GetAirlinesByName(string name)
 		{
-			return await _context.Airline.
-				Where(a => a.Name.Contains(name)).ToListAsync();
+			return await _context.Airline.AsNoTracking()
+				.Where(a => a.Name.Contains(name)).ToListAsync();
 		}
 
 		public async Task<Airline> PostAirline(Airline airline)

@@ -20,7 +20,8 @@ namespace AirportAutomationApi.Repositories
 			var collection = _context.Flight
 				.Include(l => l.Airline)
 				.Include(l => l.Destination)
-				.Include(l => l.Pilot) as IQueryable<Flight>;
+				.Include(l => l.Pilot)
+				.AsNoTracking();
 
 			return await collection.OrderBy(c => c.Id)
 				.Skip(pageSize * (page - 1))
@@ -34,6 +35,7 @@ namespace AirportAutomationApi.Repositories
 				.Include(l => l.Airline)
 				.Include(l => l.Destination)
 				.Include(l => l.Pilot)
+				.AsNoTracking()
 				.FirstOrDefaultAsync(l => l.Id == id);
 		}
 
@@ -42,7 +44,8 @@ namespace AirportAutomationApi.Repositories
 			IQueryable<Flight> query = _context.Flight
 				.Include(f => f.Airline)
 				.Include(f => f.Destination)
-				.Include(f => f.Pilot);
+				.Include(f => f.Pilot)
+				.AsNoTracking();
 
 			if (startDate.HasValue)
 			{
