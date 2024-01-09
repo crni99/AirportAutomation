@@ -16,10 +16,11 @@ namespace AirportAutomationApi.Repositories
 
 		public async Task<IList<TravelClass>> GetTravelClasses(int page, int pageSize)
 		{
-			var collection = _context.TravelClass.AsNoTracking();
-			return await collection.OrderBy(c => c.Id)
+			return await _context.TravelClass
+				.OrderBy(c => c.Id)
 				.Skip(pageSize * (page - 1))
 				.Take(pageSize)
+				.AsNoTracking()
 				.ToListAsync();
 		}
 
@@ -28,7 +29,7 @@ namespace AirportAutomationApi.Repositories
 			return await _context.TravelClass.FindAsync(id);
 		}
 
-		public bool TravelClassExists(int id)
+		public async Task<bool> TravelClassExists(int id)
 		{
 			return (_context.TravelClass?.Any(e => e.Id == id)).GetValueOrDefault();
 		}

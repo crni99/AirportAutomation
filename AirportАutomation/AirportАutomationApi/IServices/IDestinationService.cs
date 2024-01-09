@@ -11,7 +11,7 @@ namespace AirportAutomationApi.IService
 		Task PutDestination(Destination destination);
 		Task<Destination> PatchDestination(int id, JsonPatchDocument destinationDocument);
 		Task<bool> DeleteDestination(int id);
-		public bool DestinationExists(int id);
+		Task<bool> DestinationExists(int id);
 		public int DestinationsCount();
 	}
 }

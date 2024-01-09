@@ -17,10 +17,11 @@ namespace AirportAutomationApi.Repositories
 
 		public async Task<IList<Passenger>> GetPassengers(int page, int pageSize)
 		{
-			var collection = _context.Passenger.AsNoTracking();
-			return await collection.OrderBy(c => c.Id)
+			return await _context.Passenger
+				.OrderBy(c => c.Id)
 				.Skip(pageSize * (page - 1))
 				.Take(pageSize)
+				.AsNoTracking()
 				.ToListAsync();
 		}
 
@@ -41,7 +42,7 @@ namespace AirportAutomationApi.Repositories
 			{
 				query = query.Where(p => p.LastName.Contains(lastName));
 			}
-			return await query.ToListAsync();
+			return await query.ToListAsync().ConfigureAwait(false);
 		}
 
 		public async Task<Passenger> PostPassenger(Passenger passenger)
@@ -67,7 +68,7 @@ namespace AirportAutomationApi.Repositories
 
 		public async Task<bool> DeletePassenger(int id)
 		{
-			bool hasRelatedPlaneTickets = _context.PlaneTicket.Any(pt => pt.PassengerId == id);
+			bool hasRelatedPlaneTickets = await _context.PlaneTicket.AnyAsync(pt => pt.PassengerId == id);
 			if (hasRelatedPlaneTickets)
 			{
 				return false;
@@ -78,7 +79,7 @@ namespace AirportAutomationApi.Repositories
 			return true;
 		}
 
-		public bool PassengerExists(int id)
+		public async Task<bool> PassengerExists(int id)
 		{
 			return (_context.Passenger?.Any(e => e.Id == id)).GetValueOrDefault();
 		}

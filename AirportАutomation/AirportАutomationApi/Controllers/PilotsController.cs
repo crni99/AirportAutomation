@@ -84,7 +84,7 @@ namespace AirportAutomationApi.Controllers
 		[ProducesResponseType(401)]
 		public async Task<ActionResult<PilotDto>> GetPilot(int id)
 		{
-			if (!_pilotService.PilotExists(id))
+			if (!await _pilotService.PilotExists(id))
 			{
 				_logger.LogInformation("Pilot with id {id} not found.", id);
 				return NotFound();
@@ -166,7 +166,7 @@ namespace AirportAutomationApi.Controllers
 				_logger.LogInformation("Pilot with id {id} is different from provided Pilot and his id.", id);
 				return BadRequest();
 			}
-			if (!_pilotService.PilotExists(id))
+			if (!await _pilotService.PilotExists(id))
 			{
 				_logger.LogInformation("Pilot with id {id} not found.", id);
 				return NotFound();
@@ -201,7 +201,7 @@ namespace AirportAutomationApi.Controllers
 		[ProducesResponseType(401)]
 		public async Task<IActionResult> PatchPilot(int id, [FromBody] JsonPatchDocument pilotDocument)
 		{
-			if (!_pilotService.PilotExists(id))
+			if (!await _pilotService.PilotExists(id))
 			{
 				_logger.LogInformation("Pilot with id {id} not found.", id);
 				return NotFound();
@@ -225,7 +225,7 @@ namespace AirportAutomationApi.Controllers
 		[ProducesResponseType(409)]
 		public async Task<IActionResult> DeletePilot(int id)
 		{
-			if (!_pilotService.PilotExists(id))
+			if (!await _pilotService.PilotExists(id))
 			{
 				_logger.LogInformation("Pilot with id {id} not found.", id);
 				return NotFound();

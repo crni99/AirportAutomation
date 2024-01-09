@@ -12,7 +12,7 @@ namespace AirportAutomationApi.IRepository
 		Task PutAirline(Airline airline);
 		Task<Airline> PatchAirline(int id, JsonPatchDocument airlineDocument);
 		Task<bool> DeleteAirline(int id);
-		public bool AirlineExists(int id);
+		Task<bool> AirlineExists(int id);
 		public int AirlinesCount();
 	}
 }

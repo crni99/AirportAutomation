@@ -119,7 +119,7 @@ namespace AirportAutomationApi.Controllers
 		[ProducesResponseType(401)]
 		public async Task<ActionResult<PlaneTicketDto>> GetPlaneTicket(int id)
 		{
-			if (!_planeTicketService.PlaneTicketExists(id))
+			if (!await _planeTicketService.PlaneTicketExists(id))
 			{
 				_logger.LogInformation("Plane ticket with id {id} not found.", id);
 				return NotFound();
@@ -177,7 +177,7 @@ namespace AirportAutomationApi.Controllers
 				_logger.LogInformation("Plane Ticket with id {id} is different from provided Plane Ticket and his id.", id);
 				return BadRequest();
 			}
-			if (!_planeTicketService.PlaneTicketExists(id))
+			if (!await _planeTicketService.PlaneTicketExists(id))
 			{
 				_logger.LogInformation("Plane ticket with id {id} not found.", id);
 				return NotFound();
@@ -212,7 +212,7 @@ namespace AirportAutomationApi.Controllers
 		[ProducesResponseType(401)]
 		public async Task<IActionResult> PatchPlaneTicket(int id, [FromBody] JsonPatchDocument planeTicketDocument)
 		{
-			if (!_planeTicketService.PlaneTicketExists(id))
+			if (!await _planeTicketService.PlaneTicketExists(id))
 			{
 				_logger.LogInformation("Plane Ticket with id {id} not found.", id);
 				return NotFound();
@@ -234,7 +234,7 @@ namespace AirportAutomationApi.Controllers
 		[ProducesResponseType(401)]
 		public async Task<IActionResult> DeletePlaneTicket(int id)
 		{
-			if (!_planeTicketService.PlaneTicketExists(id))
+			if (!await _planeTicketService.PlaneTicketExists(id))
 			{
 				_logger.LogInformation("Plane ticket with id {id} not found.", id);
 				return NotFound();

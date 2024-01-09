@@ -17,10 +17,11 @@ namespace AirportAutomationApi.Repositories
 
 		public async Task<IList<Destination>> GetDestinations(int page, int pageSize)
 		{
-			var collection = _context.Destination.AsNoTracking();
-			return await collection.OrderBy(c => c.Id)
+			return await _context.Destination
+				.OrderBy(c => c.Id)
 				.Skip(pageSize * (page - 1))
 				.Take(pageSize)
+				.AsNoTracking()
 				.ToListAsync();
 		}
 
@@ -52,7 +53,7 @@ namespace AirportAutomationApi.Repositories
 
 		public async Task<bool> DeleteDestination(int id)
 		{
-			bool hasRelatedFlights = _context.Flight.Any(pt => pt.DestinationId == id);
+			bool hasRelatedFlights = await _context.Flight.AnyAsync(pt => pt.DestinationId == id);
 			if (hasRelatedFlights)
 			{
 				return false;
@@ -63,7 +64,7 @@ namespace AirportAutomationApi.Repositories
 			return true;
 		}
 
-		public bool DestinationExists(int id)
+		public async Task<bool> DestinationExists(int id)
 		{
 			return (_context.Destination?.Any(e => e.Id == id)).GetValueOrDefault();
 		}

@@ -11,8 +11,8 @@ namespace AirportAutomationApi.IRepository
 		Task<PlaneTicket> PostPlaneTicket(PlaneTicket planeTicket);
 		Task PutPlaneTicket(PlaneTicket planeTicket);
 		Task<PlaneTicket> PatchPlaneTicket(int id, JsonPatchDocument planeTicketDocument);
-		Task DeletePlaneTicket(int id);
-		public bool PlaneTicketExists(int id);
+		Task<bool> DeletePlaneTicket(int id);
+		Task<bool> PlaneTicketExists(int id);
 		public int PlaneTicketsCount();
 	}
 }

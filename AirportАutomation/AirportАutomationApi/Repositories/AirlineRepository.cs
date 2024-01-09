@@ -17,10 +17,11 @@ namespace AirportAutomationApi.Repositories
 
 		public async Task<IList<Airline>> GetAirlines(int page, int pageSize)
 		{
-			var collection = _context.Airline.AsNoTracking();
-			return await collection.OrderBy(c => c.Id)
+			return await _context.Airline
+				.OrderBy(c => c.Id)
 				.Skip(pageSize * (page - 1))
 				.Take(pageSize)
+				.AsNoTracking()
 				.ToListAsync();
 		}
 
@@ -31,8 +32,11 @@ namespace AirportAutomationApi.Repositories
 
 		public async Task<IList<Airline?>> GetAirlinesByName(string name)
 		{
-			return await _context.Airline.AsNoTracking()
-				.Where(a => a.Name.Contains(name)).ToListAsync();
+			return await _context.Airline
+				.AsNoTracking()
+				.Where(a => a.Name.Contains(name))
+				.ToListAsync()
+				.ConfigureAwait(false);
 		}
 
 		public async Task<Airline> PostAirline(Airline airline)
@@ -58,7 +62,7 @@ namespace AirportAutomationApi.Repositories
 
 		public async Task<bool> DeleteAirline(int id)
 		{
-			bool hasRelatedFlights = _context.Flight.Any(pt => pt.AirlineId == id);
+			bool hasRelatedFlights = await _context.Flight.AnyAsync(pt => pt.AirlineId == id);
 			if (hasRelatedFlights)
 			{
 				return false;
@@ -69,7 +73,7 @@ namespace AirportAutomationApi.Repositories
 			return true;
 		}
 
-		public bool AirlineExists(int id)
+		public async Task<bool> AirlineExists(int id)
 		{
 			return (_context.Airline?.Any(e => e.Id == id)).GetValueOrDefault();
 		}

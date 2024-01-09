@@ -77,7 +77,7 @@ namespace AirportAutomationApi.Controllers
 		[ProducesResponseType(401)]
 		public async Task<ActionResult<TravelClassDto>> GetTravelClass(int id)
 		{
-			if (!_travelClassService.TravelClassExists(id))
+			if (!await _travelClassService.TravelClassExists(id))
 			{
 				_logger.LogInformation("Travel class with id {id} not found.", id);
 				return NotFound();

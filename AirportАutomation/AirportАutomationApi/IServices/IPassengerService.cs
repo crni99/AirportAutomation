@@ -12,7 +12,7 @@ namespace AirportAutomationApi.IService
 		Task PutPassenger(Passenger passenger);
 		Task<Passenger> PatchPassenger(int id, JsonPatchDocument passengerDocument);
 		Task<bool> DeletePassenger(int id);
-		public bool PassengerExists(int id);
+		Task<bool> PassengerExists(int id);
 		public int PassengersCount();
 	}
 }

@@ -85,7 +85,7 @@ namespace AirportAutomationApi.Controllers
 		[ProducesResponseType(401)]
 		public async Task<ActionResult<FlightDto>> GetFlight(int id)
 		{
-			if (!_flightService.FlightExists(id))
+			if (!await _flightService.FlightExists(id))
 			{
 				_logger.LogInformation("Flight with id {id} not found.", id);
 				return NotFound();
@@ -167,7 +167,7 @@ namespace AirportAutomationApi.Controllers
 				_logger.LogInformation("Flight with id {id} is different from provided Flight and his id.", id);
 				return BadRequest();
 			}
-			if (!_flightService.FlightExists(id))
+			if (!await _flightService.FlightExists(id))
 			{
 				_logger.LogInformation("Flight with id {id} not found.", id);
 				return NotFound();
@@ -202,7 +202,7 @@ namespace AirportAutomationApi.Controllers
 		[ProducesResponseType(401)]
 		public async Task<IActionResult> PatchFlight(int id, [FromBody] JsonPatchDocument flightDocument)
 		{
-			if (!_flightService.FlightExists(id))
+			if (!await _flightService.FlightExists(id))
 			{
 				_logger.LogInformation("Flight with id {id} not found.", id);
 				return NotFound();
@@ -226,7 +226,7 @@ namespace AirportAutomationApi.Controllers
 		[ProducesResponseType(409)]
 		public async Task<IActionResult> DeleteFlight(int id)
 		{
-			if (!_flightService.FlightExists(id))
+			if (!await _flightService.FlightExists(id))
 			{
 				_logger.LogInformation("Flight with id {id} not found.", id);
 				return NotFound();

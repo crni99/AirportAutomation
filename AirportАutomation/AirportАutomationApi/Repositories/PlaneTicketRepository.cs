@@ -23,7 +23,8 @@ namespace AirportAutomationApi.Repositories
 				.Include(k => k.Flight)
 				.AsNoTracking();
 
-			return await collection.OrderBy(c => c.Id)
+			return await collection
+				.OrderBy(c => c.Id)
 				.Skip(pageSize * (page - 1))
 				.Take(pageSize)
 				.ToListAsync();
@@ -55,7 +56,7 @@ namespace AirportAutomationApi.Repositories
 			{
 				query = query.Where(p => p.Price <= maxPrice.Value);
 			}
-			return await query.ToListAsync();
+			return await query.ToListAsync().ConfigureAwait(false);
 		}
 
 		public async Task<PlaneTicket> PostPlaneTicket(PlaneTicket planeTicket)
@@ -79,14 +80,15 @@ namespace AirportAutomationApi.Repositories
 			return planeTicket;
 		}
 
-		public async Task DeletePlaneTicket(int id)
+		public async Task<bool> DeletePlaneTicket(int id)
 		{
 			var planeTicket = await GetPlaneTicket(id);
 			_context.PlaneTicket.Remove(planeTicket);
 			await _context.SaveChangesAsync();
+			return true;
 		}
 
-		public bool PlaneTicketExists(int id)
+		public async Task<bool> PlaneTicketExists(int id)
 		{
 			return (_context.PlaneTicket?.Any(e => e.Id == id)).GetValueOrDefault();
 		}

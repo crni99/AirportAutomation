@@ -84,7 +84,7 @@ namespace AirportAutomationApi.Controllers
 		[ProducesResponseType(401)]
 		public async Task<ActionResult<DestinationDto>> GetDestination(int id)
 		{
-			if (!_destinationService.DestinationExists(id))
+			if (!await _destinationService.DestinationExists(id))
 			{
 				_logger.LogInformation("Destination with id {id} not found.", id);
 				return NotFound();
@@ -134,7 +134,7 @@ namespace AirportAutomationApi.Controllers
 				_logger.LogInformation("Destination with id {id} is different from provided Destination and his id.", id);
 				return BadRequest();
 			}
-			if (!_destinationService.DestinationExists(id))
+			if (!await _destinationService.DestinationExists(id))
 			{
 				_logger.LogInformation("Destination with id {id} not found.", id);
 				return NotFound();
@@ -169,7 +169,7 @@ namespace AirportAutomationApi.Controllers
 		[ProducesResponseType(401)]
 		public async Task<IActionResult> PatchDestination(int id, [FromBody] JsonPatchDocument destinationDocument)
 		{
-			if (!_destinationService.DestinationExists(id))
+			if (!await _destinationService.DestinationExists(id))
 			{
 				_logger.LogInformation("Destination with id {id} not found.", id);
 				return NotFound();
@@ -193,7 +193,7 @@ namespace AirportAutomationApi.Controllers
 		[ProducesResponseType(409)]
 		public async Task<IActionResult> DeleteDestination(int id)
 		{
-			if (!_destinationService.DestinationExists(id))
+			if (!await _destinationService.DestinationExists(id))
 			{
 				_logger.LogInformation("Destination with id {id} not found.", id);
 				return NotFound();

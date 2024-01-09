@@ -70,9 +70,9 @@ namespace AirportAutomationApi.Test.Services
 		}
 
 		[Fact]
-		public void PassengerExists_Should_Call_Repository_PassengerExists()
+		public async Task PassengerExists_Should_Call_Repository_PassengerExistsAsync()
 		{
-			var result = _service.PassengerExists(1);
+			var result = await _service.PassengerExists(1);
 
 			_repositoryMock.Verify(repo => repo.PassengerExists(1), Times.Once);
 			Assert.False(result);

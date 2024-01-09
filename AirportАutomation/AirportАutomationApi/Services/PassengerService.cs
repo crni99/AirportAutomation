@@ -48,9 +48,9 @@ namespace AirportAutomationApi.Services
 			return await _passengerRepository.DeletePassenger(id);
 		}
 
-		public bool PassengerExists(int id)
+		public async Task<bool> PassengerExists(int id)
 		{
-			return _passengerRepository.PassengerExists(id);
+			return await _passengerRepository.PassengerExists(id);
 		}
 
 		public int PassengersCount()

@@ -84,7 +84,7 @@ namespace AirportAutomationApi.Controllers
 		[ProducesResponseType(401)]
 		public async Task<ActionResult<PassengerDto>> GetPassenger(int id)
 		{
-			if (!_passengerService.PassengerExists(id))
+			if (!await _passengerService.PassengerExists(id))
 			{
 				_logger.LogInformation("Passenger with id {id} not found.", id);
 				return NotFound();
@@ -166,7 +166,7 @@ namespace AirportAutomationApi.Controllers
 				_logger.LogInformation("Passenger with id {id} is different from provided passenger and his id.", id);
 				return BadRequest();
 			}
-			if (!_passengerService.PassengerExists(id))
+			if (!await _passengerService.PassengerExists(id))
 			{
 				_logger.LogInformation("Passenger with id {id} not found.", id);
 				return NotFound();
@@ -201,7 +201,7 @@ namespace AirportAutomationApi.Controllers
 		[ProducesResponseType(401)]
 		public async Task<IActionResult> PatchPassenger(int id, [FromBody] JsonPatchDocument passengerDocument)
 		{
-			if (!_passengerService.PassengerExists(id))
+			if (!await _passengerService.PassengerExists(id))
 			{
 				_logger.LogInformation("Passenger with id {id} not found.", id);
 				return NotFound();
@@ -225,7 +225,7 @@ namespace AirportAutomationApi.Controllers
 		[ProducesResponseType(409)]
 		public async Task<IActionResult> DeletePassenger(int id)
 		{
-			if (!_passengerService.PassengerExists(id))
+			if (!await _passengerService.PassengerExists(id))
 			{
 				_logger.LogInformation("Passenger with id {id} not found.", id);
 				return NotFound();

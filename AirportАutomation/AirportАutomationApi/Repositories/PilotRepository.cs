@@ -17,10 +17,11 @@ namespace AirportAutomationApi.Repositories
 
 		public async Task<IList<Pilot>> GetPilots(int page, int pageSize)
 		{
-			var collection = _context.Pilot.AsNoTracking();
-			return await collection.OrderBy(c => c.Id)
+			return await _context.Pilot
+				.OrderBy(c => c.Id)
 				.Skip(pageSize * (page - 1))
 				.Take(pageSize)
+				.AsNoTracking()
 				.ToListAsync();
 		}
 
@@ -41,7 +42,7 @@ namespace AirportAutomationApi.Repositories
 			{
 				query = query.Where(p => p.LastName.Contains(lastName));
 			}
-			return await query.ToListAsync();
+			return await query.ToListAsync().ConfigureAwait(false);
 		}
 
 		public async Task<Pilot> PostPilot(Pilot pilot)
@@ -67,7 +68,7 @@ namespace AirportAutomationApi.Repositories
 
 		public async Task<bool> DeletePilot(int id)
 		{
-			bool hasRelatedFlights = _context.Flight.Any(pt => pt.PilotId == id);
+			bool hasRelatedFlights = await _context.Flight.AnyAsync(pt => pt.PilotId == id);
 			if (hasRelatedFlights)
 			{
 				return false;
@@ -78,7 +79,7 @@ namespace AirportAutomationApi.Repositories
 			return true;
 		}
 
-		public bool PilotExists(int id)
+		public async Task<bool> PilotExists(int id)
 		{
 			return (_context.Pilot?.Any(e => e.Id == id)).GetValueOrDefault();
 		}

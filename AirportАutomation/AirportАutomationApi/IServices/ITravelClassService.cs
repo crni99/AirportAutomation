@@ -6,7 +6,7 @@ namespace AirportAutomationApi.IService
 	{
 		Task<IList<TravelClass>> GetTravelClasses(int page, int pageSize);
 		Task<TravelClass?> GetTravelClass(int id);
-		public bool TravelClassExists(int id);
+		Task<bool> TravelClassExists(int id);
 		public int TravelClassesCount();
 	}
 }

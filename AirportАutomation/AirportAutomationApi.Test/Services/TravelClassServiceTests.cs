@@ -32,9 +32,9 @@ namespace AirportAutomationApi.Test.Services
 		}
 
 		[Fact]
-		public void TravelClassExists_Should_Call_Repository_TravelClassExists()
+		public async Task TravelClassExists_Should_Call_Repository_TravelClassExists()
 		{
-			var result = _service.TravelClassExists(1);
+			var result = await _service.TravelClassExists(1);
 
 			_repositoryMock.Verify(repo => repo.TravelClassExists(1), Times.Once);
 			Assert.False(result);

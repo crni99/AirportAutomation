@@ -128,7 +128,7 @@ namespace AirportAutomationApi.Test.Controllers
 		{
 			var travelClassId = 1;
 			_travelClassServiceMock.Setup(service => service.TravelClassExists(travelClassId))
-				.Returns(true);
+				.ReturnsAsync(true);
 			_travelClassServiceMock.Setup(service => service.GetTravelClass(travelClassId))
 				.ReturnsAsync(travelClass);
 			_mapperMock.Setup(mapper => mapper.Map<TravelClassDto>(It.IsAny<TravelClass>()))
@@ -147,7 +147,7 @@ namespace AirportAutomationApi.Test.Controllers
 		{
 			var travelClassId = 2;
 			_travelClassServiceMock.Setup(service => service.TravelClassExists(travelClassId))
-				.Returns(false);
+				.ReturnsAsync(false);
 
 			var result = await _controller.GetTravelClass(travelClassId);
 

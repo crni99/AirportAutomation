@@ -86,7 +86,7 @@ namespace AirportAutomationApi.Controllers
 		public async Task<ActionResult<AirlineDto>> GetAirline(int id)
 		{
 
-			if (!_airlineService.AirlineExists(id))
+			if (!await _airlineService.AirlineExists(id))
 			{
 				_logger.LogInformation("Airline with id {id} not found.", id);
 				return NotFound();
@@ -161,7 +161,7 @@ namespace AirportAutomationApi.Controllers
 				return BadRequest();
 			}
 
-			if (!_airlineService.AirlineExists(id))
+			if (!await _airlineService.AirlineExists(id))
 			{
 				_logger.LogInformation("Airline with id {id} not found.", id);
 				return NotFound();
@@ -196,7 +196,7 @@ namespace AirportAutomationApi.Controllers
 		[ProducesResponseType(401)]
 		public async Task<IActionResult> PatchAirline(int id, [FromBody] JsonPatchDocument airlineDocument)
 		{
-			if (!_airlineService.AirlineExists(id))
+			if (!await _airlineService.AirlineExists(id))
 			{
 				_logger.LogInformation("Airline with id {id} not found.", id);
 				return NotFound();
@@ -221,7 +221,7 @@ namespace AirportAutomationApi.Controllers
 		public async Task<IActionResult> DeleteAirline(int id)
 		{
 
-			if (!_airlineService.AirlineExists(id))
+			if (!await _airlineService.AirlineExists(id))
 			{
 				_logger.LogInformation("Airline with id {id} not found.", id);
 				return NotFound();

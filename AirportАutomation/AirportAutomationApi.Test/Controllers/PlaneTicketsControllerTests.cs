@@ -172,7 +172,7 @@ namespace AirportAutomationApi.Test.Controllers
 		{
 			var planeTicketId = 1;
 			_planeTicketServiceMock.Setup(service => service.PlaneTicketExists(planeTicketId))
-				.Returns(true);
+				.ReturnsAsync(true);
 			_planeTicketServiceMock.Setup(service => service.GetPlaneTicket(planeTicketId))
 				.ReturnsAsync(planeTicket);
 			_mapperMock.Setup(mapper => mapper.Map<PlaneTicketDto>(It.IsAny<PlaneTicket>()))
@@ -191,7 +191,7 @@ namespace AirportAutomationApi.Test.Controllers
 		{
 			var planeTicketId = 2;
 			_planeTicketServiceMock.Setup(service => service.PlaneTicketExists(planeTicketId))
-				.Returns(false);
+				.ReturnsAsync(false);
 
 			var result = await _controller.GetPlaneTicket(planeTicketId);
 
@@ -310,7 +310,7 @@ namespace AirportAutomationApi.Test.Controllers
 		public async Task PutPlaneTicket_ValidUpdate_ReturnsNoContentResult()
 		{
 			var id = 1;
-			_planeTicketServiceMock.Setup(service => service.PlaneTicketExists(id)).Returns(true);
+			_planeTicketServiceMock.Setup(service => service.PlaneTicketExists(id)).ReturnsAsync(true);
 			_planeTicketServiceMock.Setup(service => service.PutPlaneTicket(It.IsAny<PlaneTicket>())).Returns(Task.CompletedTask);
 
 			var result = await _controller.PutPlaneTicket(id, planeTicketUpdateDto);
@@ -323,7 +323,7 @@ namespace AirportAutomationApi.Test.Controllers
 		public async Task PutPlaneTicket_PlaneTicketNotFound_ReturnsNotFoundResult()
 		{
 			var id = 1;
-			_planeTicketServiceMock.Setup(service => service.PlaneTicketExists(id)).Returns(false);
+			_planeTicketServiceMock.Setup(service => service.PlaneTicketExists(id)).ReturnsAsync(false);
 
 			var result = await _controller.PutPlaneTicket(id, planeTicketUpdateDto);
 
@@ -346,7 +346,7 @@ namespace AirportAutomationApi.Test.Controllers
 		public async Task PutPlaneTicket_ReturnsNullReferenceException_WhenPlaneTicketUpdateFails()
 		{
 			var id = 1;
-			_planeTicketServiceMock.Setup(service => service.PlaneTicketExists(id)).Returns(true);
+			_planeTicketServiceMock.Setup(service => service.PlaneTicketExists(id)).ReturnsAsync(true);
 			_planeTicketServiceMock.Setup(service => service.PutPlaneTicket(It.IsAny<PlaneTicket>()))
 				.ThrowsAsync(new Exception("Simulated error"));
 
@@ -363,7 +363,7 @@ namespace AirportAutomationApi.Test.Controllers
 			var id = 1;
 			var planeTicketDocument = new JsonPatchDocument();
 			var updatedPlaneTicket = new PlaneTicket { Id = id, Price = 600 };
-			_planeTicketServiceMock.Setup(service => service.PlaneTicketExists(id)).Returns(true);
+			_planeTicketServiceMock.Setup(service => service.PlaneTicketExists(id)).ReturnsAsync(true);
 			_planeTicketServiceMock.Setup(service => service.PatchPlaneTicket(id, planeTicketDocument)).ReturnsAsync(updatedPlaneTicket);
 
 			var result = await _controller.PatchPlaneTicket(id, planeTicketDocument);
@@ -380,7 +380,7 @@ namespace AirportAutomationApi.Test.Controllers
 		{
 			var id = 1;
 			var planeTicketDocument = new JsonPatchDocument();
-			_planeTicketServiceMock.Setup(service => service.PlaneTicketExists(id)).Returns(false);
+			_planeTicketServiceMock.Setup(service => service.PlaneTicketExists(id)).ReturnsAsync(false);
 
 			var result = await _controller.PatchPlaneTicket(id, planeTicketDocument);
 
@@ -392,7 +392,7 @@ namespace AirportAutomationApi.Test.Controllers
 		public async Task PatchPlaneTicket_ReturnsNullReferenceException_WhenPlaneTicketPatchFails()
 		{
 			var id = 1;
-			_planeTicketServiceMock.Setup(service => service.PlaneTicketExists(id)).Returns(true);
+			_planeTicketServiceMock.Setup(service => service.PlaneTicketExists(id)).ReturnsAsync(true);
 			_planeTicketServiceMock.Setup(service => service.PatchPlaneTicket(id, It.IsAny<JsonPatchDocument>()))
 				.ThrowsAsync(new Exception("Simulated error"));
 
@@ -407,7 +407,7 @@ namespace AirportAutomationApi.Test.Controllers
 		public async Task DeletePlaneTicket_ValidDelete_ReturnsNoContentResult()
 		{
 			var id = 1;
-			_planeTicketServiceMock.Setup(service => service.PlaneTicketExists(id)).Returns(true);
+			_planeTicketServiceMock.Setup(service => service.PlaneTicketExists(id)).ReturnsAsync(true);
 			_planeTicketServiceMock.Setup(service => service.DeletePlaneTicket(id)).Returns(Task.CompletedTask);
 
 			var result = await _controller.DeletePlaneTicket(id);
@@ -420,7 +420,7 @@ namespace AirportAutomationApi.Test.Controllers
 		public async Task DeletePlaneTicket_PlaneTicketNotFound_ReturnsNotFoundResult()
 		{
 			var id = 1;
-			_planeTicketServiceMock.Setup(service => service.PlaneTicketExists(id)).Returns(false);
+			_planeTicketServiceMock.Setup(service => service.PlaneTicketExists(id)).ReturnsAsync(false);
 
 			var result = await _controller.DeletePlaneTicket(id);
 
@@ -432,7 +432,7 @@ namespace AirportAutomationApi.Test.Controllers
 		public async Task DeletePlaneTicket_ReturnsNullReferenceException_WhenPlaneTicketDeleteFails()
 		{
 			var id = 1;
-			_planeTicketServiceMock.Setup(service => service.PlaneTicketExists(id)).Returns(true);
+			_planeTicketServiceMock.Setup(service => service.PlaneTicketExists(id)).ReturnsAsync(true);
 			_planeTicketServiceMock.Setup(service => service.DeletePlaneTicket(id))
 				.ThrowsAsync(new Exception("Simulated error"));
 
