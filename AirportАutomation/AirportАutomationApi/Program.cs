@@ -1,5 +1,5 @@
 ﻿using AirportAutomation.Infrastructure.Data;
-using AirportAutomation.Services.Middlewares;
+using AirportAutomation.Infrastructure.Middlewares;
 using AirportАutomation.Api.Binders;
 using AirportАutomation.Api.HealthChecks;
 using AirportАutomation.Api.Helpers;

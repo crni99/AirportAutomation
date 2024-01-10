@@ -1,6 +1,6 @@
-﻿using AirportAutomation.Application.Interfaces.IRepositories;
-using AirportAutomation.Application.Interfaces.IServices;
-using AirportAutomation.Core.Entities;
+﻿using AirportAutomation.Core.Entities;
+using AirportAutomation.Core.Interfaces.IRepositories;
+using AirportAutomation.Core.Interfaces.IServices;
 
 namespace AirportAutomation.Application.Services
 {

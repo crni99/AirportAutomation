@@ -33,7 +33,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\AirportAutomationDomain\AirportAutomation.Core.csproj" />
-    <ProjectReference Include="..\AirportAutomationServices\AirportAutomation.Services.csproj" />
+    <ProjectReference Include="..\AirportAutomationInfrastructure\AirportAutomation.Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>

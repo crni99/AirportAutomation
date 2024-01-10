@@ -1,12 +1,12 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
+using System.Data.SqlClient;
 using System.Net;
 using System.Text.Json;
 
-namespace AirportAutomation.Services.Middlewares
+namespace AirportAutomation.Infrastructure.Middlewares
 {
 	public class GlobalExceptionHandler
 	{

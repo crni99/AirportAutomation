@@ -1,5 +1,5 @@
-﻿using AirportAutomation.Application.Interfaces.IRepositories;
-using AirportAutomation.Core.Entities;
+﻿using AirportAutomation.Core.Entities;
+using AirportAutomation.Core.Interfaces.IRepositories;
 using AirportAutomation.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 

@@ -3,7 +3,7 @@ using AirportAutomation.Core.Entities;
 using AirportAutomationDomain.Dtos.PlaneTicket;
 using AutoMapper;
 
-namespace AirportAutomation.Core.MappingProfiles
+namespace AirportAutomation.Api.MappingProfiles
 {
 	public class PlaneTicketMappings : Profile
 	{

@@ -1,4 +1,4 @@
-﻿using AirportAutomation.Services.Middlewares;
+﻿using AirportAutomation.Infrastructure.Middlewares;
 using AirportAutomation.Web.Binders;
 using AirportAutomation.Web.Converters;
 using Serilog;

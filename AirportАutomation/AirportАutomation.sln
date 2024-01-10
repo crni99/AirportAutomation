@@ -9,8 +9,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AirportAutomation.Web", "Ai
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AirportAutomationApi.Test", "AirportAutomationApi.Test\AirportAutomationApi.Test.csproj", "{8B49CBE3-C4FD-46AF-9C30-68645539C5A2}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AirportAutomation.Services", "AirportAutomationServices\AirportAutomation.Services.csproj", "{050B86FD-9016-4239-A70A-F7054D91D8A0}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AirportAutomation.Application", "AirportAutomationApplication\AirportAutomation.Application.csproj", "{EB447C02-A913-4B4A-91FB-BEF6B9F04D40}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AirportAutomation.Core", "AirportAutomationDomain\AirportAutomation.Core.csproj", "{9DE2992A-4BE4-472D-B36E-BD3D062F9421}"
@@ -35,10 +33,6 @@ Global
 		{8B49CBE3-C4FD-46AF-9C30-68645539C5A2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8B49CBE3-C4FD-46AF-9C30-68645539C5A2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8B49CBE3-C4FD-46AF-9C30-68645539C5A2}.Release|Any CPU.Build.0 = Release|Any CPU
-		{050B86FD-9016-4239-A70A-F7054D91D8A0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{050B86FD-9016-4239-A70A-F7054D91D8A0}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{050B86FD-9016-4239-A70A-F7054D91D8A0}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{050B86FD-9016-4239-A70A-F7054D91D8A0}.Release|Any CPU.Build.0 = Release|Any CPU
 		{EB447C02-A913-4B4A-91FB-BEF6B9F04D40}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{EB447C02-A913-4B4A-91FB-BEF6B9F04D40}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EB447C02-A913-4B4A-91FB-BEF6B9F04D40}.Release|Any CPU.ActiveCfg = Release|Any CPU

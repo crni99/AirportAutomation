@@ -1,7 +1,9 @@
-﻿using AirportAutomation.Application.Interfaces.IRepositories;
-using AirportAutomation.Application.Interfaces.IServices;
+﻿using AirportAutomation.Api.Interfaces;
+using AirportAutomation.Api.MappingProfiles;
+using AirportAutomation.Api.Services;
 using AirportAutomation.Application.Services;
-using AirportAutomation.Core.MappingProfiles;
+using AirportAutomation.Core.Interfaces.IRepositories;
+using AirportAutomation.Core.Interfaces.IServices;
 using AirportAutomation.Infrastructure.Repositories;
 using AirportАutomation.Api.Authentication;
 using AspNetCoreRateLimit;

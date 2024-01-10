@@ -1,9 +1,9 @@
 ﻿using AirportAutomation.Core.Entities;
 using Microsoft.AspNetCore.JsonPatch;
 
-namespace AirportAutomation.Application.Interfaces.IServices
+namespace AirportAutomation.Core.Interfaces.IRepositories
 {
-	public interface IPilotService
+	public interface IPilotRepository
 	{
 		Task<IList<Pilot>> GetPilots(int page, int pageSize);
 		Task<Pilot?> GetPilot(int id);

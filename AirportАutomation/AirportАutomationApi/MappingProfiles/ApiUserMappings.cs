@@ -3,7 +3,7 @@ using AirportAutomation.Core.Entities;
 
 using AutoMapper;
 
-namespace AirportAutomation.Core.MappingProfiles
+namespace AirportAutomation.Api.MappingProfiles
 {
 	public class ApiUserMappings : Profile
 	{

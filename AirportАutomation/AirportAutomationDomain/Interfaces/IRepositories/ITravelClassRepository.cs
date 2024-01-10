@@ -1,6 +1,6 @@
 ﻿using AirportAutomation.Core.Entities;
 
-namespace AirportAutomation.Application.Interfaces.IRepositories
+namespace AirportAutomation.Core.Interfaces.IRepositories
 {
 	public interface ITravelClassRepository
 	{
