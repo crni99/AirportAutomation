@@ -1,4 +1,4 @@
-﻿namespace AirportAutomationWeb.Dtos.Response
+﻿namespace AirportAutomationWeb.Models.Response
 {
 	public class PagedResponse<T>
 	{

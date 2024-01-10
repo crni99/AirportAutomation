@@ -1,4 +1,4 @@
-﻿using AirportAutomationWeb.Entities;
+﻿using AirportAutomationDomain.Entities;
 
 namespace AirportAutomationWeb.Models.HealthCheck
 {

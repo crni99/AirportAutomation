@@ -1,12 +1,11 @@
-﻿using AirportAutomationApi.Dtos.TravelClass;
-using AirportAutomationApi.IService;
-using AirportАutomationApi.Dtos.Response;
-using AirportАutomationApi.IServices;
+﻿using AirportAutomationApplication.Interfaces.IServices;
+using AirportAutomationDomain.Dtos.Response;
+using AirportAutomationDomain.Dtos.TravelClass;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace AirportAutomationApi.Controllers
+namespace AirportАutomationApi.Controllers
 {
 	[Authorize]
 	[ApiVersion("1.0")]

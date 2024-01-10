@@ -1,7 +1,7 @@
-﻿using AirportAutomationApi.Controllers;
-using AirportAutomationApi.Dtos.PlaneTicket;
+﻿using AirportAutomationApi.Dtos.PlaneTicket;
 using AirportAutomationApi.Entities;
 using AirportAutomationApi.IService;
+using AirportАutomationApi.Controllers;
 using AirportАutomationApi.Dtos.PlaneTicket;
 using AirportАutomationApi.Dtos.Response;
 using AirportАutomationApi.IServices;

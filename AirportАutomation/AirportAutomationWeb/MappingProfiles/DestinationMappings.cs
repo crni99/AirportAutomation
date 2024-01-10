@@ -1,6 +1,6 @@
-﻿using AirportAutomationWeb.Dtos.Response;
-using AirportAutomationWeb.Entities;
-using AirportАutomationWeb.Dtos.Destination;
+﻿using AirportAutomationDomain.Entities;
+using AirportAutomationWeb.Models.Destination;
+using AirportAutomationWeb.Models.Response;
 using AutoMapper;
 
 namespace AirportAutomationWeb.MappingProfiles

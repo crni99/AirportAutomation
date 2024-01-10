@@ -1,9 +1,9 @@
-﻿using AirportАutomationWeb.Dtos.Airline;
-using AirportАutomationWeb.Dtos.Destination;
-using AirportАutomationWeb.Dtos.Pilot;
+﻿using AirportAutomationWeb.Models.Airline;
+using AirportAutomationWeb.Models.Destination;
+using AirportAutomationWeb.Models.Pilot;
 using System.ComponentModel;
 
-namespace AirportАutomationWeb.Dtos.Flight
+namespace AirportAutomationWeb.Models.Flight
 {
 	public class FlightViewModel
 	{

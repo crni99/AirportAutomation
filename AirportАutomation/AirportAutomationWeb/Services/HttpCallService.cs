@@ -1,6 +1,6 @@
 ﻿using AirportAutomationWeb.Authentication;
-using AirportAutomationWeb.Dtos.Response;
 using AirportAutomationWeb.Interfaces;
+using AirportAutomationWeb.Models.Response;
 using System.Net;
 using System.Net.Http.Headers;
 using System.Web;

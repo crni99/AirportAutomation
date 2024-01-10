@@ -1,7 +1,5 @@
 ﻿using AirportAutomationWeb.Authentication;
-using AirportAutomationWeb.Entities;
 using AirportAutomationWeb.Interfaces;
-using AirportAutomationWeb.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AirportAutomationWeb.Controllers
@@ -28,7 +26,7 @@ namespace AirportAutomationWeb.Controllers
 			string token = _httpCallService.GetToken();
 			if (!string.IsNullOrEmpty(token))
 			{
-				return Redirect("TravelClass");
+				return Redirect("HealthCheck");
 			}
 			return View("Index");
 		}

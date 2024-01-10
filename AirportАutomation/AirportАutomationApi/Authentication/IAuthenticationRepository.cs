@@ -1,4 +1,6 @@
-﻿namespace AirportАutomationApi.Authentication
+﻿using AirportAutomationDomain.Entities;
+
+namespace AirportАutomationApi.Authentication
 {
 	public interface IAuthenticationRepository
 	{

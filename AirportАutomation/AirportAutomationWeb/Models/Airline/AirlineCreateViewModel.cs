@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace AirportАutomationWeb.Dtos.Airline
+namespace AirportAutomationWeb.Models.Airline
 {
 	public class AirlineCreateViewModel
 	{

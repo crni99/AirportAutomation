@@ -1,4 +1,5 @@
-﻿using AirportAutomationApi.Data;
+﻿using AirportAutomationDomain.Entities;
+using AirportAutomationInfrastructure.Data;
 
 namespace AirportАutomationApi.Authentication
 {

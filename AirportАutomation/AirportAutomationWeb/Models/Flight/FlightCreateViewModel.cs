@@ -1,10 +1,9 @@
 ﻿using AirportAutomationWeb.Converters;
-using AirportАutomationWeb.Converters;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
 
-namespace AirportАutomationWeb.Dtos.Flight
+namespace AirportAutomationWeb.Models.Flight
 {
 	public class FlightCreateViewModel
 	{

@@ -1,6 +1,6 @@
-﻿using AirportAutomationApi.Binders;
-using AirportAutomationApi.Data;
+﻿using AirportAutomationInfrastructure.Data;
 using AirportAutomationServices.Middlewares;
+using AirportАutomationApi.Binders;
 using AirportАutomationApi.HealthChecks;
 using AirportАutomationApi.Helpers;
 using AspNetCoreRateLimit;

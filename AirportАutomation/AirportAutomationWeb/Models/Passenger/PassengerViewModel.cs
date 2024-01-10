@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel;
 
-namespace AirportАutomationWeb.Dtos.Passenger
+namespace AirportAutomationWeb.Models.Passenger
 {
 	public class PassengerViewModel
 	{

@@ -1,4 +1,6 @@
-﻿using AutoMapper;
+﻿using AirportAutomationDomain.Dtos.ApiUser;
+using AirportAutomationDomain.Entities;
+using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;

@@ -1,4 +1,4 @@
-﻿using AirportAutomationApi.Data;
+﻿using AirportAutomationInfrastructure.Data;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 
 namespace AirportАutomationApi.HealthChecks

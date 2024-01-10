@@ -1,7 +1,7 @@
-﻿using AirportAutomationWeb.Dtos.Response;
-using AirportAutomationWeb.Entities;
+﻿using AirportAutomationDomain.Entities;
 using AirportAutomationWeb.Interfaces;
-using AirportАutomationWeb.Dtos.TravelClass;
+using AirportAutomationWeb.Models.Response;
+using AirportAutomationWeb.Models.TravelClass;
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 

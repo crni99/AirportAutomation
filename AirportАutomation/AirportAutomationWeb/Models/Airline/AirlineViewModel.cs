@@ -1,4 +1,4 @@
-﻿namespace AirportАutomationWeb.Dtos.Airline
+﻿namespace AirportAutomationWeb.Models.Airline
 {
 	public class AirlineViewModel
 	{

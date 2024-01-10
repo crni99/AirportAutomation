@@ -28,7 +28,7 @@
     <PackageReference Include="Microsoft.AspNetCore.JsonPatch" Version="7.0.10" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="6.0.21" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Versioning" Version="5.1.0" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="7.0.8" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="7.0.11" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="7.0.8">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -53,6 +53,8 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\AirportAutomationApplication\AirportAutomationApplication.csproj" />
+    <ProjectReference Include="..\AirportAutomationInfrastructure\AirportAutomationInfrastructure.csproj" />
     <ProjectReference Include="..\AirportAutomationServices\AirportAutomationServices.csproj" />
   </ItemGroup>
 

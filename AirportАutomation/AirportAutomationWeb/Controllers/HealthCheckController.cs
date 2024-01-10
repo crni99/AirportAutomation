@@ -1,4 +1,4 @@
-﻿using AirportAutomationWeb.Entities;
+﻿using AirportAutomationDomain.Entities;
 using AirportAutomationWeb.Interfaces;
 using AirportAutomationWeb.Models.HealthCheck;
 using AutoMapper;

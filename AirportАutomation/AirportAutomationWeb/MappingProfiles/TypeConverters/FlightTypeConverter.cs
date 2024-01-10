@@ -1,5 +1,5 @@
-﻿using AirportAutomationWeb.Entities;
-using AirportАutomationWeb.Dtos.Flight;
+﻿using AirportAutomationDomain.Entities;
+using AirportAutomationWeb.Models.Flight;
 using AutoMapper;
 using System.Globalization;
 

@@ -1,5 +1,5 @@
 ﻿using AirportAutomationWeb.Authentication;
-using AirportAutomationWeb.Dtos.Response;
+using AirportAutomationWeb.Models.Response;
 
 namespace AirportAutomationWeb.Interfaces
 {

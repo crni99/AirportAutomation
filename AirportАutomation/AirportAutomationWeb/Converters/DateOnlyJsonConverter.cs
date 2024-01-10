@@ -1,7 +1,7 @@
 ﻿using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace AirportАutomationWeb.Converters
+namespace AirportAutomationWeb.Converters
 {
 	public sealed class DateOnlyJsonConverter : JsonConverter<DateOnly>
 	{
