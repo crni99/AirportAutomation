@@ -29,7 +29,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\AirportАutomationApi\AirportАutomationApi.csproj" />
+    <ProjectReference Include="..\AirportАutomationApi\AirportАutomation.Api.csproj" />
   </ItemGroup>
 
   <ItemGroup>

@@ -1,8 +1,8 @@
-﻿using AirportAutomationDomain.Dtos.Destination;
-using AirportAutomationDomain.Entities;
+﻿using AirportAutomation.Core.Dtos.Destination;
+using AirportAutomation.Core.Entities;
 using AutoMapper;
 
-namespace AirportAutomationDomain.MappingProfiles
+namespace AirportAutomation.Core.MappingProfiles
 {
 	public class DestinationMappings : Profile
 	{

@@ -1,9 +1,9 @@
-﻿using AirportAutomationDomain.Entities;
-using AirportAutomationWeb.Models.Response;
-using AirportAutomationWeb.Models.TravelClass;
+﻿using AirportAutomation.Core.Entities;
+using AirportAutomation.Web.Models.Response;
+using AirportAutomation.Web.Models.TravelClass;
 using AutoMapper;
 
-namespace AirportAutomationWeb.MappingProfiles
+namespace AirportAutomation.Web.MappingProfiles
 {
 	public class TravelClassMappings : Profile
 	{

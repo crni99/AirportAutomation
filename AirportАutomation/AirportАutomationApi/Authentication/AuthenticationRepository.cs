@@ -1,7 +1,7 @@
-﻿using AirportAutomationDomain.Entities;
-using AirportAutomationInfrastructure.Data;
+﻿using AirportAutomation.Core.Entities;
+using AirportAutomation.Infrastructure.Data;
 
-namespace AirportАutomationApi.Authentication
+namespace AirportАutomation.Api.Authentication
 {
 	public class AuthenticationRepository : IDisposable, IAuthenticationRepository
 	{

@@ -1,9 +1,9 @@
-﻿using AirportAutomationWeb.Models.Flight;
-using AirportAutomationWeb.Models.Passenger;
-using AirportAutomationWeb.Models.TravelClass;
+﻿using AirportAutomation.Web.Models.Flight;
+using AirportAutomation.Web.Models.Passenger;
+using AirportAutomation.Web.Models.TravelClass;
 using System.ComponentModel;
 
-namespace AirportAutomationWeb.Models.PlaneTicket
+namespace AirportAutomation.Web.Models.PlaneTicket
 {
 	public class PlaneTicketViewModel
 	{

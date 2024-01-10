@@ -1,9 +1,9 @@
-﻿using AirportAutomationDomain.Entities;
-using AirportAutomationWeb.Models.Flight;
+﻿using AirportAutomation.Core.Entities;
+using AirportAutomation.Web.Models.Flight;
 using AutoMapper;
 using System.Globalization;
 
-namespace AirportAutomationWeb.MappingProfiles.TypeConverters
+namespace AirportAutomation.Web.MappingProfiles.TypeConverters
 {
 	public class FlightTypeConverter :
 		ITypeConverter<FlightCreateViewModel, Flight>,

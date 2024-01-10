@@ -1,8 +1,8 @@
-﻿using AirportAutomationWeb.Interfaces;
-using AirportAutomationWeb.MappingProfiles;
-using AirportAutomationWeb.Services;
+﻿using AirportAutomation.Web.Interfaces;
+using AirportAutomation.Web.MappingProfiles;
+using AirportAutomation.Web.Services;
 
-namespace AirportAutomationWeb.Binders
+namespace AirportAutomation.Web.Binders
 {
 	public static class BinderConfiguration
 	{

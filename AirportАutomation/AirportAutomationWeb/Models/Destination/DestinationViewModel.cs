@@ -1,4 +1,4 @@
-﻿namespace AirportAutomationWeb.Models.Destination
+﻿namespace AirportAutomation.Web.Models.Destination
 {
 	public class DestinationViewModel
 	{

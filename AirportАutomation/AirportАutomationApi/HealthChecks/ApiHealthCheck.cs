@@ -1,7 +1,6 @@
 ﻿using Microsoft.Extensions.Diagnostics.HealthChecks;
-using Swashbuckle.AspNetCore.Annotations;
 
-namespace AirportАutomationApi.HealthChecks
+namespace AirportАutomation.Api.HealthChecks
 {
 	public class ApiHealthCheck : IHealthCheck
 	{

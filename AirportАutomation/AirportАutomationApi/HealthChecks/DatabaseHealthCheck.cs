@@ -1,7 +1,7 @@
-﻿using AirportAutomationInfrastructure.Data;
+﻿using AirportAutomation.Infrastructure.Data;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 
-namespace AirportАutomationApi.HealthChecks
+namespace AirportАutomation.Api.HealthChecks
 {
 	public class DatabaseHealthCheck : IHealthCheck
 	{

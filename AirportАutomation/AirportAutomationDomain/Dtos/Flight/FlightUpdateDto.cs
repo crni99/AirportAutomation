@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace AirportAutomationDomain.Dtos.Flight
+namespace AirportAutomation.Core.Dtos.Flight
 {
 	public class FlightUpdateDto
 	{

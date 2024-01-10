@@ -1,7 +1,7 @@
-﻿using AirportAutomationApplication.Interfaces.IServices;
-using AirportAutomationDomain.Dtos.Destination;
-using AirportAutomationDomain.Dtos.Response;
-using AirportAutomationDomain.Entities;
+﻿using AirportAutomation.Application.Interfaces.IServices;
+using AirportAutomation.Core.Dtos.Destination;
+using AirportAutomation.Core.Dtos.Response;
+using AirportAutomation.Core.Entities;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.JsonPatch;

@@ -1,8 +1,8 @@
-﻿using AirportAutomationWeb.Authentication;
-using AirportAutomationWeb.Interfaces;
+﻿using AirportAutomation.Web.Authentication;
+using AirportAutomation.Web.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
-namespace AirportAutomationWeb.Controllers
+namespace AirportAutomation.Web.Controllers
 {
 	[Route("")]
 	public class HomeController : Controller

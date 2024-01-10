@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
-namespace AirportAutomationDomain.Converters
+namespace AirportAutomation.Core.Converters
 {
 	public class DateOnlyConverter : ValueConverter<DateOnly, DateTime>
 	{

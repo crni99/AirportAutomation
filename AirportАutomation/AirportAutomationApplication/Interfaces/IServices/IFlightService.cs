@@ -1,7 +1,7 @@
-﻿using AirportAutomationDomain.Entities;
+﻿using AirportAutomation.Core.Entities;
 using Microsoft.AspNetCore.JsonPatch;
 
-namespace AirportAutomationApplication.Interfaces.IServices
+namespace AirportAutomation.Application.Interfaces.IServices
 {
 	public interface IFlightService
 	{

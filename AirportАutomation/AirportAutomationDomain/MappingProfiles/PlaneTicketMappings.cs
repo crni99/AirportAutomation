@@ -1,8 +1,9 @@
-﻿using AirportAutomationDomain.Dtos.PlaneTicket;
-using AirportAutomationDomain.Entities;
+﻿using AirportAutomation.Core.Dtos.PlaneTicket;
+using AirportAutomation.Core.Entities;
+using AirportAutomationDomain.Dtos.PlaneTicket;
 using AutoMapper;
 
-namespace AirportAutomationDomain.MappingProfiles
+namespace AirportAutomation.Core.MappingProfiles
 {
 	public class PlaneTicketMappings : Profile
 	{

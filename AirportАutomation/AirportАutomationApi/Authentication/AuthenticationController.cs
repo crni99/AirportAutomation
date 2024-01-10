@@ -1,5 +1,5 @@
-﻿using AirportAutomationDomain.Dtos.ApiUser;
-using AirportAutomationDomain.Entities;
+﻿using AirportAutomation.Core.Dtos.ApiUser;
+using AirportAutomation.Core.Entities;
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
@@ -7,7 +7,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 
-namespace AirportАutomationApi.Authentication
+namespace AirportАutomation.Api.Authentication
 {
 	[Route("api/[controller]")]
 	[ApiController]

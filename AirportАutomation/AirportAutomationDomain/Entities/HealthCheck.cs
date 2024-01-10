@@ -1,4 +1,4 @@
-﻿namespace AirportAutomationDomain.Entities
+﻿namespace AirportAutomation.Core.Entities
 {
 	public class HealthCheck
 	{

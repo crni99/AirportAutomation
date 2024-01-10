@@ -1,9 +1,9 @@
-﻿using AirportAutomationWeb.Interfaces;
+﻿using AirportAutomation.Web.Interfaces;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using System.Reflection;
 using System.Resources;
 
-namespace AirportAutomationWeb.Services
+namespace AirportAutomation.Web.Services
 {
 	public class AlertService : IAlertService
 	{

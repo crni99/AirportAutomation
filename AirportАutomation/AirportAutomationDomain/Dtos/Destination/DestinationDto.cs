@@ -1,4 +1,4 @@
-﻿namespace AirportAutomationDomain.Dtos.Destination
+﻿namespace AirportAutomation.Core.Dtos.Destination
 {
 	public class DestinationDto
 	{

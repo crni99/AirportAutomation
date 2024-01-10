@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 
-namespace AirportAutomationWeb.Models.Passenger
+namespace AirportAutomation.Web.Models.Passenger
 {
 	public class PassengerCreateViewModel
 	{

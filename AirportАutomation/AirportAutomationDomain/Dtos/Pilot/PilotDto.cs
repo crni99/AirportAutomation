@@ -1,4 +1,4 @@
-﻿namespace AirportAutomationDomain.Dtos.Pilot
+﻿namespace AirportAutomation.Core.Dtos.Pilot
 {
 	public class PilotDto
 	{

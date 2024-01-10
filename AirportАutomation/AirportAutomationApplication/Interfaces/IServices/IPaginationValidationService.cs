@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 
-namespace AirportAutomationApplication.Interfaces.IServices
+namespace AirportAutomation.Application.Interfaces.IServices
 {
 	public interface IPaginationValidationService
 	{

@@ -1,6 +1,6 @@
-﻿using AirportAutomationDomain.Entities;
+﻿using AirportAutomation.Core.Entities;
 
-namespace AirportAutomationApplication.Interfaces.IServices
+namespace AirportAutomation.Application.Interfaces.IServices
 {
 	public interface ITravelClassService
 	{

@@ -1,6 +1,6 @@
-﻿using AirportAutomationDomain.Entities;
+﻿using AirportAutomation.Core.Entities;
 
-namespace AirportAutomationWeb.Models.HealthCheck
+namespace AirportAutomation.Web.Models.HealthCheck
 {
 	public class HealthCheckViewModel
 	{

@@ -1,11 +1,11 @@
-﻿using AirportAutomationWeb.Authentication;
-using AirportAutomationWeb.Interfaces;
-using AirportAutomationWeb.Models.Response;
+﻿using AirportAutomation.Web.Authentication;
+using AirportAutomation.Web.Interfaces;
+using AirportAutomation.Web.Models.Response;
 using System.Net;
 using System.Net.Http.Headers;
 using System.Web;
 
-namespace AirportAutomationWeb.Services
+namespace AirportAutomation.Web.Services
 {
 	/// <summary>
 	/// Service for making HTTP calls to an API.

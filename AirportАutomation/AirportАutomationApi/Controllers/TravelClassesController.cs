@@ -1,6 +1,6 @@
-﻿using AirportAutomationApplication.Interfaces.IServices;
-using AirportAutomationDomain.Dtos.Response;
-using AirportAutomationDomain.Dtos.TravelClass;
+﻿using AirportAutomation.Application.Interfaces.IServices;
+using AirportAutomation.Core.Dtos.Response;
+using AirportAutomation.Core.Dtos.TravelClass;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;

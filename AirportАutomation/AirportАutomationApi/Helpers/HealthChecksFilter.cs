@@ -3,7 +3,7 @@ using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.Annotations;
 using Swashbuckle.AspNetCore.SwaggerGen;
 
-namespace AirportАutomationApi.Helpers
+namespace AirportАutomation.Api.Helpers
 {
 	[SwaggerTag("ApiHealth")]
 	public class HealthChecksFilter : IDocumentFilter

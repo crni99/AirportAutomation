@@ -1,8 +1,8 @@
-﻿using AirportAutomationDomain.Entities;
-using AirportAutomationWeb.Models.HealthCheck;
+﻿using AirportAutomation.Core.Entities;
+using AirportAutomation.Web.Models.HealthCheck;
 using AutoMapper;
 
-namespace AirportAutomationWeb.MappingProfiles
+namespace AirportAutomation.Web.MappingProfiles
 {
 	public class HealthCheckMappings : Profile
 	{

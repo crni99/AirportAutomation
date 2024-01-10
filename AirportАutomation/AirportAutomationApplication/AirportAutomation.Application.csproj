@@ -12,7 +12,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\AirportAutomationDomain\AirportAutomationDomain.csproj" />
+    <ProjectReference Include="..\AirportAutomationDomain\AirportAutomation.Core.csproj" />
   </ItemGroup>
 
 </Project>

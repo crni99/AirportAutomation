@@ -1,10 +1,10 @@
-﻿using AirportAutomationDomain.Entities;
-using AirportAutomationWeb.MappingProfiles.TypeConverters;
-using AirportAutomationWeb.Models.PlaneTicket;
-using AirportAutomationWeb.Models.Response;
+﻿using AirportAutomation.Core.Entities;
+using AirportAutomation.Web.MappingProfiles.TypeConverters;
+using AirportAutomation.Web.Models.PlaneTicket;
+using AirportAutomation.Web.Models.Response;
 using AutoMapper;
 
-namespace AirportAutomationWeb.MappingProfiles
+namespace AirportAutomation.Web.MappingProfiles
 {
 	public class PlaneTicketMappings : Profile
 	{

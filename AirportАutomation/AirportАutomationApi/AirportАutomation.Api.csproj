@@ -53,9 +53,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\AirportAutomationApplication\AirportAutomationApplication.csproj" />
-    <ProjectReference Include="..\AirportAutomationInfrastructure\AirportAutomationInfrastructure.csproj" />
-    <ProjectReference Include="..\AirportAutomationServices\AirportAutomationServices.csproj" />
+    <ProjectReference Include="..\AirportAutomationApplication\AirportAutomation.Application.csproj" />
+    <ProjectReference Include="..\AirportAutomationInfrastructure\AirportAutomation.Infrastructure.csproj" />
+    <ProjectReference Include="..\AirportAutomationServices\AirportAutomation.Services.csproj" />
   </ItemGroup>
 
   <ItemGroup>

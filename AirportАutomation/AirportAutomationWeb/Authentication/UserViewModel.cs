@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 
-namespace AirportAutomationWeb.Authentication
+namespace AirportAutomation.Web.Authentication
 {
 	public class UserViewModel
 	{

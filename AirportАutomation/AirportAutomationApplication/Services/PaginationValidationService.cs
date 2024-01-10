@@ -1,8 +1,8 @@
-﻿using AirportAutomationApplication.Interfaces.IServices;
+﻿using AirportAutomation.Application.Interfaces.IServices;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 
-namespace AirportAutomationApplication.Services
+namespace AirportAutomation.Application.Services
 {
 	public class PaginationValidationService : IPaginationValidationService
 	{

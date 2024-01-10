@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace AirportAutomationDomain.Dtos.Passenger
+namespace AirportAutomation.Core.Dtos.Passenger
 {
 	public class PassengerCreateDto
 	{

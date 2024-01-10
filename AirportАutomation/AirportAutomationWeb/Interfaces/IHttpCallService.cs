@@ -1,7 +1,7 @@
-﻿using AirportAutomationWeb.Authentication;
-using AirportAutomationWeb.Models.Response;
+﻿using AirportAutomation.Web.Authentication;
+using AirportAutomation.Web.Models.Response;
 
-namespace AirportAutomationWeb.Interfaces
+namespace AirportAutomation.Web.Interfaces
 {
 	public interface IHttpCallService
 	{

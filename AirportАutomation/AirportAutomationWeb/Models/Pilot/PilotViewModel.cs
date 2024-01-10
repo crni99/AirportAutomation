@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel;
 
-namespace AirportAutomationWeb.Models.Pilot
+namespace AirportAutomation.Web.Models.Pilot
 {
 	public class PilotViewModel
 	{

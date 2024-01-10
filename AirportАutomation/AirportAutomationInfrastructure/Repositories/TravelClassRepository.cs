@@ -1,9 +1,9 @@
-﻿using AirportAutomationApplication.Interfaces.IRepositories;
-using AirportAutomationDomain.Entities;
-using AirportAutomationInfrastructure.Data;
+﻿using AirportAutomation.Application.Interfaces.IRepositories;
+using AirportAutomation.Core.Entities;
+using AirportAutomation.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 
-namespace AirportAutomationInfrastructure.Repositories
+namespace AirportAutomation.Infrastructure.Repositories
 {
 	public class TravelClassRepository : ITravelClassRepository
 	{

@@ -1,7 +1,7 @@
-﻿using AirportAutomationDomain.Entities;
+﻿using AirportAutomation.Core.Entities;
 using Microsoft.AspNetCore.JsonPatch;
 
-namespace AirportAutomationApplication.Interfaces.IRepositories
+namespace AirportAutomation.Application.Interfaces.IRepositories
 {
 	public interface IPassengerRepository
 	{

@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 
-namespace AirportAutomationDomain.Entities
+namespace AirportAutomation.Core.Entities
 {
 	public class PlaneTicket
 	{

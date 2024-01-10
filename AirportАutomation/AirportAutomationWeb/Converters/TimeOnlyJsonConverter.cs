@@ -2,7 +2,7 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace AirportAutomationWeb.Converters
+namespace AirportAutomation.Web.Converters
 {
 	public sealed class TimeOnlyJsonConverter : JsonConverter<TimeOnly>
 	{

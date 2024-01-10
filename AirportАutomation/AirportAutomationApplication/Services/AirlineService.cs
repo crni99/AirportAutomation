@@ -1,9 +1,9 @@
-﻿using AirportAutomationApplication.Interfaces.IRepositories;
-using AirportAutomationApplication.Interfaces.IServices;
-using AirportAutomationDomain.Entities;
+﻿using AirportAutomation.Application.Interfaces.IRepositories;
+using AirportAutomation.Application.Interfaces.IServices;
+using AirportAutomation.Core.Entities;
 using Microsoft.AspNetCore.JsonPatch;
 
-namespace AirportAutomationApplication.Services
+namespace AirportAutomation.Application.Services
 {
 	public class AirlineService : IAirlineService
 	{

@@ -1,8 +1,8 @@
-﻿using AirportAutomationDomain.Converters;
-using AirportAutomationDomain.Entities;
+﻿using AirportAutomation.Core.Converters;
+using AirportAutomation.Core.Entities;
 using Microsoft.EntityFrameworkCore;
 
-namespace AirportAutomationInfrastructure.Data
+namespace AirportAutomation.Infrastructure.Data
 {
 	public class DatabaseContext : DbContext
 	{

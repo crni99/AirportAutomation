@@ -1,7 +1,7 @@
 ﻿using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.SwaggerGen;
 
-namespace AirportАutomationApi.Helpers
+namespace AirportАutomation.Api.Helpers
 {
 	public class JsonPatchDocumentFilter : IDocumentFilter
 	{

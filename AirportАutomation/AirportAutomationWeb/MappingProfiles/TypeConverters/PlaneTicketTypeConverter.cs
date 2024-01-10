@@ -1,9 +1,9 @@
-﻿using AirportAutomationDomain.Entities;
-using AirportAutomationWeb.Models.PlaneTicket;
+﻿using AirportAutomation.Core.Entities;
+using AirportAutomation.Web.Models.PlaneTicket;
 using AutoMapper;
 using System.Globalization;
 
-namespace AirportAutomationWeb.MappingProfiles.TypeConverters
+namespace AirportAutomation.Web.MappingProfiles.TypeConverters
 {
 	public class PlaneTicketTypeConverter :
 		ITypeConverter<PlaneTicketCreateViewModel, PlaneTicket>,

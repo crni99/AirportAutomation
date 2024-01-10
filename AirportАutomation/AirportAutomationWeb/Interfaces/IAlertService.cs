@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc.ViewFeatures;
 
-namespace AirportAutomationWeb.Interfaces
+namespace AirportAutomation.Web.Interfaces
 {
 	public interface IAlertService
 	{

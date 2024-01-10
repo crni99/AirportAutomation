@@ -1,11 +1,11 @@
-﻿using AirportAutomationDomain.Entities;
-using AirportAutomationWeb.Interfaces;
-using AirportAutomationWeb.Models.Destination;
-using AirportAutomationWeb.Models.Response;
+﻿using AirportAutomation.Core.Entities;
+using AirportAutomation.Web.Interfaces;
+using AirportAutomation.Web.Models.Destination;
+using AirportAutomation.Web.Models.Response;
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 
-namespace AirportAutomationWeb.Controllers
+namespace AirportAutomation.Web.Controllers
 {
 	[Route("[controller]")]
 	public class DestinationController : Controller
