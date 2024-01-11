@@ -6,12 +6,12 @@ using System.Globalization;
 namespace AirportAutomation.Web.MappingProfiles.TypeConverters
 {
 	public class PlaneTicketTypeConverter :
-		ITypeConverter<PlaneTicketCreateViewModel, PlaneTicket>,
-		ITypeConverter<PlaneTicketViewModel, PlaneTicket>
+		ITypeConverter<PlaneTicketCreateViewModel, PlaneTicketEntity>,
+		ITypeConverter<PlaneTicketViewModel, PlaneTicketEntity>
 	{
-		public PlaneTicket Convert(PlaneTicketCreateViewModel source, PlaneTicket destination, ResolutionContext context)
+		public PlaneTicketEntity Convert(PlaneTicketCreateViewModel source, PlaneTicketEntity destination, ResolutionContext context)
 		{
-			var planeTicket = new PlaneTicket
+			var planeTicket = new PlaneTicketEntity
 			{
 				SeatNumber = source.SeatNumber,
 				PassengerId = (int)source.PassengerId,
@@ -40,9 +40,9 @@ namespace AirportAutomation.Web.MappingProfiles.TypeConverters
 			return planeTicket;
 		}
 
-		public PlaneTicket Convert(PlaneTicketViewModel source, PlaneTicket destination, ResolutionContext context)
+		public PlaneTicketEntity Convert(PlaneTicketViewModel source, PlaneTicketEntity destination, ResolutionContext context)
 		{
-			var planeTicket = new PlaneTicket
+			var planeTicket = new PlaneTicketEntity
 			{
 				Id = source.Id,
 				Price = source.Price,

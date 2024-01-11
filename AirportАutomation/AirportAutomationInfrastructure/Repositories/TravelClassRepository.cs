@@ -14,7 +14,7 @@ namespace AirportAutomation.Infrastructure.Repositories
 			_context = context ?? throw new ArgumentNullException(nameof(context));
 		}
 
-		public async Task<IList<TravelClass>> GetTravelClasses(int page, int pageSize)
+		public async Task<IList<TravelClassEntity>> GetTravelClasses(int page, int pageSize)
 		{
 			return await _context.TravelClass
 				.OrderBy(c => c.Id)
@@ -24,7 +24,7 @@ namespace AirportAutomation.Infrastructure.Repositories
 				.ToListAsync();
 		}
 
-		public async Task<TravelClass?> GetTravelClass(int id)
+		public async Task<TravelClassEntity?> GetTravelClass(int id)
 		{
 			return await _context.TravelClass.FindAsync(id);
 		}

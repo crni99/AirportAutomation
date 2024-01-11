@@ -108,7 +108,7 @@ namespace AirportАutomationApi.Controllers
 		[ProducesResponseType(401)]
 		public async Task<ActionResult<DestinationDto>> PostDestination(DestinationCreateDto destinationCreateDto)
 		{
-			var destination = _mapper.Map<Destination>(destinationCreateDto);
+			var destination = _mapper.Map<DestinationEntity>(destinationCreateDto);
 			await _destinationService.PostDestination(destination);
 			return CreatedAtAction("GetDestination", new { id = destination.Id }, destination);
 		}
@@ -139,7 +139,7 @@ namespace AirportАutomationApi.Controllers
 				_logger.LogInformation("Destination with id {id} not found.", id);
 				return NotFound();
 			}
-			var destination = _mapper.Map<Destination>(destinationDto);
+			var destination = _mapper.Map<DestinationEntity>(destinationDto);
 			await _destinationService.PutDestination(destination);
 			return NoContent();
 		}

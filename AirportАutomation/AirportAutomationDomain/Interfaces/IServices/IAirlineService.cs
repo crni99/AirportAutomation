@@ -5,12 +5,12 @@ namespace AirportAutomation.Core.Interfaces.IServices
 {
 	public interface IAirlineService
 	{
-		Task<IList<Airline>> GetAirlines(int page, int pageSize);
-		Task<Airline?> GetAirline(int id);
-		Task<IList<Airline?>> GetAirlinesByName(string name);
-		Task<Airline> PostAirline(Airline airline);
-		Task PutAirline(Airline airline);
-		Task<Airline> PatchAirline(int id, JsonPatchDocument airlineDocument);
+		Task<IList<AirlineEntity>> GetAirlines(int page, int pageSize);
+		Task<AirlineEntity?> GetAirline(int id);
+		Task<IList<AirlineEntity?>> GetAirlinesByName(string name);
+		Task<AirlineEntity> PostAirline(AirlineEntity airline);
+		Task PutAirline(AirlineEntity airline);
+		Task<AirlineEntity> PatchAirline(int id, JsonPatchDocument airlineDocument);
 		Task<bool> DeleteAirline(int id);
 		Task<bool> AirlineExists(int id);
 		public int AirlinesCount();

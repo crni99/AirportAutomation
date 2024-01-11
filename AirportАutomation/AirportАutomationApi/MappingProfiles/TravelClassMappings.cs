@@ -8,8 +8,8 @@ namespace AirportAutomation.Api.MappingProfiles
 	{
 		public TravelClassMappings()
 		{
-			CreateMap<TravelClass, TravelClassDto>();
-			CreateMap<TravelClassDto, TravelClass>();
+			CreateMap<TravelClassEntity, TravelClassDto>();
+			CreateMap<TravelClassDto, TravelClassEntity>();
 		}
 	}
 }

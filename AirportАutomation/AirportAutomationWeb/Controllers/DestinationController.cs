@@ -29,7 +29,7 @@ namespace AirportAutomation.Web.Controllers
 				_alertService.SetAlertMessage(TempData, "invalid_page_number", false);
 				return RedirectToAction("Index");
 			}
-			var response = await _httpCallService.GetDataList<Destination>(page, pageSize);
+			var response = await _httpCallService.GetDataList<DestinationEntity>(page, pageSize);
 			if (response == null)
 			{
 				return View();
@@ -42,7 +42,7 @@ namespace AirportAutomation.Web.Controllers
 		[Route("{id}")]
 		public async Task<IActionResult> Details(int id)
 		{
-			var response = await _httpCallService.GetData<Destination>(id);
+			var response = await _httpCallService.GetData<DestinationEntity>(id);
 			if (response is null)
 			{
 				_alertService.SetAlertMessage(TempData, "data_not_found", false);
@@ -68,8 +68,8 @@ namespace AirportAutomation.Web.Controllers
 		{
 			if (ModelState.IsValid)
 			{
-				var destination = _mapper.Map<Destination>(destinationCreateDto);
-				var response = await _httpCallService.CreateData<Destination>(destination);
+				var destination = _mapper.Map<DestinationEntity>(destinationCreateDto);
+				var response = await _httpCallService.CreateData<DestinationEntity>(destination);
 				if (response is null)
 				{
 					_alertService.SetAlertMessage(TempData, "create_data_failed", false);
@@ -87,7 +87,7 @@ namespace AirportAutomation.Web.Controllers
 		[Route("Edit/{id}")]
 		public async Task<IActionResult> Edit(int id)
 		{
-			var response = await _httpCallService.GetData<Destination>(id);
+			var response = await _httpCallService.GetData<DestinationEntity>(id);
 			if (response is null)
 			{
 				_alertService.SetAlertMessage(TempData, "data_not_found", false);
@@ -106,8 +106,8 @@ namespace AirportAutomation.Web.Controllers
 		{
 			if (ModelState.IsValid)
 			{
-				var destination = _mapper.Map<Destination>(destinationDto);
-				var response = await _httpCallService.EditData<Destination>(destination, destination.Id);
+				var destination = _mapper.Map<DestinationEntity>(destinationDto);
+				var response = await _httpCallService.EditData<DestinationEntity>(destination, destination.Id);
 				if (response)
 				{
 					_alertService.SetAlertMessage(TempData, "edit_data_success", true);
@@ -126,7 +126,7 @@ namespace AirportAutomation.Web.Controllers
 		[Route("Delete/{id}")]
 		public async Task<IActionResult> Delete(int id)
 		{
-			var response = await _httpCallService.DeleteData<Destination>(id);
+			var response = await _httpCallService.DeleteData<DestinationEntity>(id);
 			if (response)
 			{
 				_alertService.SetAlertMessage(TempData, "delete_data_success", true);
@@ -143,7 +143,7 @@ namespace AirportAutomation.Web.Controllers
 		[Route("GetDestinations")]
 		public async Task<IActionResult> GetDestinations(int page = 1, int pageSize = 10)
 		{
-			var response = await _httpCallService.GetDataList<Destination>(page, pageSize);
+			var response = await _httpCallService.GetDataList<DestinationEntity>(page, pageSize);
 			if (response == null || response.Data == null || !response.Data.Any())
 			{
 				return Json(new { success = false, data = response });

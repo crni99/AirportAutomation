@@ -29,7 +29,7 @@ namespace AirportAutomation.Web.Controllers
 				_alertService.SetAlertMessage(TempData, "invalid_page_number", false);
 				return RedirectToAction("Index");
 			}
-			var response = await _httpCallService.GetDataList<PlaneTicket>(page, pageSize);
+			var response = await _httpCallService.GetDataList<PlaneTicketEntity>(page, pageSize);
 			if (response == null)
 			{
 				return View();
@@ -42,7 +42,7 @@ namespace AirportAutomation.Web.Controllers
 		[Route("{id}")]
 		public async Task<IActionResult> Details(int id)
 		{
-			var response = await _httpCallService.GetData<PlaneTicket>(id);
+			var response = await _httpCallService.GetData<PlaneTicketEntity>(id);
 			if (response is null)
 			{
 				_alertService.SetAlertMessage(TempData, "data_not_found", false);
@@ -64,7 +64,7 @@ namespace AirportAutomation.Web.Controllers
 				_alertService.SetAlertMessage(TempData, "missing_field", false);
 				return RedirectToAction("Index");
 			}
-			var response = await _httpCallService.GetDataForPrice<PlaneTicket>(minPrice, maxPrice);
+			var response = await _httpCallService.GetDataForPrice<PlaneTicketEntity>(minPrice, maxPrice);
 			return Json(response);
 		}
 
@@ -80,8 +80,8 @@ namespace AirportAutomation.Web.Controllers
 		[ValidateAntiForgeryToken]
 		public async Task<IActionResult> CreatePlaneTicket(PlaneTicketCreateViewModel planeTicketCreateDto)
 		{
-			var planeTicket = _mapper.Map<PlaneTicket>(planeTicketCreateDto);
-			var response = await _httpCallService.CreateData<PlaneTicket>(planeTicket);
+			var planeTicket = _mapper.Map<PlaneTicketEntity>(planeTicketCreateDto);
+			var response = await _httpCallService.CreateData<PlaneTicketEntity>(planeTicket);
 			if (response is null)
 			{
 				_alertService.SetAlertMessage(TempData, "create_data_failed", false);
@@ -97,7 +97,7 @@ namespace AirportAutomation.Web.Controllers
 		[Route("Edit/{id}")]
 		public async Task<IActionResult> Edit(int id)
 		{
-			var response = await _httpCallService.GetData<PlaneTicket>(id);
+			var response = await _httpCallService.GetData<PlaneTicketEntity>(id);
 			if (response is null)
 			{
 				_alertService.SetAlertMessage(TempData, "data_not_found", false);
@@ -114,8 +114,8 @@ namespace AirportAutomation.Web.Controllers
 		[ValidateAntiForgeryToken]
 		public async Task<IActionResult> EditPlaneTicket(PlaneTicketViewModel planeTicketDto)
 		{
-			var planeTicket = _mapper.Map<PlaneTicket>(planeTicketDto);
-			var response = await _httpCallService.EditData<PlaneTicket>(planeTicket, planeTicket.Id);
+			var planeTicket = _mapper.Map<PlaneTicketEntity>(planeTicketDto);
+			var response = await _httpCallService.EditData<PlaneTicketEntity>(planeTicket, planeTicket.Id);
 			if (response)
 			{
 				_alertService.SetAlertMessage(TempData, "edit_data_success", true);
@@ -132,7 +132,7 @@ namespace AirportAutomation.Web.Controllers
 		[Route("Delete/{id}")]
 		public async Task<IActionResult> Delete(int id)
 		{
-			var response = await _httpCallService.DeleteData<PlaneTicket>(id);
+			var response = await _httpCallService.DeleteData<PlaneTicketEntity>(id);
 			if (response)
 			{
 				_alertService.SetAlertMessage(TempData, "delete_data_success", true);
@@ -149,7 +149,7 @@ namespace AirportAutomation.Web.Controllers
 		[Route("GetPlaneTickets")]
 		public async Task<IActionResult> GetPlaneTickets(int page = 1, int pageSize = 10)
 		{
-			var response = await _httpCallService.GetDataList<PlaneTicket>(page, pageSize);
+			var response = await _httpCallService.GetDataList<PlaneTicketEntity>(page, pageSize);
 			if (response == null || response.Data == null || !response.Data.Any())
 			{
 				return Json(new { success = false, data = response });

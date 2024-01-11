@@ -5,12 +5,12 @@ namespace AirportAutomation.Core.Interfaces.IServices
 {
 	public interface IFlightService
 	{
-		Task<IList<Flight>> GetFlights(int page, int pageSize);
-		Task<Flight?> GetFlight(int id);
-		Task<IList<Flight?>> GetFlightsBetweenDates(DateOnly? startDate, DateOnly? endDate);
-		Task<Flight> PostFlight(Flight flight);
-		Task PutFlight(Flight flight);
-		Task<Flight> PatchFlight(int id, JsonPatchDocument flightDocument);
+		Task<IList<FlightEntity>> GetFlights(int page, int pageSize);
+		Task<FlightEntity?> GetFlight(int id);
+		Task<IList<FlightEntity?>> GetFlightsBetweenDates(DateOnly? startDate, DateOnly? endDate);
+		Task<FlightEntity> PostFlight(FlightEntity flight);
+		Task PutFlight(FlightEntity flight);
+		Task<FlightEntity> PatchFlight(int id, JsonPatchDocument flightDocument);
 		Task<bool> DeleteFlight(int id);
 		Task<bool> FlightExists(int id);
 		public int FlightsCount();

@@ -4,7 +4,7 @@ namespace AirportАutomation.Api.Authentication
 {
 	public interface IAuthenticationRepository
 	{
-		public ApiUser ValidateUser(string username, string password);
+		public ApiUserEntity ValidateUser(string username, string password);
 
 	}
 }

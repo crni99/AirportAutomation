@@ -14,30 +14,30 @@ namespace AirportAutomation.Application.Services
 			_pilotRepository = pilotRepository;
 		}
 
-		public async Task<IList<Pilot>> GetPilots(int page, int pageSize)
+		public async Task<IList<PilotEntity>> GetPilots(int page, int pageSize)
 		{
 			return await _pilotRepository.GetPilots(page, pageSize);
 		}
-		public async Task<Pilot?> GetPilot(int id)
+		public async Task<PilotEntity?> GetPilot(int id)
 		{
 			return await _pilotRepository.GetPilot(id);
 		}
 
-		public async Task<IList<Pilot?>> GetPilotsByName(string? firstName, string? lastName)
+		public async Task<IList<PilotEntity?>> GetPilotsByName(string? firstName, string? lastName)
 		{
 			return await _pilotRepository.GetPilotsByName(firstName, lastName);
 		}
 
-		public async Task<Pilot> PostPilot(Pilot pilot)
+		public async Task<PilotEntity> PostPilot(PilotEntity pilot)
 		{
 			return await _pilotRepository.PostPilot(pilot);
 		}
 
-		public async Task PutPilot(Pilot pilot)
+		public async Task PutPilot(PilotEntity pilot)
 		{
 			await _pilotRepository.PutPilot(pilot);
 		}
-		public async Task<Pilot> PatchPilot(int id, JsonPatchDocument passengerDocument)
+		public async Task<PilotEntity> PatchPilot(int id, JsonPatchDocument passengerDocument)
 		{
 			return await _pilotRepository.PatchPilot(id, passengerDocument);
 		}

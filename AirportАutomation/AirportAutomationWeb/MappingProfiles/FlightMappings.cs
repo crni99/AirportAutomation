@@ -10,14 +10,14 @@ namespace AirportAutomation.Web.MappingProfiles
 	{
 		public FlightMappings()
 		{
-			CreateMap<Flight, FlightViewModel>();
-			CreateMap<FlightViewModel, Flight>().ConvertUsing<FlightTypeConverter>();
+			CreateMap<FlightEntity, FlightViewModel>();
+			CreateMap<FlightViewModel, FlightEntity>().ConvertUsing<FlightTypeConverter>();
 
-			CreateMap<Flight, FlightCreateViewModel>();
-			CreateMap<FlightCreateViewModel, Flight>().ConvertUsing<FlightTypeConverter>();
+			CreateMap<FlightEntity, FlightCreateViewModel>();
+			CreateMap<FlightCreateViewModel, FlightEntity>().ConvertUsing<FlightTypeConverter>();
 
 
-			CreateMap<PagedResponse<Flight>, PagedResponse<FlightViewModel>>();
+			CreateMap<PagedResponse<FlightEntity>, PagedResponse<FlightViewModel>>();
 		}
 	}
 }

@@ -15,7 +15,7 @@ namespace AirportAutomation.Infrastructure.Repositories
 			_context = context ?? throw new ArgumentNullException(nameof(context));
 		}
 
-		public async Task<IList<Passenger>> GetPassengers(int page, int pageSize)
+		public async Task<IList<PassengerEntity>> GetPassengers(int page, int pageSize)
 		{
 			return await _context.Passenger
 				.OrderBy(c => c.Id)
@@ -25,14 +25,14 @@ namespace AirportAutomation.Infrastructure.Repositories
 				.ToListAsync();
 		}
 
-		public async Task<Passenger?> GetPassenger(int id)
+		public async Task<PassengerEntity?> GetPassenger(int id)
 		{
 			return await _context.Passenger.FindAsync(id);
 		}
 
-		public async Task<IList<Passenger?>> GetPassengersByName(string firstName = null, string lastName = null)
+		public async Task<IList<PassengerEntity?>> GetPassengersByName(string firstName = null, string lastName = null)
 		{
-			IQueryable<Passenger> query = _context.Passenger.AsNoTracking();
+			IQueryable<PassengerEntity> query = _context.Passenger.AsNoTracking();
 
 			if (!string.IsNullOrEmpty(firstName))
 			{
@@ -45,20 +45,20 @@ namespace AirportAutomation.Infrastructure.Repositories
 			return await query.ToListAsync().ConfigureAwait(false);
 		}
 
-		public async Task<Passenger> PostPassenger(Passenger passenger)
+		public async Task<PassengerEntity> PostPassenger(PassengerEntity passenger)
 		{
 			_context.Passenger.Add(passenger);
 			await _context.SaveChangesAsync();
 			return passenger;
 		}
 
-		public async Task PutPassenger(Passenger passenger)
+		public async Task PutPassenger(PassengerEntity passenger)
 		{
 			_context.Entry(passenger).State = EntityState.Modified;
 			await _context.SaveChangesAsync();
 		}
 
-		public async Task<Passenger> PatchPassenger(int id, JsonPatchDocument passengerDocument)
+		public async Task<PassengerEntity> PatchPassenger(int id, JsonPatchDocument passengerDocument)
 		{
 			var passenger = await GetPassenger(id);
 			passengerDocument.ApplyTo(passenger);

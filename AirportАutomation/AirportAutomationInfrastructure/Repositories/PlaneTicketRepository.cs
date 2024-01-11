@@ -15,7 +15,7 @@ namespace AirportAutomation.Infrastructure.Repositories
 			_context = context ?? throw new ArgumentNullException(nameof(context));
 		}
 
-		public async Task<IList<PlaneTicket>> GetPlaneTickets(int page, int pageSize)
+		public async Task<IList<PlaneTicketEntity>> GetPlaneTickets(int page, int pageSize)
 		{
 			var collection = _context.PlaneTicket
 				.Include(k => k.Passenger)
@@ -30,7 +30,7 @@ namespace AirportAutomation.Infrastructure.Repositories
 				.ToListAsync();
 		}
 
-		public async Task<PlaneTicket?> GetPlaneTicket(int id)
+		public async Task<PlaneTicketEntity?> GetPlaneTicket(int id)
 		{
 			return await _context.PlaneTicket
 				.Include(k => k.Passenger)
@@ -40,9 +40,9 @@ namespace AirportAutomation.Infrastructure.Repositories
 				.FirstOrDefaultAsync(k => k.Id == id);
 		}
 
-		public async Task<IList<PlaneTicket?>> GetPlaneTicketsForPrice(int? minPrice, int? maxPrice)
+		public async Task<IList<PlaneTicketEntity?>> GetPlaneTicketsForPrice(int? minPrice, int? maxPrice)
 		{
-			IQueryable<PlaneTicket> query = _context.PlaneTicket
+			IQueryable<PlaneTicketEntity> query = _context.PlaneTicket
 				.Include(k => k.Passenger)
 				.Include(k => k.TravelClass)
 				.Include(k => k.Flight)
@@ -59,20 +59,20 @@ namespace AirportAutomation.Infrastructure.Repositories
 			return await query.ToListAsync().ConfigureAwait(false);
 		}
 
-		public async Task<PlaneTicket> PostPlaneTicket(PlaneTicket planeTicket)
+		public async Task<PlaneTicketEntity> PostPlaneTicket(PlaneTicketEntity planeTicket)
 		{
 			_context.PlaneTicket.Add(planeTicket);
 			await _context.SaveChangesAsync();
 			return planeTicket;
 		}
 
-		public async Task PutPlaneTicket(PlaneTicket planeTicket)
+		public async Task PutPlaneTicket(PlaneTicketEntity planeTicket)
 		{
 			_context.Entry(planeTicket).State = EntityState.Modified;
 			await _context.SaveChangesAsync();
 		}
 
-		public async Task<PlaneTicket> PatchPlaneTicket(int id, JsonPatchDocument planeTicketDocument)
+		public async Task<PlaneTicketEntity> PatchPlaneTicket(int id, JsonPatchDocument planeTicketDocument)
 		{
 			var planeTicket = await GetPlaneTicket(id);
 			planeTicketDocument.ApplyTo(planeTicket);

@@ -9,12 +9,12 @@ namespace AirportAutomation.Api.MappingProfiles
 	{
 		public PlaneTicketMappings()
 		{
-			CreateMap<PlaneTicket, PlaneTicketDto>();
-			CreateMap<PlaneTicket, PlaneTicketCreateDto>();
-			CreateMap<PlaneTicketDto, PlaneTicket>();
-			CreateMap<PlaneTicketCreateDto, PlaneTicket>();
-			CreateMap<PlaneTicket, PlaneTicketUpdateDto>();
-			CreateMap<PlaneTicketUpdateDto, PlaneTicket>();
+			CreateMap<PlaneTicketEntity, PlaneTicketDto>();
+			CreateMap<PlaneTicketEntity, PlaneTicketCreateDto>();
+			CreateMap<PlaneTicketDto, PlaneTicketEntity>();
+			CreateMap<PlaneTicketCreateDto, PlaneTicketEntity>();
+			CreateMap<PlaneTicketEntity, PlaneTicketUpdateDto>();
+			CreateMap<PlaneTicketUpdateDto, PlaneTicketEntity>();
 		}
 	}
 }

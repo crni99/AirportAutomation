@@ -8,7 +8,7 @@ namespace AirportAutomation.Web.MappingProfiles
 	{
 		public HealthCheckMappings()
 		{
-			CreateMap<HealthCheck, HealthCheckViewModel>();
+			CreateMap<HealthCheckEntity, HealthCheckViewModel>();
 		}
 
 	}

@@ -14,32 +14,32 @@ namespace AirportAutomation.Application.Services
 			_planeTicketRepository = planeTicketRepository;
 		}
 
-		public async Task<IList<PlaneTicket>> GetPlaneTickets(int page, int pageSize)
+		public async Task<IList<PlaneTicketEntity>> GetPlaneTickets(int page, int pageSize)
 		{
 			return await _planeTicketRepository.GetPlaneTickets(page, pageSize);
 		}
 
-		public async Task<PlaneTicket?> GetPlaneTicket(int id)
+		public async Task<PlaneTicketEntity?> GetPlaneTicket(int id)
 		{
 			return await _planeTicketRepository.GetPlaneTicket(id);
 		}
 
-		public async Task<IList<PlaneTicket?>> GetPlaneTicketsForPrice(int? minPrice, int? maxPrice)
+		public async Task<IList<PlaneTicketEntity?>> GetPlaneTicketsForPrice(int? minPrice, int? maxPrice)
 		{
 			return await _planeTicketRepository.GetPlaneTicketsForPrice(minPrice, maxPrice);
 		}
 
-		public async Task<PlaneTicket> PostPlaneTicket(PlaneTicket planeTicket)
+		public async Task<PlaneTicketEntity> PostPlaneTicket(PlaneTicketEntity planeTicket)
 		{
 			return await _planeTicketRepository.PostPlaneTicket(planeTicket);
 		}
 
-		public async Task PutPlaneTicket(PlaneTicket planeTicket)
+		public async Task PutPlaneTicket(PlaneTicketEntity planeTicket)
 		{
 			await _planeTicketRepository.PutPlaneTicket(planeTicket);
 		}
 
-		public async Task<PlaneTicket> PatchPlaneTicket(int id, JsonPatchDocument planeTicketDocument)
+		public async Task<PlaneTicketEntity> PatchPlaneTicket(int id, JsonPatchDocument planeTicketDocument)
 		{
 			return await _planeTicketRepository.PatchPlaneTicket(id, planeTicketDocument);
 		}

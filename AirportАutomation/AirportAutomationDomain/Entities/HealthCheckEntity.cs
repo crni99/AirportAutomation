@@ -1,6 +1,6 @@
 ﻿namespace AirportAutomation.Core.Entities
 {
-	public class HealthCheck
+	public class HealthCheckEntity
 	{
 		public string Status { get; set; }
 		public string TotalDuration { get; set; }

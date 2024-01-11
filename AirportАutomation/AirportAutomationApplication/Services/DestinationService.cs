@@ -14,26 +14,26 @@ namespace AirportAutomation.Application.Services
 			_destinationRepository = destinationRepository;
 		}
 
-		public async Task<IList<Destination>> GetDestinations(int page, int pageSize)
+		public async Task<IList<DestinationEntity>> GetDestinations(int page, int pageSize)
 		{
 			return await _destinationRepository.GetDestinations(page, pageSize);
 		}
-		public async Task<Destination?> GetDestination(int id)
+		public async Task<DestinationEntity?> GetDestination(int id)
 		{
 			return await _destinationRepository.GetDestination(id);
 		}
 
-		public async Task<Destination> PostDestination(Destination destination)
+		public async Task<DestinationEntity> PostDestination(DestinationEntity destination)
 		{
 			return await _destinationRepository.PostDestination(destination);
 		}
 
-		public async Task PutDestination(Destination destination)
+		public async Task PutDestination(DestinationEntity destination)
 		{
 			await _destinationRepository.PutDestination(destination);
 		}
 
-		public async Task<Destination> PatchDestination(int id, JsonPatchDocument destinationDocument)
+		public async Task<DestinationEntity> PatchDestination(int id, JsonPatchDocument destinationDocument)
 		{
 			return await _destinationRepository.PatchDestination(id, destinationDocument);
 		}

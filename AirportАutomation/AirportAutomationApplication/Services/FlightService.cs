@@ -14,31 +14,31 @@ namespace AirportAutomation.Application.Services
 			_flightRepository = flightRepository;
 		}
 
-		public async Task<IList<Flight>> GetFlights(int page, int pageSize)
+		public async Task<IList<FlightEntity>> GetFlights(int page, int pageSize)
 		{
 			return await _flightRepository.GetFlights(page, pageSize);
 		}
-		public async Task<Flight?> GetFlight(int id)
+		public async Task<FlightEntity?> GetFlight(int id)
 		{
 			return await _flightRepository.GetFlight(id);
 		}
 
-		public async Task<IList<Flight?>> GetFlightsBetweenDates(DateOnly? startDate, DateOnly? endDate)
+		public async Task<IList<FlightEntity?>> GetFlightsBetweenDates(DateOnly? startDate, DateOnly? endDate)
 		{
 			return await _flightRepository.GetFlightsBetweenDates(startDate, endDate);
 		}
 
-		public async Task<Flight> PostFlight(Flight flight)
+		public async Task<FlightEntity> PostFlight(FlightEntity flight)
 		{
 			return await _flightRepository.PostFlight(flight);
 		}
 
-		public async Task PutFlight(Flight flight)
+		public async Task PutFlight(FlightEntity flight)
 		{
 			await _flightRepository.PutFlight(flight);
 		}
 
-		public async Task<Flight> PatchFlight(int id, JsonPatchDocument flightDocument)
+		public async Task<FlightEntity> PatchFlight(int id, JsonPatchDocument flightDocument)
 		{
 			return await _flightRepository.PatchFlight(id, flightDocument);
 		}

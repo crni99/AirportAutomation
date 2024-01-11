@@ -21,7 +21,7 @@ namespace AirportAutomation.Web.Controllers
 		[HttpGet]
 		public async Task<IActionResult> Index()
 		{
-			var response = await _httpCallService.GetHealthCheck<HealthCheck>();
+			var response = await _httpCallService.GetHealthCheck<HealthCheckEntity>();
 			if (response == null)
 			{
 				return View();

@@ -11,7 +11,7 @@ namespace AirportAutomation.Web.Services
 
 		public AlertService()
 		{
-			_resourceManager = new ResourceManager("AirportAutomationWeb.Resources.AlertMessages", Assembly.GetExecutingAssembly());
+			_resourceManager = new ResourceManager("AirportAutomation.Web.Resources.AlertMessages", Assembly.GetExecutingAssembly());
 		}
 
 		public void SetAlertMessage(ITempDataDictionary tempData, string messageKey, bool isSuccess)

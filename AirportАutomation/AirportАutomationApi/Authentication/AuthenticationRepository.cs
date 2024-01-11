@@ -12,7 +12,7 @@ namespace AirportАutomation.Api.Authentication
 			_context = context ?? throw new ArgumentNullException(nameof(context));
 		}
 
-		public ApiUser ValidateUser(string username, string password)
+		public ApiUserEntity ValidateUser(string username, string password)
 		{
 			return _context.ApiUser.FirstOrDefault(user => user.UserName.Equals(username) && user.Password == password);
 		}

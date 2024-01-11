@@ -13,12 +13,12 @@ namespace AirportAutomation.Application.Services
 			_travelClassRepository = travelClassRepository;
 		}
 
-		public async Task<IList<TravelClass>> GetTravelClasses(int page, int pageSize)
+		public async Task<IList<TravelClassEntity>> GetTravelClasses(int page, int pageSize)
 		{
 			return await _travelClassRepository.GetTravelClasses(page, pageSize);
 		}
 
-		public async Task<TravelClass?> GetTravelClass(int id)
+		public async Task<TravelClassEntity?> GetTravelClass(int id)
 		{
 			return await _travelClassRepository.GetTravelClass(id);
 		}

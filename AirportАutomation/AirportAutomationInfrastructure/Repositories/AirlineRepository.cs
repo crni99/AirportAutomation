@@ -15,7 +15,7 @@ namespace AirportAutomation.Infrastructure.Repositories
 			_context = context ?? throw new ArgumentNullException(nameof(context));
 		}
 
-		public async Task<IList<Airline>> GetAirlines(int page, int pageSize)
+		public async Task<IList<AirlineEntity>> GetAirlines(int page, int pageSize)
 		{
 			return await _context.Airline
 				.OrderBy(c => c.Id)
@@ -25,12 +25,12 @@ namespace AirportAutomation.Infrastructure.Repositories
 				.ToListAsync();
 		}
 
-		public async Task<Airline?> GetAirline(int id)
+		public async Task<AirlineEntity?> GetAirline(int id)
 		{
 			return await _context.Airline.FindAsync(id);
 		}
 
-		public async Task<IList<Airline?>> GetAirlinesByName(string name)
+		public async Task<IList<AirlineEntity?>> GetAirlinesByName(string name)
 		{
 			return await _context.Airline
 				.AsNoTracking()
@@ -39,20 +39,20 @@ namespace AirportAutomation.Infrastructure.Repositories
 				.ConfigureAwait(false);
 		}
 
-		public async Task<Airline> PostAirline(Airline airline)
+		public async Task<AirlineEntity> PostAirline(AirlineEntity airline)
 		{
 			_context.Airline.Add(airline);
 			await _context.SaveChangesAsync();
 			return airline;
 		}
 
-		public async Task PutAirline(Airline airline)
+		public async Task PutAirline(AirlineEntity airline)
 		{
 			_context.Entry(airline).State = EntityState.Modified;
 			await _context.SaveChangesAsync();
 		}
 
-		public async Task<Airline> PatchAirline(int id, JsonPatchDocument airlineDocument)
+		public async Task<AirlineEntity> PatchAirline(int id, JsonPatchDocument airlineDocument)
 		{
 			var airline = await GetAirline(id);
 			airlineDocument.ApplyTo(airline);

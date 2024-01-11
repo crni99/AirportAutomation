@@ -1,6 +1,8 @@
 ﻿using AirportAutomation.Core.Converters;
 using AirportAutomation.Core.Entities;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using System.Reflection;
 
 namespace AirportAutomation.Infrastructure.Data
 {
@@ -21,13 +23,13 @@ namespace AirportAutomation.Infrastructure.Data
 			base.ConfigureConventions(builder);
 		}
 
-		public DbSet<Passenger> Passenger { get; set; }
-		public DbSet<TravelClass> TravelClass { get; set; }
-		public DbSet<Destination> Destination { get; set; }
-		public DbSet<Pilot> Pilot { get; set; }
-		public DbSet<Airline> Airline { get; set; }
-		public DbSet<Flight> Flight { get; set; }
-		public DbSet<PlaneTicket> PlaneTicket { get; set; }
-		public DbSet<ApiUser> ApiUser { get; set; }
+		public DbSet<PassengerEntity> Passenger { get; set; }
+		public DbSet<TravelClassEntity> TravelClass { get; set; }
+		public DbSet<DestinationEntity> Destination { get; set; }
+		public DbSet<PilotEntity> Pilot { get; set; }
+		public DbSet<AirlineEntity> Airline { get; set; }
+		public DbSet<FlightEntity> Flight { get; set; }
+		public DbSet<PlaneTicketEntity> PlaneTicket { get; set; }
+		public DbSet<ApiUserEntity> ApiUser { get; set; }
 	}
 }

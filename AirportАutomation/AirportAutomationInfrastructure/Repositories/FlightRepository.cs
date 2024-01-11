@@ -15,7 +15,7 @@ namespace AirportAutomation.Infrastructure.Repositories
 			_context = context ?? throw new ArgumentNullException(nameof(context));
 		}
 
-		public async Task<IList<Flight>> GetFlights(int page, int pageSize)
+		public async Task<IList<FlightEntity>> GetFlights(int page, int pageSize)
 		{
 			var collection = _context.Flight
 				.Include(l => l.Airline)
@@ -30,7 +30,7 @@ namespace AirportAutomation.Infrastructure.Repositories
 				.ToListAsync();
 		}
 
-		public async Task<Flight?> GetFlight(int id)
+		public async Task<FlightEntity?> GetFlight(int id)
 		{
 			return await _context.Flight
 				.Include(l => l.Airline)
@@ -40,9 +40,9 @@ namespace AirportAutomation.Infrastructure.Repositories
 				.FirstOrDefaultAsync(l => l.Id == id);
 		}
 
-		public async Task<IList<Flight?>> GetFlightsBetweenDates(DateOnly? startDate, DateOnly? endDate)
+		public async Task<IList<FlightEntity?>> GetFlightsBetweenDates(DateOnly? startDate, DateOnly? endDate)
 		{
-			IQueryable<Flight> query = _context.Flight
+			IQueryable<FlightEntity> query = _context.Flight
 				.Include(f => f.Airline)
 				.Include(f => f.Destination)
 				.Include(f => f.Pilot)
@@ -59,20 +59,20 @@ namespace AirportAutomation.Infrastructure.Repositories
 			return await query.ToListAsync().ConfigureAwait(false);
 		}
 
-		public async Task<Flight> PostFlight(Flight flight)
+		public async Task<FlightEntity> PostFlight(FlightEntity flight)
 		{
 			_context.Flight.Add(flight);
 			await _context.SaveChangesAsync();
 			return flight;
 		}
 
-		public async Task PutFlight(Flight flight)
+		public async Task PutFlight(FlightEntity flight)
 		{
 			_context.Entry(flight).State = EntityState.Modified;
 			await _context.SaveChangesAsync();
 		}
 
-		public async Task<Flight> PatchFlight(int id, JsonPatchDocument flightDocument)
+		public async Task<FlightEntity> PatchFlight(int id, JsonPatchDocument flightDocument)
 		{
 			var flight = await GetFlight(id);
 			flightDocument.ApplyTo(flight);

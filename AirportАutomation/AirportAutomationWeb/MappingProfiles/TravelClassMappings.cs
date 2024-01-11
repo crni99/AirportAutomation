@@ -9,10 +9,10 @@ namespace AirportAutomation.Web.MappingProfiles
 	{
 		public TravelClassMappings()
 		{
-			CreateMap<TravelClass, TravelClassViewModel>();
-			CreateMap<TravelClassViewModel, TravelClass>();
+			CreateMap<TravelClassEntity, TravelClassViewModel>();
+			CreateMap<TravelClassViewModel, TravelClassEntity>();
 
-			CreateMap<PagedResponse<TravelClass>, PagedResponse<TravelClassViewModel>>();
+			CreateMap<PagedResponse<TravelClassEntity>, PagedResponse<TravelClassViewModel>>();
 		}
 	}
 }

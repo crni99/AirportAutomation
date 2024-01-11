@@ -8,12 +8,12 @@ namespace AirportAutomation.Api.MappingProfiles
 	{
 		public FlightMappings()
 		{
-			CreateMap<Flight, FlightDto>();
-			CreateMap<Flight, FlightCreateDto>();
-			CreateMap<FlightDto, Flight>();
-			CreateMap<FlightCreateDto, Flight>();
-			CreateMap<Flight, FlightUpdateDto>();
-			CreateMap<FlightUpdateDto, Flight>();
+			CreateMap<FlightEntity, FlightDto>();
+			CreateMap<FlightEntity, FlightCreateDto>();
+			CreateMap<FlightDto, FlightEntity>();
+			CreateMap<FlightCreateDto, FlightEntity>();
+			CreateMap<FlightEntity, FlightUpdateDto>();
+			CreateMap<FlightUpdateDto, FlightEntity>();
 		}
 	}
 }

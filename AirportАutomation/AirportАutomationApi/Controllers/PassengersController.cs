@@ -138,9 +138,9 @@ namespace AirportАutomationApi.Controllers
 		[ProducesResponseType(201, Type = typeof(PassengerCreateDto))]
 		[ProducesResponseType(400)]
 		[ProducesResponseType(401)]
-		public async Task<ActionResult<Passenger>> PostPassenger(PassengerCreateDto passengerCreateDto)
+		public async Task<ActionResult<PassengerEntity>> PostPassenger(PassengerCreateDto passengerCreateDto)
 		{
-			var passenger = _mapper.Map<Passenger>(passengerCreateDto);
+			var passenger = _mapper.Map<PassengerEntity>(passengerCreateDto);
 			await _passengerService.PostPassenger(passenger);
 			return CreatedAtAction("GetPassenger", new { id = passenger.Id }, passenger);
 		}
@@ -171,7 +171,7 @@ namespace AirportАutomationApi.Controllers
 				_logger.LogInformation("Passenger with id {id} not found.", id);
 				return NotFound();
 			}
-			var passenger = _mapper.Map<Passenger>(passengerDto);
+			var passenger = _mapper.Map<PassengerEntity>(passengerDto);
 			await _passengerService.PutPassenger(passenger);
 			return NoContent();
 		}

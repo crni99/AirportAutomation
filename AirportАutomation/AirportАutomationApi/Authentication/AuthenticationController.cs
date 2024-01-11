@@ -39,7 +39,7 @@ namespace AirportАutomation.Api.Authentication
 		[HttpPost]
 		public ActionResult<string> Authenticate(ApiUserDto apiUserDto)
 		{
-			var apiUser = _mapper.Map<ApiUser>(apiUserDto);
+			var apiUser = _mapper.Map<ApiUserEntity>(apiUserDto);
 			var user = _authenticationRepository.ValidateUser(apiUser.UserName, apiUser.Password);
 
 			if (user is null)

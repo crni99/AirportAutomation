@@ -15,7 +15,7 @@ namespace AirportAutomation.Infrastructure.Repositories
 			_context = context ?? throw new ArgumentNullException(nameof(context));
 		}
 
-		public async Task<IList<Destination>> GetDestinations(int page, int pageSize)
+		public async Task<IList<DestinationEntity>> GetDestinations(int page, int pageSize)
 		{
 			return await _context.Destination
 				.OrderBy(c => c.Id)
@@ -25,25 +25,25 @@ namespace AirportAutomation.Infrastructure.Repositories
 				.ToListAsync();
 		}
 
-		public async Task<Destination?> GetDestination(int id)
+		public async Task<DestinationEntity?> GetDestination(int id)
 		{
 			return await _context.Destination.FindAsync(id);
 		}
 
-		public async Task<Destination> PostDestination(Destination destination)
+		public async Task<DestinationEntity> PostDestination(DestinationEntity destination)
 		{
 			_context.Destination.Add(destination);
 			await _context.SaveChangesAsync();
 			return destination;
 		}
 
-		public async Task PutDestination(Destination destination)
+		public async Task PutDestination(DestinationEntity destination)
 		{
 			_context.Entry(destination).State = EntityState.Modified;
 			await _context.SaveChangesAsync();
 		}
 
-		public async Task<Destination> PatchDestination(int id, JsonPatchDocument destinationDocument)
+		public async Task<DestinationEntity> PatchDestination(int id, JsonPatchDocument destinationDocument)
 		{
 			var destination = await GetDestination(id);
 			destinationDocument.ApplyTo(destination);

@@ -149,9 +149,9 @@ namespace AirportAutomation.Web.Services
 		/// </returns>
 		public async Task<PagedResponse<T>> GetDataList<T>(int page, int pageSize)
 		{
-			var model = typeof(T);
-			var requestUri = $"{apiURL}/{model.Name}";
-			if (model.Name.Equals("TravelClass"))
+			var modelName = GetModelName<T>();
+			var requestUri = $"{apiURL}/{modelName}";
+			if (modelName.Equals("TravelClass"))
 			{
 				requestUri += $"es/";
 			}
@@ -194,10 +194,10 @@ namespace AirportAutomation.Web.Services
 		public async Task<T> GetData<T>(int id)
 		{
 			T data = default;
-			var model = typeof(T);
+			var modelName = GetModelName<T>();
 
-			string requestUri = $"{apiURL}/{model.Name}";
-			if (model.Name.Equals("TravelClass"))
+			string requestUri = $"{apiURL}/{modelName}";
+			if (modelName.Equals("TravelClass"))
 			{
 				requestUri += $"es/{id}";
 			}
@@ -234,10 +234,10 @@ namespace AirportAutomation.Web.Services
 		/// </returns>
 		public async Task<PagedResponse<T>> GetDataList<T>()
 		{
-			var model = typeof(T);
+			var modelName = GetModelName<T>();
 
-			string requestUri = $"{apiURL}/{model.Name}";
-			if (model.Name.Equals("TravelClass"))
+			string requestUri = $"{apiURL}/{modelName}";
+			if (modelName.Equals("TravelClass"))
 			{
 				requestUri += "es";
 			}
@@ -273,10 +273,10 @@ namespace AirportAutomation.Web.Services
 		/// </returns>
 		public async Task<string> GetDataByName<T>(string name)
 		{
-			var model = typeof(T);
+			var modelName = GetModelName<T>();
 
-			string requestUri = $"{apiURL}/{model.Name}";
-			if (model.Name.Equals("TravelClass"))
+			string requestUri = $"{apiURL}/{modelName}";
+			if (modelName.Equals("TravelClass"))
 			{
 				requestUri += $"es/byName/{name}";
 			}
@@ -315,10 +315,10 @@ namespace AirportAutomation.Web.Services
 		/// </returns>
 		public async Task<string> GetDataByFNameOrLName<T>(string firstName, string lastName)
 		{
-			var model = typeof(T);
+			var modelName = GetModelName<T>();
 
-			string requestUri = $"{apiURL}/{model.Name}";
-			if (model.Name.Equals("TravelClass"))
+			string requestUri = $"{apiURL}/{modelName}";
+			if (modelName.Equals("TravelClass"))
 			{
 				requestUri += $"es/byName";
 			}
@@ -370,10 +370,10 @@ namespace AirportAutomation.Web.Services
 		/// </returns>
 		public async Task<string> GetDataForPrice<T>(int? minPrice, int? maxPrice)
 		{
-			var model = typeof(T);
+			var modelName = GetModelName<T>();
 
-			string requestUri = $"{apiURL}/{model.Name}";
-			if (model.Name.Equals("TravelClass"))
+			string requestUri = $"{apiURL}/{modelName}";
+			if (modelName.Equals("TravelClass"))
 			{
 				requestUri += $"es/byPrice";
 			}
@@ -425,10 +425,10 @@ namespace AirportAutomation.Web.Services
 		/// </returns>
 		public async Task<string> GetDataBetweenDates<T>(string startDate, string endDate)
 		{
-			var model = typeof(T);
+			var modelName = GetModelName<T>();
 
-			string requestUri = $"{apiURL}/{model.Name}";
-			if (model.Name.Equals("TravelClass"))
+			string requestUri = $"{apiURL}/{modelName}";
+			if (modelName.Equals("TravelClass"))
 			{
 				requestUri += $"es/byDate";
 			}
@@ -480,8 +480,8 @@ namespace AirportAutomation.Web.Services
 		public async Task<T> CreateData<T>(T t)
 		{
 			T data = default;
-			var model = typeof(T);
-			string requestUri = $"{apiURL}/{model.Name}s";
+			var modelName = GetModelName<T>();
+			string requestUri = $"{apiURL}/{modelName}s";
 
 			using var httpClient = _httpClientFactory.CreateClient("AirportAutomationApi");
 			ConfigureHttpClient(httpClient);
@@ -511,8 +511,8 @@ namespace AirportAutomation.Web.Services
 		/// </returns>
 		public async Task<bool> EditData<T>(T t, int id)
 		{
-			var model = typeof(T);
-			string requestUri = $"{apiURL}/{model.Name}s/{id}";
+			var modelName = GetModelName<T>();
+			string requestUri = $"{apiURL}/{modelName}s/{id}";
 
 			using var httpClient = _httpClientFactory.CreateClient("AirportAutomationApi");
 			ConfigureHttpClient(httpClient);
@@ -542,8 +542,8 @@ namespace AirportAutomation.Web.Services
 		/// </returns>
 		public async Task<bool> DeleteData<T>(int id)
 		{
-			var model = typeof(T);
-			var requestUri = $"{apiURL}/{model.Name}s/{id}";
+			var modelName = GetModelName<T>();
+			var requestUri = $"{apiURL}/{modelName}s/{id}";
 
 			using var httpClient = _httpClientFactory.CreateClient("AirportAutomationApi");
 			ConfigureHttpClient(httpClient);
@@ -588,9 +588,9 @@ namespace AirportAutomation.Web.Services
 		public async Task<T> GetHealthCheck<T>()
 		{
 			T data = default;
-			var model = typeof(T);
+			var modelName = GetModelName<T>();
 
-			string requestUri = $"{apiURL}/{model.Name}";
+			string requestUri = $"{apiURL}/{modelName}";
 
 			var httpRequestMessage = new HttpRequestMessage(HttpMethod.Get, requestUri);
 
@@ -608,6 +608,17 @@ namespace AirportAutomation.Web.Services
 				_logger.LogError("Failed to retrieve data. Status code: {StatusCode}", response.StatusCode);
 			}
 			return data;
+		}
+
+		public string GetModelName<T>()
+		{
+			var modelName = typeof(T).Name;
+			const string entitySuffix = "Entity";
+			if (modelName.EndsWith(entitySuffix))
+			{
+				modelName = modelName.Substring(0, modelName.Length - entitySuffix.Length);
+			}
+			return modelName;
 		}
 	}
 }

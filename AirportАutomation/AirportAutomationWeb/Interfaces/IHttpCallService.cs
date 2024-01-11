@@ -19,5 +19,6 @@ namespace AirportAutomation.Web.Interfaces
 		Task<string> GetDataForPrice<T>(int? minPrice, int? maxPrice);
 		Task<string> GetDataBetweenDates<T>(string? startDate, string? endDate);
 		Task<T> GetHealthCheck<T>();
+		string GetModelName<T>();
 	}
 }

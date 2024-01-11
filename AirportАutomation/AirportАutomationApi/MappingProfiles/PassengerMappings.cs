@@ -8,10 +8,10 @@ namespace AirportAutomation.Api.MappingProfiles
 	{
 		public PassengerMappings()
 		{
-			CreateMap<Passenger, PassengerDto>();
-			CreateMap<Passenger, PassengerCreateDto>();
-			CreateMap<PassengerDto, Passenger>();
-			CreateMap<PassengerCreateDto, Passenger>();
+			CreateMap<PassengerEntity, PassengerDto>();
+			CreateMap<PassengerEntity, PassengerCreateDto>();
+			CreateMap<PassengerDto, PassengerEntity>();
+			CreateMap<PassengerCreateDto, PassengerEntity>();
 		}
 	}
 }

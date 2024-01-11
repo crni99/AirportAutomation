@@ -14,31 +14,31 @@ namespace AirportAutomation.Application.Services
 			_airlineRepository = airlineRepository;
 		}
 
-		public async Task<IList<Airline>> GetAirlines(int page, int pageSize)
+		public async Task<IList<AirlineEntity>> GetAirlines(int page, int pageSize)
 		{
 			return await _airlineRepository.GetAirlines(page, pageSize);
 		}
-		public async Task<Airline?> GetAirline(int id)
+		public async Task<AirlineEntity?> GetAirline(int id)
 		{
 			return await _airlineRepository.GetAirline(id);
 		}
 
-		public async Task<IList<Airline?>> GetAirlinesByName(string name)
+		public async Task<IList<AirlineEntity?>> GetAirlinesByName(string name)
 		{
 			return await _airlineRepository.GetAirlinesByName(name);
 		}
 
-		public async Task<Airline> PostAirline(Airline airline)
+		public async Task<AirlineEntity> PostAirline(AirlineEntity airline)
 		{
 			return await _airlineRepository.PostAirline(airline);
 		}
 
-		public async Task PutAirline(Airline airline)
+		public async Task PutAirline(AirlineEntity airline)
 		{
 			await _airlineRepository.PutAirline(airline);
 		}
 
-		public async Task<Airline> PatchAirline(int id, JsonPatchDocument airlineDocument)
+		public async Task<AirlineEntity> PatchAirline(int id, JsonPatchDocument airlineDocument)
 		{
 			return await _airlineRepository.PatchAirline(id, airlineDocument);
 		}

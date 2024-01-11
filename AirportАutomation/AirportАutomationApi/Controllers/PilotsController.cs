@@ -135,12 +135,12 @@ namespace AirportАutomationApi.Controllers
 		/// <response code="400">If the request is invalid or if there's a validation error.</response>
 		/// <response code="401">If user do not have permission to access the requested resource.</response>
 		[HttpPost]
-		[ProducesResponseType(201, Type = typeof(Pilot))]
+		[ProducesResponseType(201, Type = typeof(PilotEntity))]
 		[ProducesResponseType(400)]
 		[ProducesResponseType(401)]
-		public async Task<ActionResult<Pilot>> PostPilot(PilotCreateDto pilotCreateDto)
+		public async Task<ActionResult<PilotEntity>> PostPilot(PilotCreateDto pilotCreateDto)
 		{
-			var pilot = _mapper.Map<Pilot>(pilotCreateDto);
+			var pilot = _mapper.Map<PilotEntity>(pilotCreateDto);
 			await _pilotService.PostPilot(pilot);
 			return CreatedAtAction("GetPilot", new { id = pilot.Id }, pilot);
 		}
@@ -171,7 +171,7 @@ namespace AirportАutomationApi.Controllers
 				_logger.LogInformation("Pilot with id {id} not found.", id);
 				return NotFound();
 			}
-			var pilot = _mapper.Map<Pilot>(pilotDto);
+			var pilot = _mapper.Map<PilotEntity>(pilotDto);
 			await _pilotService.PutPilot(pilot);
 			return NoContent();
 		}
