@@ -16,7 +16,7 @@ namespace AirportАutomation.Api.HealthChecks
 			using (var httpClient = _httpClientFactory.CreateClient())
 			{
 				var response = await
-				httpClient.GetAsync("https://localhost:7107/swagger/index.html", cancellationToken);
+				httpClient.GetAsync("https://localhost:44362/swagger/index.html", cancellationToken);
 				if (response.IsSuccessStatusCode)
 				{
 					return await Task.FromResult(new HealthCheckResult(

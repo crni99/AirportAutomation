@@ -1,4 +1,9 @@
-﻿<!DOCTYPE html>
+﻿@inject IHttpContextAccessor _httpContextAccessor
+@{
+	string token = _httpContextAccessor.HttpContext.Session.GetString("AccessToken");
+}
+
+<!DOCTYPE html>
 <html lang="en">
 <head>
 	<meta charset="utf-8" />
@@ -48,9 +53,12 @@
 						</li>
 					</ul>
 					<ul class="navbar-nav">
-						<li class="nav-item">
-							<a id="signOut" class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="SignOut">Sign Out</a>
-						</li>
+						@if (!string.IsNullOrEmpty(token))
+						{
+							<li class="nav-item">
+								<a id="signOut" class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="SignOut">Sign Out</a>
+							</li>
+						}
 						<li class="nav-item">
 							<a class="nav-link text-dark" asp-area="" asp-controller="HealthCheck" asp-action="Index">Status Check</a>
 						</li>
