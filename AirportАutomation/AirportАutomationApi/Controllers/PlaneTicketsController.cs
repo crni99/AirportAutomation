@@ -5,6 +5,7 @@ using AirportAutomation.Core.Entities;
 using AirportAutomation.Core.Interfaces.IServices;
 using AirportAutomationDomain.Dtos.PlaneTicket;
 using AirportАutomation.Api.Controllers;
+using AirportАutomation.Api.Interfaces;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.JsonPatch;
@@ -18,6 +19,7 @@ namespace AirportАutomationApi.Controllers
 	{
 		private readonly IPlaneTicketService _planeTicketService;
 		private readonly IPaginationValidationService _paginationValidationService;
+		private readonly IInputValidationService _inputValidationService;
 		private readonly IMapper _mapper;
 		private readonly ILogger<PlaneTicketsController> _logger;
 		private readonly int maxPageSize;
@@ -25,12 +27,14 @@ namespace AirportАutomationApi.Controllers
 		public PlaneTicketsController(
 			IPlaneTicketService planeTicketService,
 			IPaginationValidationService paginationValidationService,
+			IInputValidationService inputValidationService,
 			IMapper mapper,
 			ILogger<PlaneTicketsController> logger,
 			IConfiguration configuration)
 		{
 			_planeTicketService = planeTicketService ?? throw new ArgumentNullException(nameof(planeTicketService));
 			_paginationValidationService = paginationValidationService ?? throw new ArgumentNullException(nameof(paginationValidationService));
+			_inputValidationService = inputValidationService ?? throw new ArgumentNullException(nameof(inputValidationService));
 			_mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
 			_logger = logger ?? throw new ArgumentNullException(nameof(logger));
 			maxPageSize = configuration.GetValue<int>("pageSettings:maxPageSize");
@@ -44,7 +48,7 @@ namespace AirportАutomationApi.Controllers
 		/// <returns>A paginated list of plane tickets.</returns>
 		/// <response code="200">Returns a list of plane tickets wrapped in a <see cref="PagedResponse{PlaneTicketDto}"/>.</response>
 		/// <response code="204">If no plane tickets are found.</response>
-		/// <response code="400">If the request is invalid.</response>
+		/// <response code="400">If the request is invalid or if there's a validation error.</response>
 		/// <response code="401">If user do not have permission to access the requested resource.</response>
 		[HttpGet]
 		[ProducesResponseType(200, Type = typeof(PagedResponse<PlaneTicketDto>))]
@@ -79,11 +83,13 @@ namespace AirportАutomationApi.Controllers
 		/// An IActionResult containing a list of plane tickets within the specified price range.
 		/// </returns>
 		/// <response code="200">Returns a list of plane tickets if any are found.</response>
+		/// <response code="400">If the request is invalid or if there's a validation error.</response>
 		/// <response code="404">If no plane tickets are found.</response>
 		/// <response code="401">If user do not have permission to access the requested resource.</response>
 		[HttpGet("byPrice")]
 		[ProducesResponseType(200, Type = typeof(IEnumerable<PlaneTicketDto>))]
-		[ProducesResponseType(204)]
+		[ProducesResponseType(400)]
+		[ProducesResponseType(404)]
 		[ProducesResponseType(401)]
 		public async Task<ActionResult<IEnumerable<PlaneTicketDto>>> GetPlaneTicketsForPrice(
 			[FromQuery] int? minPrice = null,
@@ -98,7 +104,7 @@ namespace AirportАutomationApi.Controllers
 			if (planeTickets is null || !planeTickets.Any())
 			{
 				_logger.LogInformation("Plane tickets not found.");
-				return NoContent();
+				return NotFound();
 			}
 			var planeTicketsDto = _mapper.Map<IEnumerable<PlaneTicketDto>>(planeTickets);
 			return Ok(planeTicketsDto);
@@ -110,14 +116,21 @@ namespace AirportАutomationApi.Controllers
 		/// <param name="id"></param>
 		/// <returns>A single plane ticket that match the specified id.</returns>
 		/// <response code="200">Returns a single plane ticket if any is found.</response>
+		/// <response code="400">If the request is invalid or if there's a validation error.</response>
 		/// <response code="404">If no plane ticket is found.</response>
 		/// <response code="401">If user do not have permission to access the requested resource.</response>
 		[HttpGet("{id}")]
 		[ProducesResponseType(200, Type = typeof(PlaneTicketDto))]
+		[ProducesResponseType(400)]
 		[ProducesResponseType(404)]
 		[ProducesResponseType(401)]
 		public async Task<ActionResult<PlaneTicketDto>> GetPlaneTicket(int id)
 		{
+			if (!_inputValidationService.IsNonNegativeInt(id))
+			{
+				_logger.LogInformation("Invalid input. The ID {id} must be a non-negative integer.", id);
+				return BadRequest("Invalid input. The ID must be a non-negative integer.");
+			}
 			if (!await _planeTicketService.PlaneTicketExists(id))
 			{
 				_logger.LogInformation("Plane ticket with id {id} not found.", id);
@@ -171,6 +184,11 @@ namespace AirportАutomationApi.Controllers
 		[ProducesResponseType(401)]
 		public async Task<IActionResult> PutPlaneTicket(int id, PlaneTicketUpdateDto planeTicketUpdateDto)
 		{
+			if (!_inputValidationService.IsNonNegativeInt(id))
+			{
+				_logger.LogInformation("Invalid input. The ID {id} must be a non-negative integer.", id);
+				return BadRequest("Invalid input. The ID must be a non-negative integer.");
+			}
 			if (id != planeTicketUpdateDto.Id)
 			{
 				_logger.LogInformation("Plane Ticket with id {id} is different from provided Plane Ticket and his id.", id);
@@ -200,17 +218,22 @@ namespace AirportАutomationApi.Controllers
 		///     "value": "NewName"
 		/// }
 		/// </remarks>
-		/// <response code="204">No content. The partial update was successful.</response>
+		/// <response code="200">The partial update was successful.</response>
 		/// <response code="400">If the request is invalid or if there's a validation error.</response>
 		/// <response code="404">If the plane ticket with the specified ID is not found.</response>
 		/// <response code="401">If user do not have permission to access the requested resource.</response>
 		[HttpPatch("{id}")]
-		[ProducesResponseType(204)]
+		[ProducesResponseType(200)]
 		[ProducesResponseType(400)]
 		[ProducesResponseType(404)]
 		[ProducesResponseType(401)]
 		public async Task<IActionResult> PatchPlaneTicket(int id, [FromBody] JsonPatchDocument planeTicketDocument)
 		{
+			if (!_inputValidationService.IsNonNegativeInt(id))
+			{
+				_logger.LogInformation("Invalid input. The ID {id} must be a non-negative integer.", id);
+				return BadRequest("Invalid input. The ID must be a non-negative integer.");
+			}
 			if (!await _planeTicketService.PlaneTicketExists(id))
 			{
 				_logger.LogInformation("Plane Ticket with id {id} not found.", id);
@@ -225,14 +248,21 @@ namespace AirportАutomationApi.Controllers
 		/// </summary>
 		/// <param name="id">The ID of the plane ticket to delete.</param>
 		/// <response code="204">No content. The deletion was successful.</response>
+		/// <response code="400">If the request is invalid or if there's a validation error.</response>
 		/// <response code="404">If the plane ticket with the specified ID is not found.</response>
 		/// <response code="401">If user do not have permission to access the requested resource.</response>
 		[HttpDelete("{id}")]
 		[ProducesResponseType(204)]
+		[ProducesResponseType(400)]
 		[ProducesResponseType(404)]
 		[ProducesResponseType(401)]
 		public async Task<IActionResult> DeletePlaneTicket(int id)
 		{
+			if (!_inputValidationService.IsNonNegativeInt(id))
+			{
+				_logger.LogInformation("Invalid input. The ID {id} must be a non-negative integer.", id);
+				return BadRequest("Invalid input. The ID must be a non-negative integer.");
+			}
 			if (!await _planeTicketService.PlaneTicketExists(id))
 			{
 				_logger.LogInformation("Plane ticket with id {id} not found.", id);
@@ -244,4 +274,3 @@ namespace AirportАutomationApi.Controllers
 
 	}
 }
-

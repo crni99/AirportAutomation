@@ -3,6 +3,7 @@ using AirportAutomation.Core.Entities;
 using AirportАutomation.Api.Controllers;
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -37,6 +38,8 @@ namespace AirportАutomation.Api.Authentication
 		/// <response code="400">If the request is invalid or if there's a validation error.</response>
 		/// <response code="401">If authentication fails due to incorrect credentials.</response>
 		[HttpPost]
+		[ProducesResponseType(typeof(JsonWebToken), 200)]
+		[ProducesResponseType(401)]
 		public ActionResult<string> Authenticate(ApiUserDto apiUserDto)
 		{
 			var apiUser = _mapper.Map<ApiUserEntity>(apiUserDto);

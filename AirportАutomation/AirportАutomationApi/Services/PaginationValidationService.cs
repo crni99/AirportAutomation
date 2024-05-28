@@ -1,6 +1,5 @@
 ﻿using AirportAutomation.Api.Interfaces;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
 
 namespace AirportAutomation.Api.Services
 {

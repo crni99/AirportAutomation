@@ -4,6 +4,7 @@ using AirportAutomation.Core.Dtos.Response;
 using AirportAutomation.Core.Entities;
 using AirportAutomation.Core.Interfaces.IServices;
 using AirportАutomation.Api.Controllers;
+using AirportАutomation.Api.Interfaces;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.JsonPatch;
@@ -17,6 +18,7 @@ namespace AirportАutomationApi.Controllers
 	{
 		private readonly IPilotService _pilotService;
 		private readonly IPaginationValidationService _paginationValidationService;
+		private readonly IInputValidationService _inputValidationService;
 		private readonly IMapper _mapper;
 		private readonly ILogger<PilotsController> _logger;
 		private readonly int maxPageSize;
@@ -24,12 +26,14 @@ namespace AirportАutomationApi.Controllers
 		public PilotsController(
 			IPilotService pilotService,
 			IPaginationValidationService paginationValidationService,
+			IInputValidationService inputValidationService,
 			IMapper mapper,
 			ILogger<PilotsController> logger,
 			IConfiguration configuration)
 		{
 			_pilotService = pilotService ?? throw new ArgumentNullException(nameof(pilotService));
 			_paginationValidationService = paginationValidationService ?? throw new ArgumentNullException(nameof(paginationValidationService));
+			_inputValidationService = inputValidationService ?? throw new ArgumentNullException(nameof(inputValidationService));
 			_mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
 			_logger = logger ?? throw new ArgumentNullException(nameof(logger));
 			maxPageSize = configuration.GetValue<int>("pageSettings:maxPageSize");
@@ -43,7 +47,7 @@ namespace AirportАutomationApi.Controllers
 		/// <returns>A paginated list of pilots.</returns>
 		/// <response code="200">Returns a list of pilots wrapped in a <see cref="PagedResponse{PilotDto}"/>.</response>
 		/// <response code="204">If no pilots are found.</response>
-		/// <response code="400">If the request is invalid.</response>
+		/// <response code="400">If the request is invalid or if there's a validation error.</response>
 		/// <response code="401">If user do not have permission to access the requested resource.</response>
 		[HttpGet]
 		[ProducesResponseType(200, Type = typeof(PagedResponse<PilotDto>))]
@@ -75,14 +79,21 @@ namespace AirportАutomationApi.Controllers
 		/// <param name="id"></param>
 		/// <returns>A single pilot that match the specified id.</returns>
 		/// <response code="200">Returns a single pilot if any is found.</response>
+		/// <response code="400">If the request is invalid or if there's a validation error.</response>
 		/// <response code="404">If no pilot is found.</response>
 		/// <response code="401">If user do not have permission to access the requested resource.</response>
 		[HttpGet("{id}")]
 		[ProducesResponseType(200, Type = typeof(PilotDto))]
+		[ProducesResponseType(400)]
 		[ProducesResponseType(404)]
 		[ProducesResponseType(401)]
 		public async Task<ActionResult<PilotDto>> GetPilot(int id)
 		{
+			if (!_inputValidationService.IsNonNegativeInt(id))
+			{
+				_logger.LogInformation("Invalid input. The ID {id} must be a non-negative integer.", id);
+				return BadRequest("Invalid input. The ID must be a non-negative integer.");
+			}
 			if (!await _pilotService.PilotExists(id))
 			{
 				_logger.LogInformation("Pilot with id {id} not found.", id);
@@ -100,10 +111,12 @@ namespace AirportАutomationApi.Controllers
 		/// <param name="lastName"></param>
 		/// <returns>A list of pilots.</returns>
 		/// <response code="200">Returns a list of pilots if any are found.</response>
+		/// <response code="400">If the request is invalid or if there's a validation error.</response>
 		/// <response code="404">If no pilots are found.</response>
 		/// <response code="401">If user do not have permission to access the requested resource.</response>
 		[HttpGet("byName")]
 		[ProducesResponseType(200, Type = typeof(IEnumerable<PilotDto>))]
+		[ProducesResponseType(400)]
 		[ProducesResponseType(404)]
 		[ProducesResponseType(401)]
 		public async Task<ActionResult<IEnumerable<PilotDto>>> GetPilotsByName(
@@ -160,6 +173,11 @@ namespace AirportАutomationApi.Controllers
 		[ProducesResponseType(401)]
 		public async Task<IActionResult> PutPilot(int id, PilotDto pilotDto)
 		{
+			if (!_inputValidationService.IsNonNegativeInt(id))
+			{
+				_logger.LogInformation("Invalid input. The ID {id} must be a non-negative integer.", id);
+				return BadRequest("Invalid input. The ID must be a non-negative integer.");
+			}
 			if (id != pilotDto.Id)
 			{
 				_logger.LogInformation("Pilot with id {id} is different from provided Pilot and his id.", id);
@@ -189,17 +207,22 @@ namespace AirportАutomationApi.Controllers
 		///     "value": "NewName"
 		/// }
 		/// </remarks>
-		/// <response code="204">No content. The partial update was successful.</response>
+		/// <response code="200">The partial update was successful.</response>
 		/// <response code="400">If the request is invalid or if there's a validation error.</response>
 		/// <response code="404">If the pilot with the specified ID is not found.</response>
 		/// <response code="401">If user do not have permission to access the requested resource.</response>
 		[HttpPatch("{id}")]
-		[ProducesResponseType(204)]
+		[ProducesResponseType(200)]
 		[ProducesResponseType(400)]
 		[ProducesResponseType(404)]
 		[ProducesResponseType(401)]
 		public async Task<IActionResult> PatchPilot(int id, [FromBody] JsonPatchDocument pilotDocument)
 		{
+			if (!_inputValidationService.IsNonNegativeInt(id))
+			{
+				_logger.LogInformation("Invalid input. The ID {id} must be a non-negative integer.", id);
+				return BadRequest("Invalid input. The ID must be a non-negative integer.");
+			}
 			if (!await _pilotService.PilotExists(id))
 			{
 				_logger.LogInformation("Pilot with id {id} not found.", id);
@@ -214,16 +237,23 @@ namespace AirportАutomationApi.Controllers
 		/// </summary>
 		/// <param name="id">The ID of the pilot to delete.</param>
 		/// <response code="204">No content. The deletion was successful.</response>
+		/// <response code="400">If the request is invalid or if there's a validation error.</response>
 		/// <response code="404">If the pilot with the specified ID is not found.</response>
 		/// <response code="401">If user do not have permission to access the requested resource.</response>
 		/// <response code="409">Conflict. If the pilot cannot be deleted because it is being referenced by other entities.</response>
 		[HttpDelete("{id}")]
 		[ProducesResponseType(204)]
+		[ProducesResponseType(400)]
 		[ProducesResponseType(404)]
 		[ProducesResponseType(401)]
 		[ProducesResponseType(409)]
 		public async Task<IActionResult> DeletePilot(int id)
 		{
+			if (!_inputValidationService.IsNonNegativeInt(id))
+			{
+				_logger.LogInformation("Invalid input. The ID {id} must be a non-negative integer.", id);
+				return BadRequest("Invalid input. The ID must be a non-negative integer.");
+			}
 			if (!await _pilotService.PilotExists(id))
 			{
 				_logger.LogInformation("Pilot with id {id} not found.", id);
@@ -243,4 +273,3 @@ namespace AirportАutomationApi.Controllers
 
 	}
 }
-

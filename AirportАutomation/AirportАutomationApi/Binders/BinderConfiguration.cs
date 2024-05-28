@@ -6,6 +6,8 @@ using AirportAutomation.Core.Interfaces.IRepositories;
 using AirportAutomation.Core.Interfaces.IServices;
 using AirportAutomation.Infrastructure.Repositories;
 using AirportАutomation.Api.Authentication;
+using AirportАutomation.Api.Interfaces;
+using AirportАutomation.Api.Services;
 using AspNetCoreRateLimit;
 
 namespace AirportАutomation.Api.Binders
@@ -51,6 +53,7 @@ namespace AirportАutomation.Api.Binders
 			services.AddScoped<IAuthenticationRepository, AuthenticationRepository>();
 
 			services.AddScoped<IPaginationValidationService, PaginationValidationService>();
+			services.AddScoped<IInputValidationService, InputValidationService>();
 		}
 	}
 }
