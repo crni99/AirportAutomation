@@ -3,6 +3,7 @@ using AirportAutomation.Core.Dtos.Pilot;
 using AirportAutomation.Core.Dtos.Response;
 using AirportAutomation.Core.Entities;
 using AirportAutomation.Core.Interfaces.IServices;
+using AirportАutomation.Api.Controllers;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.JsonPatch;
@@ -12,9 +13,7 @@ namespace AirportАutomationApi.Controllers
 {
 	[Authorize]
 	[ApiVersion("1.0")]
-	[Route("api/[controller]")]
-	[ApiController]
-	public class PilotsController : ControllerBase
+	public class PilotsController : BaseController
 	{
 		private readonly IPilotService _pilotService;
 		private readonly IPaginationValidationService _paginationValidationService;

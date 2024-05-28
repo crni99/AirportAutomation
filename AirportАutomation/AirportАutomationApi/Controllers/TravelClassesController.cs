@@ -2,6 +2,7 @@
 using AirportAutomation.Core.Dtos.Response;
 using AirportAutomation.Core.Dtos.TravelClass;
 using AirportAutomation.Core.Interfaces.IServices;
+using AirportАutomation.Api.Controllers;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -10,9 +11,7 @@ namespace AirportАutomationApi.Controllers
 {
 	[Authorize]
 	[ApiVersion("1.0")]
-	[Route("api/[controller]")]
-	[ApiController]
-	public class TravelClassesController : ControllerBase
+	public class TravelClassesController : BaseController
 	{
 		private readonly ITravelClassService _travelClassService;
 		private readonly IPaginationValidationService _paginationValidationService;

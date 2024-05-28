@@ -8,7 +8,7 @@ namespace AirportАutomation.Api.Helpers
 	[SwaggerTag("ApiHealth")]
 	public class HealthChecksFilter : IDocumentFilter
 	{
-		public const string HealthCheckEndpoint = @"/api/HealthCheck";
+		public const string HealthCheckEndpoint = @"/api/v1/HealthCheck";
 
 		/// <summary>
 		/// Applies the custom health check endpoint to the Swagger document.

@@ -17,12 +17,12 @@ namespace AirportАutomation.Api.Helpers
 			swaggerDoc.Components.Schemas.Add("Operation", new OpenApiSchema
 			{
 				Type = "object",
-				Properties = new Dictionary<string, OpenApiSchema>
-			{
-				{"op", new OpenApiSchema{ Type = "string" } },
-				{"value", new OpenApiSchema{ Type = "string"} },
-				{"path", new OpenApiSchema{ Type = "string" } }
-			}
+				Properties = new System.Collections.Generic.Dictionary<string, OpenApiSchema>
+				{
+					{"op", new OpenApiSchema{ Type = "string" } },
+					{"value", new OpenApiSchema{ Type = "string"} },
+					{"path", new OpenApiSchema{ Type = "string" } }
+				}
 			});
 
 			swaggerDoc.Components.Schemas.Add("JsonPatchDocument", new OpenApiSchema
@@ -35,16 +35,31 @@ namespace AirportАutomation.Api.Helpers
 				Description = "Array of operations to perform"
 			});
 
-			foreach (var path in swaggerDoc.Paths.SelectMany(p => p.Value.Operations)
-			.Where(p => p.Key == Microsoft.OpenApi.Models.OperationType.Patch))
+			// Loop through each path and operation for each API version
+			foreach (var apiDescription in context.ApiDescriptions)
 			{
-				foreach (var item in path.Value.RequestBody.Content.Where(c => c.Key != "application/json-patch+json"))
-					path.Value.RequestBody.Content.Remove(item.Key);
-				var response = path.Value.RequestBody.Content.FirstOrDefault(c => c.Key == "application/json-patch+json");
-				response.Value.Schema = new OpenApiSchema
+				var relativePath = apiDescription.RelativePath;
+				if (swaggerDoc.Paths.ContainsKey(relativePath))
 				{
-					Reference = new OpenApiReference { Type = ReferenceType.Schema, Id = "JsonPatchDocument" }
-				};
+					var pathItem = swaggerDoc.Paths[relativePath];
+					foreach (var operation in pathItem.Operations)
+					{
+						if (operation.Key == OperationType.Patch)
+						{
+							foreach (var item in operation.Value.RequestBody.Content.Where(c => c.Key != "application/json-patch+json").ToList())
+								operation.Value.RequestBody.Content.Remove(item.Key);
+
+							var response = operation.Value.RequestBody.Content.FirstOrDefault(c => c.Key == "application/json-patch+json");
+							if (response.Value != null)
+							{
+								response.Value.Schema = new OpenApiSchema
+								{
+									Reference = new OpenApiReference { Type = ReferenceType.Schema, Id = "JsonPatchDocument" }
+								};
+							}
+						}
+					}
+				}
 			}
 		}
 	}

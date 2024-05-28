@@ -6,6 +6,7 @@ using AirportАutomation.Api.Helpers;
 using AspNetCoreRateLimit;
 using HealthChecks.UI.Client;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Mvc.Versioning;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.IdentityModel.Tokens;
@@ -49,7 +50,7 @@ builder.Services.AddSwaggerGen(setupAction =>
 {
 	setupAction.SwaggerDoc("v1", new OpenApiInfo
 	{
-		Description = "Airport Automation Api",
+		Description = "Airport Automation Api - Version 1",
 		Title = "AirportAutomationApi",
 		Version = "v1",
 		Contact = new OpenApiContact
@@ -60,6 +61,20 @@ builder.Services.AddSwaggerGen(setupAction =>
 		},
 
 	});
+
+	/* setupAction.SwaggerDoc("v2", new OpenApiInfo
+	{
+		Description = "Airport Automation Api - Version 2",
+		Title = "AirportAutomationApi",
+		Version = "v2",
+		Contact = new OpenApiContact
+		{
+			Name = "Ognjen Andjelic",
+			Email = "andjelicb.ognjen@gmail.com",
+			Url = new Uri("https://github.com/crni99")
+		},
+
+	}); */
 
 	setupAction.AddSecurityDefinition("AirportAutomationApiBearerAuth", new OpenApiSecurityScheme()
 	{
@@ -140,11 +155,20 @@ builder.Services.Configure<IpRateLimitOptions>(options =>
 	};
 });
 
+builder.Services.AddVersionedApiExplorer(o =>
+{
+	o.GroupNameFormat = "'v'VVV";
+	o.SubstituteApiVersionInUrl = true;
+});
+
 builder.Services.AddApiVersioning(setupAction =>
 {
 	setupAction.AssumeDefaultVersionWhenUnspecified = true;
 	setupAction.DefaultApiVersion = new Microsoft.AspNetCore.Mvc.ApiVersion(1, 0);
 	setupAction.ReportApiVersions = true;
+	setupAction.ApiVersionReader = ApiVersionReader.Combine(new UrlSegmentApiVersionReader(),
+															new HeaderApiVersionReader("x-api-version"),
+															new MediaTypeApiVersionReader("x-api-version"));
 });
 
 builder.Services.AddHttpClient();
@@ -164,12 +188,14 @@ if (app.Environment.IsDevelopment())
 	app.UseSwagger();
 	app.UseSwaggerUI(c =>
 	{
+		c.SwaggerEndpoint("/swagger/v1/swagger.json", "Airport Automation API V1");
+		// c.SwaggerEndpoint("/swagger/v2/swagger.json", "Airport Automation API V2");
 		c.DefaultModelsExpandDepth(-1);
 	});
 }
 
 app.UseHttpsRedirection();
-app.MapHealthChecks("/api/HealthCheck", new()
+app.MapHealthChecks("/api/v{version:apiVersion}/HealthCheck", new()
 {
 	ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse,
 	ResultStatusCodes =

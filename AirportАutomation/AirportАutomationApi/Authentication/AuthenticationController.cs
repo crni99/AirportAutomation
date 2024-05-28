@@ -1,5 +1,6 @@
 ﻿using AirportAutomation.Core.Dtos.ApiUser;
 using AirportAutomation.Core.Entities;
+using AirportАutomation.Api.Controllers;
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
@@ -9,9 +10,8 @@ using System.Text;
 
 namespace AirportАutomation.Api.Authentication
 {
-	[Route("api/[controller]")]
-	[ApiController]
-	public class AuthenticationController : ControllerBase
+	[ApiVersion("1.0")]
+	public class AuthenticationController : BaseController
 	{
 		private readonly IAuthenticationRepository _authenticationRepository;
 		private readonly IConfiguration _configuration;
