@@ -18,7 +18,7 @@
                 var jsonData = JSON.parse(data);
                 tableBody.empty();
 
-                $.each(jsonData, function (index, item) {
+                $.each(jsonData.data, function (index, item) {
                     var row = document.createElement("tr");
                     row.innerHTML = '<td>' + item.id + '</td>' +
                         '<td>' + item.firstName + '</td>' +
@@ -64,7 +64,7 @@ function searchByName(searchUrl, tableBody, entityType) {
                 var jsonData = JSON.parse(data);
                 tableBody.empty();
 
-                $.each(jsonData, function (index, item) {
+                $.each(jsonData.data, function (index, item) {
                     var row = document.createElement("tr");
                     row.innerHTML = '<td>' + item.id + '</td>' +
                         '<td>' + item.name + '</td>';
@@ -103,7 +103,7 @@ function searchByDate(searchUrl, tableBody, entityType) {
                 var jsonData = JSON.parse(data);
                 tableBody.empty();
 
-                $.each(jsonData, function (index, item) {
+                $.each(jsonData.data, function (index, item) {
                     var row = document.createElement("tr");
                     row.innerHTML = '<td>' + item.id + '</td>' +
                         '<td>' + item.departureDate + '</td>' +
@@ -146,7 +146,7 @@ function searchByPrice(searchUrl, tableBody, entityType) {
                 var jsonData = JSON.parse(data);
                 tableBody.empty();
 
-                $.each(jsonData, function (index, item) {
+                $.each(jsonData.data, function (index, item) {
                     var row = document.createElement("tr");
                     row.innerHTML = '<td>' + item.id + '</td>' +
                         '<td>' + item.price + '</td>' +
