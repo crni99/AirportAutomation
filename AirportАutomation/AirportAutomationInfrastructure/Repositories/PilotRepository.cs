@@ -30,7 +30,7 @@ namespace AirportAutomation.Infrastructure.Repositories
 			return await _context.Pilot.FindAsync(id);
 		}
 
-		public async Task<IList<PilotEntity?>> GetPilotsByName(string? firstName, string? lastName)
+		public async Task<IList<PilotEntity?>> GetPilotsByName(int page, int pageSize, string firstName = null, string lastName = null)
 		{
 			IQueryable<PilotEntity> query = _context.Pilot.AsNoTracking();
 
@@ -42,7 +42,12 @@ namespace AirportAutomation.Infrastructure.Repositories
 			{
 				query = query.Where(p => p.LastName.Contains(lastName));
 			}
-			return await query.ToListAsync().ConfigureAwait(false);
+
+			return await query.OrderBy(c => c.Id)
+								.Skip(pageSize * (page - 1))
+								.Take(pageSize)
+								.ToListAsync()
+								.ConfigureAwait(false);
 		}
 
 		public async Task<PilotEntity> PostPilot(PilotEntity pilot)
@@ -84,9 +89,19 @@ namespace AirportAutomation.Infrastructure.Repositories
 			return (_context.Pilot?.Any(e => e.Id == id)).GetValueOrDefault();
 		}
 
-		public int PilotsCount()
+		public async Task<int> PilotsCount(string firstName = null, string lastName = null)
 		{
-			return _context.Pilot.Count();
+			IQueryable<PilotEntity> query = _context.Pilot;
+
+			if (!string.IsNullOrEmpty(firstName))
+			{
+				query = query.Where(p => p.FirstName.Contains(firstName));
+			}
+			if (!string.IsNullOrEmpty(lastName))
+			{
+				query = query.Where(p => p.LastName.Contains(lastName));
+			}
+			return await query.CountAsync().ConfigureAwait(false);
 		}
 	}
 }

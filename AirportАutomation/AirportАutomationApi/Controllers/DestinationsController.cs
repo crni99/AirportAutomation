@@ -67,19 +67,19 @@ namespace AirportАutomationApi.Controllers
 				_logger.LogInformation("Destinations not found.");
 				return NoContent();
 			}
-			var totalItems = _destinationService.DestinationsCount();
+			var totalItems = await _destinationService.DestinationsCount();
 			var data = _mapper.Map<IEnumerable<DestinationDto>>(destinations);
 			var response = new PagedResponse<DestinationDto>(data, page, correctedPageSize, totalItems);
 			return Ok(response);
 		}
 
 		/// <summary>
-		/// Endpoint for retrieving single destination.
+		/// Endpoint for retrieving a single destination.
 		/// </summary>
-		/// <param name="id"></param>
-		/// <returns>A single destination that match the specified id.</returns>
+		/// <param name="id">The ID of the destination to retrieve.</param>
+		/// <returns>A single destination that matches the specified ID.</returns>
+		/// <response code="200">Returns a single destination if found.</response>
 		/// <response code="400">If the request is invalid or if there's a validation error.</response>
-		/// <response code="200">Returns a single destination if any is found.</response>
 		/// <response code="404">If no destination is found.</response>
 		/// <response code="401">If user do not have permission to access the requested resource.</response>
 		[HttpGet("{id}")]
@@ -107,30 +107,32 @@ namespace AirportАutomationApi.Controllers
 		/// <summary>
 		/// Endpoint for creating a new destination.
 		/// </summary>
-		/// <param name="destinationCreateDto"></param>
+		/// <param name="destinationCreateDto">The data to create the new destination.</param>
 		/// <returns>The created destination.</returns>
 		/// <response code="201">Returns the created destination if successful.</response>
 		/// <response code="400">If the request is invalid or if there's a validation error.</response>
 		/// <response code="401">If user do not have permission to access the requested resource.</response>
 		[HttpPost]
-		[ProducesResponseType(201, Type = typeof(DestinationCreateDto))]
+		[ProducesResponseType(201, Type = typeof(DestinationDto))]
 		[ProducesResponseType(400)]
 		[ProducesResponseType(401)]
 		public async Task<ActionResult<DestinationDto>> PostDestination(DestinationCreateDto destinationCreateDto)
 		{
 			var destination = _mapper.Map<DestinationEntity>(destinationCreateDto);
 			await _destinationService.PostDestination(destination);
-			return CreatedAtAction("GetDestination", new { id = destination.Id }, destination);
+			var destinationDto = _mapper.Map<DestinationDto>(destination);
+			return CreatedAtAction("GetDestination", new { id = destinationDto.Id }, destinationDto);
 		}
 
 		/// <summary>
 		/// Endpoint for updating a single destination.
 		/// </summary>
 		/// <param name="id">The ID of the destination to update.</param>
-		/// <param name="destinationDto">The updated destination data.</param>
-		/// <response code="204">No content. The update was successful.</response>
+		/// <param name="destinationDto">The data to update the destination.</param>
+		/// <returns>No content.</returns>
+		/// <response code="204">Returns no content if successful.</response>
 		/// <response code="400">If the request is invalid or if there's a validation error.</response>
-		/// <response code="404">If the destination with the specified ID is not found.</response>
+		/// <response code="404">If no destination is found.</response>
 		/// <response code="401">If user do not have permission to access the requested resource.</response>
 		[HttpPut("{id}")]
 		[ProducesResponseType(204)]
@@ -163,7 +165,8 @@ namespace AirportАutomationApi.Controllers
 		/// Endpoint for partially updating a single destination.
 		/// </summary>
 		/// <param name="id">The ID of the destination to partially update.</param>
-		/// <param name="destinationDocument">The JSON document containing the partial update instructions.</param>
+		/// <param name="destinationDocument">The patch document containing the changes.</param>
+		/// <returns>The updated destination.</returns>
 		/// <remarks>
 		/// The JSON document should follow the JSON Patch standard (RFC 6902) and contain one or more operations.
 		/// Example operation:
@@ -173,12 +176,12 @@ namespace AirportАutomationApi.Controllers
 		///     "value": "NewName"
 		/// }
 		/// </remarks>
-		/// <response code="200">The partial update was successful.</response>
+		/// <response code="200">Returns the updated destination if successful.</response>
 		/// <response code="400">If the request is invalid or if there's a validation error.</response>
 		/// <response code="404">If the destination with the specified ID is not found.</response>
 		/// <response code="401">If user do not have permission to access the requested resource.</response>
 		[HttpPatch("{id}")]
-		[ProducesResponseType(200)]
+		[ProducesResponseType(200, Type = typeof(DestinationDto))]
 		[ProducesResponseType(400)]
 		[ProducesResponseType(404)]
 		[ProducesResponseType(401)]
@@ -195,16 +198,18 @@ namespace AirportАutomationApi.Controllers
 				return NotFound();
 			}
 			var updatedDestination = await _destinationService.PatchDestination(id, destinationDocument);
-			return Ok(updatedDestination);
+			var destinationDto = _mapper.Map<DestinationDto>(updatedDestination);
+			return Ok(destinationDto);
 		}
 
 		/// <summary>
-		/// Endpoint for deleting a single destination by ID.
+		/// Endpoint for deleting a single destination.
 		/// </summary>
 		/// <param name="id">The ID of the destination to delete.</param>
-		/// <response code="204">No content. The deletion was successful.</response>
+		/// <returns>No content.</returns>
+		/// <response code="204">Returns no content if successful.</response>
 		/// <response code="400">If the request is invalid or if there's a validation error.</response>
-		/// <response code="404">If the destination with the specified ID is not found.</response>
+		/// <response code="404">If no destination is found.</response>
 		/// <response code="401">If user do not have permission to access the requested resource.</response>
 		/// <response code="409">Conflict. If the passenger cannot be deleted because it is being referenced by other entities.</response>
 		[HttpDelete("{id}")]

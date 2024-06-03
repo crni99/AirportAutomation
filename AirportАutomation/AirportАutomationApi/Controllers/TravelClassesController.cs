@@ -66,18 +66,18 @@ namespace AirportАutomationApi.Controllers
 				_logger.LogInformation("Travel classes not found.");
 				return NoContent();
 			}
-			var totalItems = _travelClassService.TravelClassesCount();
+			var totalItems = await _travelClassService.TravelClassesCount();
 			var data = _mapper.Map<IEnumerable<TravelClassDto>>(travelClasses);
 			var response = new PagedResponse<TravelClassDto>(data, page, correctedPageSize, totalItems);
 			return Ok(response);
 		}
 
 		/// <summary>
-		/// Endpoint for retrieving single travel class.
+		/// Endpoint for retrieving a single travel class.
 		/// </summary>
-		/// <param name="id"></param>
-		/// <returns>A single travel class that match the specified id.</returns>
-		/// <response code="200">Returns a single travel class if any is found.</response>
+		/// <param name="id">The ID of the travel class to retrieve.</param>
+		/// <returns>A single travel class that matches the specified ID.</returns>
+		/// <response code="200">Returns a single travel class if found.</response>
 		/// <response code="400">If the request is invalid or if there's a validation error.</response>
 		/// <response code="404">If no travel class is found.</response>
 		/// <response code="401">If user do not have permission to access the requested resource.</response>

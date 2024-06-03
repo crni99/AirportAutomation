@@ -68,18 +68,18 @@ namespace AirportАutomationApi.Controllers
 				_logger.LogInformation("Airlines not found.");
 				return NoContent();
 			}
-			var totalItems = _airlineService.AirlinesCount();
+			var totalItems = await _airlineService.AirlinesCount();
 			var data = _mapper.Map<IEnumerable<AirlineDto>>(airlines);
 			var response = new PagedResponse<AirlineDto>(data, page, correctedPageSize, totalItems);
 			return Ok(response);
 		}
 
 		/// <summary>
-		/// Endpoint for retrieving single airline.
+		/// Endpoint for retrieving a single airline.
 		/// </summary>
-		/// <param name="id"></param>
-		/// <returns>A single airline that match the specified id.</returns>
-		/// <response code="200">Returns a single airline if any is found.</response>
+		/// <param name="id">The ID of the airline to retrieve.</param>
+		/// <returns>A single airline that matches the specified ID.</returns>
+		/// <response code="200">Returns a single airline if found.</response>
 		/// <response code="400">If the request is invalid or if there's a validation error.</response>
 		/// <response code="404">If no airline is found.</response>
 		/// <response code="401">If user do not have permission to access the requested resource.</response>
@@ -106,63 +106,74 @@ namespace AirportАutomationApi.Controllers
 		}
 
 		/// <summary>
-		/// Endpoint for retrieving a list of airlines containing the specified name.
+		/// Endpoint for retrieving a paginated list of airlines containing the specified name.
 		/// </summary>
 		/// <param name="name">The name to search for.</param>
+		/// <param name="page">The page number for pagination (optional).</param>
+		/// <param name="pageSize">The size of each page for pagination (optional).</param>
 		/// <returns>A list of airlines that match the specified name.</returns>
-		/// <response code="200">Returns a list of airlines if any are found.</response>
+		/// <response code="200">Returns a paged list of airlines if found.</response>
 		/// <response code="400">If the request is invalid or if there's a validation error.</response>
 		/// <response code="404">If no airlines are found.</response>
 		/// <response code="401">If user do not have permission to access the requested resource.</response>
 		[HttpGet("byName/{name}")]
-		[ProducesResponseType(200, Type = typeof(IEnumerable<AirlineDto>))]
+		[ProducesResponseType(200, Type = typeof(PagedResponse<AirlineDto>))]
 		[ProducesResponseType(400)]
 		[ProducesResponseType(404)]
 		[ProducesResponseType(401)]
-		public async Task<ActionResult<IEnumerable<AirlineDto>>> GetAirlinesByName(string name)
+		public async Task<ActionResult<PagedResponse<AirlineDto>>> GetAirlinesByName(string name, [FromQuery] int page = 1, [FromQuery] int pageSize = 10)
 		{
 			if (!_inputValidationService.IsValidString(name))
 			{
 				_logger.LogInformation("Invalid input. The name must be a valid non-empty string.");
 				return BadRequest("Invalid input. The name must be a valid non-empty string.");
 			}
-			var airlines = await _airlineService.GetAirlinesByName(name);
+			var (isValid, correctedPageSize, result) = _paginationValidationService.ValidatePaginationParameters(page, pageSize, maxPageSize);
+			if (!isValid)
+			{
+				return result;
+			}
+			var airlines = await _airlineService.GetAirlinesByName(page, correctedPageSize, name);
 			if (airlines is null || airlines.Count == 0)
 			{
 				_logger.LogInformation("Airline with name {AirlineName} not found.", name);
 				return NotFound();
 			}
-			var airlinesDto = _mapper.Map<IEnumerable<AirlineDto>>(airlines);
-			return Ok(airlinesDto);
+			var totalItems = await _airlineService.AirlinesCount(name);
+			var data = _mapper.Map<IEnumerable<AirlineDto>>(airlines);
+			var response = new PagedResponse<AirlineDto>(data, page, correctedPageSize, totalItems);
+			return Ok(response);
 		}
 
 		/// <summary>
 		/// Endpoint for creating a new airline.
 		/// </summary>
-		/// <param name="airlineCreateDto"></param>
+		/// <param name="airlineCreateDto">The data to create the new airline.</param>
 		/// <returns>The created airline.</returns>
 		/// <response code="201">Returns the created airline if successful.</response>
 		/// <response code="400">If the request is invalid or if there's a validation error.</response>
 		/// <response code="401">If user do not have permission to access the requested resource.</response>
 		[HttpPost]
-		[ProducesResponseType(201, Type = typeof(AirlineEntity))]
+		[ProducesResponseType(201, Type = typeof(AirlineDto))]
 		[ProducesResponseType(400)]
 		[ProducesResponseType(401)]
-		public async Task<ActionResult<AirlineEntity>> PostAirline(AirlineCreateDto airlineCreateDto)
+		public async Task<ActionResult<AirlineDto>> PostAirline(AirlineCreateDto airlineCreateDto)
 		{
 			var airline = _mapper.Map<AirlineEntity>(airlineCreateDto);
 			await _airlineService.PostAirline(airline);
-			return CreatedAtAction("GetAirline", new { id = airline.Id }, airline);
+			var airlineDto = _mapper.Map<AirlineDto>(airline);
+			return CreatedAtAction("GetAirline", new { id = airlineDto.Id }, airlineDto);
 		}
 
 		/// <summary>
 		/// Endpoint for updating a single airline.
 		/// </summary>
 		/// <param name="id">The ID of the airline to update.</param>
-		/// <param name="airlineDto">The updated airline data.</param>
-		/// <response code="204">No content. The update was successful.</response>
+		/// <param name="airlineDto">The data to update the airline.</param>
+		/// <returns>No content.</returns>
+		/// <response code="204">Returns no content if successful.</response>
 		/// <response code="400">If the request is invalid or if there's a validation error.</response>
-		/// <response code="404">If the airline with the specified ID is not found.</response>
+		/// <response code="404">If no airline is found.</response>
 		/// <response code="401">If user do not have permission to access the requested resource.</response>
 		[HttpPut("{id}")]
 		[ProducesResponseType(204)]
@@ -196,7 +207,8 @@ namespace AirportАutomationApi.Controllers
 		/// Endpoint for partially updating a single airline.
 		/// </summary>
 		/// <param name="id">The ID of the airline to partially update.</param>
-		/// <param name="airlineDocument">The JSON document containing the partial update instructions.</param>
+		/// <param name="airlineDocument">The patch document containing the changes.</param>
+		/// <returns>The updated airline.</returns>
 		/// <remarks>
 		/// The JSON document should follow the JSON Patch standard (RFC 6902) and contain one or more operations.
 		/// Example operation:
@@ -206,12 +218,12 @@ namespace AirportАutomationApi.Controllers
 		///     "value": "NewName"
 		/// }
 		/// </remarks>
-		/// <response code="200">The partial update was successful.</response>
+		/// <response code="200">Returns the updated airline if successful.</response>
 		/// <response code="400">If the request is invalid or if there's a validation error.</response>
 		/// <response code="404">If the airline with the specified ID is not found.</response>
 		/// <response code="401">If user do not have permission to access the requested resource.</response>
 		[HttpPatch("{id}")]
-		[ProducesResponseType(200)]
+		[ProducesResponseType(200, Type = typeof(AirlineDto))]
 		[ProducesResponseType(400)]
 		[ProducesResponseType(404)]
 		[ProducesResponseType(401)]
@@ -228,16 +240,18 @@ namespace AirportАutomationApi.Controllers
 				return NotFound();
 			}
 			var updatedAirline = await _airlineService.PatchAirline(id, airlineDocument);
-			return Ok(updatedAirline);
+			var airlineDto = _mapper.Map<AirlineDto>(updatedAirline);
+			return Ok(airlineDto);
 		}
 
 		/// <summary>
-		/// Endpoint for deleting a single airline by ID.
+		/// Endpoint for deleting a single airline.
 		/// </summary>
 		/// <param name="id">The ID of the airline to delete.</param>
-		/// <response code="204">No content. The deletion was successful.</response>
+		/// <returns>No content.</returns>
+		/// <response code="204">Returns no content if successful.</response>
 		/// <response code="400">If the request is invalid or if there's a validation error.</response>
-		/// <response code="404">If the airline with the specified ID is not found.</response>
+		/// <response code="404">If no airline is found.</response>
 		/// <response code="401">If user do not have permission to access the requested resource.</response>
 		/// <response code="409">Conflict. If the passenger cannot be deleted because it is being referenced by other entities.</response>
 		[HttpDelete("{id}")]

@@ -23,9 +23,9 @@ namespace AirportAutomation.Application.Services
 			return await _passengerRepository.GetPassenger(id);
 		}
 
-		public async Task<IList<PassengerEntity?>> GetPassengersByName(string firstName, string lastName)
+		public async Task<IList<PassengerEntity?>> GetPassengersByName(int page, int pageSize, string firstName, string lastName)
 		{
-			return await _passengerRepository.GetPassengersByName(firstName, lastName);
+			return await _passengerRepository.GetPassengersByName(page, pageSize, firstName, lastName);
 		}
 
 		public async Task<PassengerEntity> PostPassenger(PassengerEntity passenger)
@@ -53,9 +53,9 @@ namespace AirportAutomation.Application.Services
 			return await _passengerRepository.PassengerExists(id);
 		}
 
-		public int PassengersCount()
+		public async Task<int> PassengersCount(string firstName = null, string lastName = null)
 		{
-			return _passengerRepository.PassengersCount();
+			return await _passengerRepository.PassengersCount(firstName, lastName);
 		}
 	}
 }

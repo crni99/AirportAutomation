@@ -24,9 +24,9 @@ namespace AirportAutomation.Application.Services
 			return await _planeTicketRepository.GetPlaneTicket(id);
 		}
 
-		public async Task<IList<PlaneTicketEntity?>> GetPlaneTicketsForPrice(int? minPrice, int? maxPrice)
+		public async Task<IList<PlaneTicketEntity?>> GetPlaneTicketsForPrice(int page, int pageSize, int? minPrice, int? maxPrice)
 		{
-			return await _planeTicketRepository.GetPlaneTicketsForPrice(minPrice, maxPrice);
+			return await _planeTicketRepository.GetPlaneTicketsForPrice(page, pageSize, minPrice, maxPrice);
 		}
 
 		public async Task<PlaneTicketEntity> PostPlaneTicket(PlaneTicketEntity planeTicket)
@@ -54,9 +54,9 @@ namespace AirportAutomation.Application.Services
 			return await _planeTicketRepository.PlaneTicketExists(id);
 		}
 
-		public int PlaneTicketsCount()
+		public async Task<int> PlaneTicketsCount(int? minPrice = null, int? maxPrice = null)
 		{
-			return _planeTicketRepository.PlaneTicketsCount();
+			return await _planeTicketRepository.PlaneTicketsCount(minPrice, maxPrice);
 		}
 
 	}

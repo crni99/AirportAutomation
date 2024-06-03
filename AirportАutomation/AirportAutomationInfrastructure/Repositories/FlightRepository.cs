@@ -40,7 +40,7 @@ namespace AirportAutomation.Infrastructure.Repositories
 				.FirstOrDefaultAsync(l => l.Id == id);
 		}
 
-		public async Task<IList<FlightEntity?>> GetFlightsBetweenDates(DateOnly? startDate, DateOnly? endDate)
+		public async Task<IList<FlightEntity?>> GetFlightsBetweenDates(int page, int pageSize, DateOnly? startDate, DateOnly? endDate)
 		{
 			IQueryable<FlightEntity> query = _context.Flight
 				.Include(f => f.Airline)
@@ -56,7 +56,11 @@ namespace AirportAutomation.Infrastructure.Repositories
 			{
 				query = query.Where(f => f.DepartureDate <= endDate);
 			}
-			return await query.ToListAsync().ConfigureAwait(false);
+			return await query.OrderBy(c => c.Id)
+					 .Skip(pageSize * (page - 1))
+					 .Take(pageSize)
+					 .ToListAsync()
+					 .ConfigureAwait(false);
 		}
 
 		public async Task<FlightEntity> PostFlight(FlightEntity flight)
@@ -95,12 +99,24 @@ namespace AirportAutomation.Infrastructure.Repositories
 
 		public async Task<bool> FlightExists(int id)
 		{
-			return (_context.Flight?.Any(e => e.Id == id)).GetValueOrDefault();
+			return await _context.Flight.AsNoTracking().AnyAsync(e => e.Id == id);
 		}
 
-		public int FlightsCount()
+		public async Task<int> FlightsCount(DateOnly? startDate = null, DateOnly? endDate = null)
 		{
-			return _context.Flight.Count();
+			IQueryable<FlightEntity> query = _context.Flight.AsNoTracking();
+
+			if (startDate.HasValue)
+			{
+				query = query.Where(f => f.DepartureDate >= startDate);
+			}
+
+			if (endDate.HasValue)
+			{
+				query = query.Where(f => f.DepartureDate <= endDate);
+			}
+			return await query.CountAsync().ConfigureAwait(false);
 		}
+
 	}
 }

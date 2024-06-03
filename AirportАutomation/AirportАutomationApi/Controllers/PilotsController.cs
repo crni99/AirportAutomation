@@ -67,18 +67,18 @@ namespace AirportАutomationApi.Controllers
 				_logger.LogInformation("Pilots not found.");
 				return NoContent();
 			}
-			var totalItems = _pilotService.PilotsCount();
+			var totalItems = await _pilotService.PilotsCount();
 			var data = _mapper.Map<IEnumerable<PilotDto>>(pilots);
 			var response = new PagedResponse<PilotDto>(data, page, correctedPageSize, totalItems);
 			return Ok(response);
 		}
 
 		/// <summary>
-		/// Endpoint for retrieving single pilot.
+		/// Endpoint for retrieving a single pilot.
 		/// </summary>
-		/// <param name="id"></param>
-		/// <returns>A single pilot that match the specified id.</returns>
-		/// <response code="200">Returns a single pilot if any is found.</response>
+		/// <param name="id">The ID of the pilot to retrieve.</param>
+		/// <returns>A single pilot that matches the specified ID.</returns>
+		/// <response code="200">Returns a single pilot if found.</response>
 		/// <response code="400">If the request is invalid or if there's a validation error.</response>
 		/// <response code="404">If no pilot is found.</response>
 		/// <response code="401">If user do not have permission to access the requested resource.</response>
@@ -105,66 +105,79 @@ namespace AirportАutomationApi.Controllers
 		}
 
 		/// <summary>
-		/// Endpoint for fetching a list of pilots by first name, last name, or both.
+		/// Endpoint for retrieving a paginated list of pilots containing the specified name.
 		/// </summary>
-		/// <param name="firstName"></param>
-		/// <param name="lastName"></param>
-		/// <returns>A list of pilots.</returns>
-		/// <response code="200">Returns a list of pilots if any are found.</response>
+		/// <param name="firstName">The first name to search for.</param>
+		/// <param name="lastName">The last name to search for.</param>
+		/// <param name="page">The page number for pagination (optional).</param>
+		/// <param name="pageSize">The size of each page for pagination (optional).</param>
+		/// <returns>A list of pilots that match the specified name.</returns>
+		/// <response code="200">Returns a paged list of pilots if found.</response>
 		/// <response code="400">If the request is invalid or if there's a validation error.</response>
 		/// <response code="404">If no pilots are found.</response>
 		/// <response code="401">If user do not have permission to access the requested resource.</response>
 		[HttpGet("byName")]
-		[ProducesResponseType(200, Type = typeof(IEnumerable<PilotDto>))]
+		[ProducesResponseType(200, Type = typeof(PagedResponse<PilotDto>))]
 		[ProducesResponseType(400)]
 		[ProducesResponseType(404)]
 		[ProducesResponseType(401)]
-		public async Task<ActionResult<IEnumerable<PilotDto>>> GetPilotsByName(
+		public async Task<ActionResult<PagedResponse<PilotDto>>> GetPilotsByName(
 			[FromQuery] string? firstName = null,
-			[FromQuery] string? lastName = null)
+			[FromQuery] string? lastName = null,
+			[FromQuery] int page = 1,
+			[FromQuery] int pageSize = 10)
 		{
 			if (string.IsNullOrEmpty(firstName) && string.IsNullOrEmpty(lastName))
 			{
 				_logger.LogInformation("Both first name and last name are missing in the request.");
 				return BadRequest("Both first name and last name are missing in the request.");
 			}
-			var pilots = await _pilotService.GetPilotsByName(firstName, lastName);
+			var (isValid, correctedPageSize, result) = _paginationValidationService.ValidatePaginationParameters(page, pageSize, maxPageSize);
+			if (!isValid)
+			{
+				return result;
+			}
+			var pilots = await _pilotService.GetPilotsByName(page, correctedPageSize, firstName, lastName);
 			if (pilots == null || pilots.Count == 0)
 			{
 				_logger.LogInformation("Pilots not found.");
 				return NotFound();
 			}
-			var pilotsDto = _mapper.Map<IEnumerable<PilotDto>>(pilots);
-			return Ok(pilotsDto);
+			var totalItems = await _pilotService.PilotsCount(firstName, lastName);
+			var data = _mapper.Map<IEnumerable<PilotDto>>(pilots);
+			var response = new PagedResponse<PilotDto>(data, page, correctedPageSize, totalItems);
+			return Ok(response);
 		}
 
 		/// <summary>
 		/// Endpoint for creating a new pilot.
 		/// </summary>
-		/// <param name="pilotCreateDto"></param>
+		/// <param name="pilotCreateDto">The data to create the new pilot.</param>
 		/// <returns>The created pilot.</returns>
 		/// <response code="201">Returns the created pilot if successful.</response>
 		/// <response code="400">If the request is invalid or if there's a validation error.</response>
 		/// <response code="401">If user do not have permission to access the requested resource.</response>
 		[HttpPost]
-		[ProducesResponseType(201, Type = typeof(PilotEntity))]
+		[ProducesResponseType(201, Type = typeof(PilotDto))]
 		[ProducesResponseType(400)]
 		[ProducesResponseType(401)]
-		public async Task<ActionResult<PilotEntity>> PostPilot(PilotCreateDto pilotCreateDto)
+		public async Task<ActionResult<PilotDto>> PostPilot(PilotCreateDto pilotCreateDto)
 		{
 			var pilot = _mapper.Map<PilotEntity>(pilotCreateDto);
 			await _pilotService.PostPilot(pilot);
-			return CreatedAtAction("GetPilot", new { id = pilot.Id }, pilot);
+			var pilotDto = _mapper.Map<PilotDto>(pilot);
+			return CreatedAtAction("GetPilot", new { id = pilotDto.Id }, pilotDto);
 		}
 
 		/// <summary>
 		/// Endpoint for updating a single pilot.
 		/// </summary>
 		/// <param name="id">The ID of the pilot to update.</param>
-		/// <param name="pilotDto">The updated pilot data.</param>
-		/// <response code="204">No content. The update was successful.</response>
+		/// <param name="pilotDto">The data to update the pilot.</param>
+		/// <returns>No content.</returns>
+		/// <response code="204">Returns no content if successful.</response>
 		/// <response code="400">If the request is invalid or if there's a validation error.</response>
-		/// <response code="404">If the pilot with the specified ID is not found.</response>
+		/// <response code="404">If no pilot is found.</response>
 		/// <response code="401">If user do not have permission to access the requested resource.</response>
 		[HttpPut("{id}")]
 		[ProducesResponseType(204)]
@@ -197,7 +210,8 @@ namespace AirportАutomationApi.Controllers
 		/// Endpoint for partially updating a single pilot.
 		/// </summary>
 		/// <param name="id">The ID of the pilot to partially update.</param>
-		/// <param name="pilotDocument">The JSON document containing the partial update instructions.</param>
+		/// <param name="pilotDocument">The patch document containing the changes.</param>
+		/// <returns>The updated pilot.</returns>
 		/// <remarks>
 		/// The JSON document should follow the JSON Patch standard (RFC 6902) and contain one or more operations.
 		/// Example operation:
@@ -207,12 +221,12 @@ namespace AirportАutomationApi.Controllers
 		///     "value": "NewName"
 		/// }
 		/// </remarks>
-		/// <response code="200">The partial update was successful.</response>
+		/// <response code="200">Returns the updated pilot if successful.</response>
 		/// <response code="400">If the request is invalid or if there's a validation error.</response>
 		/// <response code="404">If the pilot with the specified ID is not found.</response>
 		/// <response code="401">If user do not have permission to access the requested resource.</response>
 		[HttpPatch("{id}")]
-		[ProducesResponseType(200)]
+		[ProducesResponseType(200, Type = typeof(PilotDto))]
 		[ProducesResponseType(400)]
 		[ProducesResponseType(404)]
 		[ProducesResponseType(401)]
@@ -229,18 +243,20 @@ namespace AirportАutomationApi.Controllers
 				return NotFound();
 			}
 			var updatedPilot = await _pilotService.PatchPilot(id, pilotDocument);
-			return Ok(updatedPilot);
+			var pilotDto = _mapper.Map<PilotDto>(updatedPilot);
+			return Ok(pilotDto);
 		}
 
 		/// <summary>
-		/// Endpoint for deleting a single pilot by ID.
+		/// Endpoint for deleting a single pilot.
 		/// </summary>
 		/// <param name="id">The ID of the pilot to delete.</param>
-		/// <response code="204">No content. The deletion was successful.</response>
+		/// <returns>No content.</returns>
+		/// <response code="204">Returns no content if successful.</response>
 		/// <response code="400">If the request is invalid or if there's a validation error.</response>
-		/// <response code="404">If the pilot with the specified ID is not found.</response>
+		/// <response code="404">If no pilot is found.</response>
 		/// <response code="401">If user do not have permission to access the requested resource.</response>
-		/// <response code="409">Conflict. If the pilot cannot be deleted because it is being referenced by other entities.</response>
+		/// <response code="409">Conflict. If the passenger cannot be deleted because it is being referenced by other entities.</response>
 		[HttpDelete("{id}")]
 		[ProducesResponseType(204)]
 		[ProducesResponseType(400)]

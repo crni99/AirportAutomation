@@ -69,9 +69,9 @@ namespace AirportAutomation.Infrastructure.Repositories
 			return (_context.Destination?.Any(e => e.Id == id)).GetValueOrDefault();
 		}
 
-		public int DestinationsCount()
+		public async Task<int> DestinationsCount()
 		{
-			return _context.Destination.Count();
+			return await _context.Destination.CountAsync();
 		}
 	}
 }

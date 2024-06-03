@@ -28,12 +28,12 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Logs\" />
+    <ProjectReference Include="..\AirportAutomationDomain\AirportAutomation.Core.csproj" />
+    <ProjectReference Include="..\AirportAutomationInfrastructure\AirportAutomation.Infrastructure.csproj" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\AirportAutomationDomain\AirportAutomation.Core.csproj" />
-    <ProjectReference Include="..\AirportAutomationInfrastructure\AirportAutomation.Infrastructure.csproj" />
+    <Folder Include="Logs\" />
   </ItemGroup>
 
 </Project>

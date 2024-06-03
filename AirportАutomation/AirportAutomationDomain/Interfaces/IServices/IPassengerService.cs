@@ -7,12 +7,12 @@ namespace AirportAutomation.Core.Interfaces.IServices
 	{
 		Task<IList<PassengerEntity>> GetPassengers(int page, int pageSize);
 		Task<PassengerEntity?> GetPassenger(int id);
-		Task<IList<PassengerEntity?>> GetPassengersByName(string firstName, string lastName);
+		Task<IList<PassengerEntity?>> GetPassengersByName(int page, int pageSize, string firstName, string lastName);
 		Task<PassengerEntity> PostPassenger(PassengerEntity passenger);
 		Task PutPassenger(PassengerEntity passenger);
 		Task<PassengerEntity> PatchPassenger(int id, JsonPatchDocument passengerDocument);
 		Task<bool> DeletePassenger(int id);
 		Task<bool> PassengerExists(int id);
-		public int PassengersCount();
+		Task<int> PassengersCount(string firstName = null, string lastName = null);
 	}
 }

@@ -12,6 +12,6 @@ namespace AirportAutomation.Core.Interfaces.IRepositories
 		Task<DestinationEntity> PatchDestination(int id, JsonPatchDocument destinationDocument);
 		Task<bool> DeleteDestination(int id);
 		Task<bool> DestinationExists(int id);
-		public int DestinationsCount();
+		Task<int> DestinationsCount();
 	}
 }

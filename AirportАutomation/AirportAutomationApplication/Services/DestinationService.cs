@@ -47,9 +47,9 @@ namespace AirportAutomation.Application.Services
 		{
 			return await _destinationRepository.DestinationExists(id);
 		}
-		public int DestinationsCount()
+		public async Task<int> DestinationsCount()
 		{
-			return _destinationRepository.DestinationsCount();
+			return await _destinationRepository.DestinationsCount();
 		}
 	}
 }

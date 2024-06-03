@@ -3,6 +3,7 @@ using AirportAutomation.Core.Interfaces.IRepositories;
 using AirportAutomation.Infrastructure.Data;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.EntityFrameworkCore;
+using System.Xml.Linq;
 
 namespace AirportAutomation.Infrastructure.Repositories
 {
@@ -30,13 +31,15 @@ namespace AirportAutomation.Infrastructure.Repositories
 			return await _context.Airline.FindAsync(id);
 		}
 
-		public async Task<IList<AirlineEntity?>> GetAirlinesByName(string name)
+		public async Task<IList<AirlineEntity?>> GetAirlinesByName(int page, int pageSize, string name)
 		{
 			return await _context.Airline
-				.AsNoTracking()
 				.Where(a => a.Name.Contains(name))
-				.ToListAsync()
-				.ConfigureAwait(false);
+				.OrderBy(c => c.Id)
+				.Skip(pageSize * (page - 1))
+				.Take(pageSize)
+				.AsNoTracking()
+				.ToListAsync();
 		}
 
 		public async Task<AirlineEntity> PostAirline(AirlineEntity airline)
@@ -75,12 +78,18 @@ namespace AirportAutomation.Infrastructure.Repositories
 
 		public async Task<bool> AirlineExists(int id)
 		{
-			return (_context.Airline?.Any(e => e.Id == id)).GetValueOrDefault();
+			return await _context.Airline.AsNoTracking().AnyAsync(e => e.Id == id);
 		}
 
-		public int AirlinesCount()
+		public async Task<int> AirlinesCount(string? name = null)
 		{
-			return _context.Airline.Count();
+			IQueryable<AirlineEntity> query = _context.Airline.AsNoTracking();
+			if (!string.IsNullOrEmpty(name))
+			{
+				query = query.Where(a => a.Name.Contains(name));
+			}
+			return await query.CountAsync().ConfigureAwait(false);
 		}
+
 	}
 }

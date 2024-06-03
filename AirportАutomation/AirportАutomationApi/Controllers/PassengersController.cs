@@ -1,4 +1,5 @@
 ﻿using AirportAutomation.Api.Interfaces;
+using AirportAutomation.Core.Dtos.Airline;
 using AirportAutomation.Core.Dtos.Passenger;
 using AirportAutomation.Core.Dtos.Response;
 using AirportAutomation.Core.Entities;
@@ -67,18 +68,18 @@ namespace AirportАutomationApi.Controllers
 				_logger.LogInformation("Passengers not found.");
 				return NoContent();
 			}
-			var totalItems = _passengerService.PassengersCount();
+			var totalItems = await _passengerService.PassengersCount();
 			var data = _mapper.Map<IEnumerable<PassengerDto>>(passengers);
 			var response = new PagedResponse<PassengerDto>(data, page, correctedPageSize, totalItems);
 			return Ok(response);
 		}
 
 		/// <summary>
-		/// Endpoint for retrieving single passenger.
+		/// Endpoint for retrieving a single passenger.
 		/// </summary>
-		/// <param name="id"></param>
-		/// <returns>A single passenger that match the specified id.</returns>
-		/// <response code="200">Returns a single passenger if any is found.</response>
+		/// <param name="id">The ID of the passenger to retrieve.</param>
+		/// <returns>A single passenger that matches the specified ID.</returns>
+		/// <response code="200">Returns a single passenger if found.</response>
 		/// <response code="400">If the request is invalid or if there's a validation error.</response>
 		/// <response code="404">If no passenger is found.</response>
 		/// <response code="401">If user do not have permission to access the requested resource.</response>
@@ -105,66 +106,79 @@ namespace AirportАutomationApi.Controllers
 		}
 
 		/// <summary>
-		/// Endpoint for fetching a list of passengers by first name, last name, or both.
+		/// Endpoint for retrieving a paginated list of passengers containing the specified name.
 		/// </summary>
-		/// <param name="firstName"></param>
-		/// <param name="lastName"></param>
-		/// <returns>A list of passengers.</returns>
-		/// <response code="200">Returns a list of passengers if any are found.</response>
+		/// <param name="firstName">The first name to search for.</param>
+		/// <param name="lastName">The last name to search for.</param>
+		/// <param name="page">The page number for pagination (optional).</param>
+		/// <param name="pageSize">The size of each page for pagination (optional).</param>
+		/// <returns>A list of passengers that match the specified name.</returns>
+		/// <response code="200">Returns a paged list of passengers if found.</response>
 		/// <response code="400">If the request is invalid or if there's a validation error.</response>
 		/// <response code="404">If no passengers are found.</response>
 		/// <response code="401">If user do not have permission to access the requested resource.</response>
-		[HttpGet("byName")]
-		[ProducesResponseType(200, Type = typeof(IEnumerable<PassengerDto>))]
+		[HttpGet("byName/")]
+		[ProducesResponseType(200, Type = typeof(PagedResponse<PassengerDto>))]
 		[ProducesResponseType(400)]
 		[ProducesResponseType(404)]
 		[ProducesResponseType(401)]
-		public async Task<ActionResult<IEnumerable<PassengerDto>>> GetPassengersByName(
+		public async Task<ActionResult<PagedResponse<PassengerDto>>> GetPassengersByName(
 			[FromQuery] string? firstName = null,
-			[FromQuery] string? lastName = null)
+			[FromQuery] string? lastName = null,
+			[FromQuery] int page = 1,
+			[FromQuery] int pageSize = 10)
 		{
 			if (string.IsNullOrEmpty(firstName) && string.IsNullOrEmpty(lastName))
 			{
 				_logger.LogInformation("Both first name and last name are missing in the request.");
 				return BadRequest("Both first name and last name are missing in the request.");
 			}
-			var passengers = await _passengerService.GetPassengersByName(firstName, lastName);
+			var (isValid, correctedPageSize, result) = _paginationValidationService.ValidatePaginationParameters(page, pageSize, maxPageSize);
+			if (!isValid)
+			{
+				return result;
+			}
+			var passengers = await _passengerService.GetPassengersByName(page, correctedPageSize, firstName, lastName);
 			if (passengers == null || passengers.Count == 0)
 			{
 				_logger.LogInformation("Passengers not found.");
 				return NotFound();
 			}
-			var passengersDto = _mapper.Map<IEnumerable<PassengerDto>>(passengers);
-			return Ok(passengersDto);
+			var totalItems = await _passengerService.PassengersCount(firstName, lastName);
+			var data = _mapper.Map<IEnumerable<PassengerDto>>(passengers);
+			var response = new PagedResponse<PassengerDto>(data, page, correctedPageSize, totalItems);
+			return Ok(response);
 		}
 
 		/// <summary>
 		/// Endpoint for creating a new passenger.
 		/// </summary>
-		/// <param name="passengerCreateDto"></param>
+		/// <param name="passengerCreateDto">The data to create the new passenger.</param>
 		/// <returns>The created passenger.</returns>
 		/// <response code="201">Returns the created passenger if successful.</response>
 		/// <response code="400">If the request is invalid or if there's a validation error.</response>
 		/// <response code="401">If user do not have permission to access the requested resource.</response>
 		[HttpPost]
-		[ProducesResponseType(201, Type = typeof(PassengerCreateDto))]
+		[ProducesResponseType(201, Type = typeof(PassengerDto))]
 		[ProducesResponseType(400)]
 		[ProducesResponseType(401)]
-		public async Task<ActionResult<PassengerEntity>> PostPassenger(PassengerCreateDto passengerCreateDto)
+		public async Task<ActionResult<PassengerDto>> PostPassenger(PassengerCreateDto passengerCreateDto)
 		{
 			var passenger = _mapper.Map<PassengerEntity>(passengerCreateDto);
 			await _passengerService.PostPassenger(passenger);
-			return CreatedAtAction("GetPassenger", new { id = passenger.Id }, passenger);
+			var passengerDto = _mapper.Map<PassengerDto>(passenger);
+			return CreatedAtAction("GetPassenger", new { id = passengerDto.Id }, passengerDto);
 		}
 
 		/// <summary>
 		/// Endpoint for updating a single passenger.
 		/// </summary>
 		/// <param name="id">The ID of the passenger to update.</param>
-		/// <param name="passengerDto">The updated passenger data.</param>
-		/// <response code="204">No content. The update was successful.</response>
+		/// <param name="passengerDto">The data to update the passenger.</param>
+		/// <returns>No content.</returns>
+		/// <response code="204">Returns no content if successful.</response>
 		/// <response code="400">If the request is invalid or if there's a validation error.</response>
-		/// <response code="404">If the passenger with the specified ID is not found.</response>
+		/// <response code="404">If no passenger is found.</response>
 		/// <response code="401">If user do not have permission to access the requested resource.</response>
 		[HttpPut("{id}")]
 		[ProducesResponseType(204)]
@@ -197,7 +211,8 @@ namespace AirportАutomationApi.Controllers
 		/// Endpoint for partially updating a single passenger.
 		/// </summary>
 		/// <param name="id">The ID of the passenger to partially update.</param>
-		/// <param name="passengerDocument">The JSON document containing the partial update instructions.</param>
+		/// <param name="passengerDocument">The patch document containing the changes.</param>
+		/// <returns>The updated passenger.</returns>
 		/// <remarks>
 		/// The JSON document should follow the JSON Patch standard (RFC 6902) and contain one or more operations.
 		/// Example operation:
@@ -207,12 +222,12 @@ namespace AirportАutomationApi.Controllers
 		///     "value": "NewName"
 		/// }
 		/// </remarks>
-		/// <response code="200">The partial update was successful.</response>
+		/// <response code="200">Returns the updated passenger if successful.</response>
 		/// <response code="400">If the request is invalid or if there's a validation error.</response>
 		/// <response code="404">If the passenger with the specified ID is not found.</response>
 		/// <response code="401">If user do not have permission to access the requested resource.</response>
 		[HttpPatch("{id}")]
-		[ProducesResponseType(200)]
+		[ProducesResponseType(200, Type = typeof(PassengerDto))]
 		[ProducesResponseType(400)]
 		[ProducesResponseType(404)]
 		[ProducesResponseType(401)]
@@ -229,16 +244,18 @@ namespace AirportАutomationApi.Controllers
 				return NotFound();
 			}
 			var updatedPassenger = await _passengerService.PatchPassenger(id, passengerDocument);
-			return Ok(updatedPassenger);
+			var passengerDto = _mapper.Map<PassengerDto>(updatedPassenger);
+			return Ok(passengerDto);
 		}
 
 		/// <summary>
-		/// Endpoint for deleting a single passenger by ID.
+		/// Endpoint for deleting a single passenger.
 		/// </summary>
 		/// <param name="id">The ID of the passenger to delete.</param>
-		/// <response code="204">No content. The deletion was successful.</response>
+		/// <returns>No content.</returns>
+		/// <response code="204">Returns no content if successful.</response>
 		/// <response code="400">If the request is invalid or if there's a validation error.</response>
-		/// <response code="404">If the passenger with the specified ID is not found.</response>
+		/// <response code="404">If no passenger is found.</response>
 		/// <response code="401">If user do not have permission to access the requested resource.</response>
 		/// <response code="409">Conflict. If the passenger cannot be deleted because it is being referenced by other entities.</response>
 		[HttpDelete("{id}")]

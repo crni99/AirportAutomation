@@ -28,9 +28,9 @@ namespace AirportAutomation.Application.Services
 			return await _travelClassRepository.TravelClassExists(id);
 		}
 
-		public int TravelClassesCount()
+		public async Task<int> TravelClassesCount()
 		{
-			return _travelClassRepository.TravelClassesCount();
+			return await _travelClassRepository.TravelClassesCount();
 		}
 
 	}

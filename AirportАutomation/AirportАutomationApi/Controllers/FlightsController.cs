@@ -67,18 +67,18 @@ namespace AirportАutomationApi.Controllers
 				_logger.LogInformation("Flights not found.");
 				return NoContent();
 			}
-			var totalItems = _flightService.FlightsCount();
+			var totalItems = await _flightService.FlightsCount();
 			var data = _mapper.Map<IEnumerable<FlightDto>>(flights);
 			var response = new PagedResponse<FlightDto>(data, page, correctedPageSize, totalItems);
 			return Ok(response);
 		}
 
 		/// <summary>
-		/// Endpoint for retrieving single flight.
+		/// Endpoint for retrieving a single flight.
 		/// </summary>
-		/// <param name="id"></param>
-		/// <returns>A single flight that match the specified id.</returns>
-		/// <response code="200">Returns a single flight if any is found.</response>
+		/// <param name="id">The ID of the flight to retrieve.</param>
+		/// <returns>A single flight that matches the specified ID.</returns>
+		/// <response code="200">Returns a single flight if found.</response>
 		/// <response code="400">If the request is invalid or if there's a validation error.</response>
 		/// <response code="404">If no flight is found.</response>
 		/// <response code="401">If user do not have permission to access the requested resource.</response>
@@ -105,24 +105,33 @@ namespace AirportАutomationApi.Controllers
 		}
 
 		/// <summary>
-		/// Endpoint for retrieving flights between two specified dates.
-		/// </summary>
-		/// <param name="startDate">The start date of the date range.</param>
-		/// <param name="endDate">The end date of the date range.</param>
-		/// <returns>A list of flights within the specified date range.</returns>
-		/// <response code="200">Returns a list of flights if any is found.</response>
+		/// Endpoint for retrieving a paginated list of flights containing the specified name.
+		/// </summary
+		/// <param name="startDate">The start date for the search.</param>
+		/// <param name = "endDate" > The end date for the search.</param>
+		/// <param name="page">The page number for pagination (optional).</param>
+		/// <param name="pageSize">The size of each page for pagination (optional).</param>
+		/// <returns>A list of flights that match the specified name.</returns>
+		/// <response code="200">Returns a paged list of flights if found.</response>
 		/// <response code="400">If the request is invalid or if there's a validation error.</response>
-		/// <response code="404">If no flights is found.</response>
+		/// <response code="404">If no flights are found.</response>
 		/// <response code="401">If user do not have permission to access the requested resource.</response>
 		[HttpGet("byDate")]
-		[ProducesResponseType(200, Type = typeof(IEnumerable<FlightDto>))]
+		[ProducesResponseType(200, Type = typeof(PagedResponse<FlightDto>))]
 		[ProducesResponseType(400)]
 		[ProducesResponseType(404)]
 		[ProducesResponseType(401)]
-		public async Task<ActionResult<IEnumerable<FlightDto>>> GetFlightsBetweenDates(
+		public async Task<ActionResult<PagedResponse<FlightDto>>> GetFlightsBetweenDates(
 			[FromQuery] DateOnly? startDate = null,
-			[FromQuery] DateOnly? endDate = null)
+			[FromQuery] DateOnly? endDate = null,
+			[FromQuery] int page = 1,
+			[FromQuery] int pageSize = 10)
 		{
+			var (isValid, correctedPageSize, result) = _paginationValidationService.ValidatePaginationParameters(page, pageSize, maxPageSize);
+			if (!isValid)
+			{
+				return result;
+			}
 			if (!_inputValidationService.IsValidDateOnly(startDate) && !_inputValidationService.IsValidDateOnly(endDate))
 			{
 				_logger.LogInformation("Invalid input. The start and end dates must be valid dates.");
@@ -133,43 +142,47 @@ namespace AirportАutomationApi.Controllers
 				_logger.LogInformation("Both start date and end date are missing in the request.");
 				return BadRequest("Both start date and end date are missing in the request.");
 			}
-			var flights = await _flightService.GetFlightsBetweenDates(startDate, endDate);
+			var flights = await _flightService.GetFlightsBetweenDates(page, correctedPageSize, startDate, endDate);
 			if (flights == null || flights.Count == 0)
 			{
 				_logger.LogInformation("Flights not found.");
 				return NotFound();
 			}
-			var flightsDto = _mapper.Map<IEnumerable<FlightDto>>(flights);
-			return Ok(flightsDto);
+			var totalItems = await _flightService.FlightsCount(startDate, endDate);
+			var data = _mapper.Map<IEnumerable<FlightDto>>(flights);
+			var response = new PagedResponse<FlightDto>(data, page, correctedPageSize, totalItems);
+			return Ok(response);
 		}
 
 		/// <summary>
 		/// Endpoint for creating a new flight.
 		/// </summary>
-		/// <param name="flightCreateDto"></param>
+		/// <param name="flightCreateDto">The data to create the new flight.</param>
 		/// <returns>The created flight.</returns>
 		/// <response code="201">Returns the created flight if successful.</response>
 		/// <response code="400">If the request is invalid or if there's a validation error.</response>
 		/// <response code="401">If user do not have permission to access the requested resource.</response>
 		[HttpPost]
-		[ProducesResponseType(201, Type = typeof(FlightEntity))]
+		[ProducesResponseType(201, Type = typeof(FlightDto))]
 		[ProducesResponseType(400)]
 		[ProducesResponseType(401)]
 		public async Task<ActionResult<FlightEntity>> PostFlight(FlightCreateDto flightCreateDto)
 		{
 			var flight = _mapper.Map<FlightEntity>(flightCreateDto);
 			await _flightService.PostFlight(flight);
-			return CreatedAtAction("GetFlight", new { id = flight.Id }, flight);
+			var flightDto = _mapper.Map<FlightDto>(flight);
+			return CreatedAtAction("GetFlight", new { id = flightDto.Id }, flightDto);
 		}
 
 		/// <summary>
 		/// Endpoint for updating a single flight.
 		/// </summary>
 		/// <param name="id">The ID of the flight to update.</param>
-		/// <param name="flightUpdateDto">The updated flight data.</param>
-		/// <response code="204">No content. The update was successful.</response>
+		/// <param name="flightUpdateDto">The data to update the flight.</param>
+		/// <returns>No content.</returns>
+		/// <response code="204">Returns no content if successful.</response>
 		/// <response code="400">If the request is invalid or if there's a validation error.</response>
-		/// <response code="404">If the flight with the specified ID is not found.</response>
+		/// <response code="404">If no flight is found.</response>
 		/// <response code="401">If user do not have permission to access the requested resource.</response>
 		[HttpPut("{id}")]
 		[ProducesResponseType(204)]
@@ -202,7 +215,8 @@ namespace AirportАutomationApi.Controllers
 		/// Endpoint for partially updating a single flight.
 		/// </summary>
 		/// <param name="id">The ID of the flight to partially update.</param>
-		/// <param name="flightDocument">The JSON document containing the partial update instructions.</param>
+		/// <param name="flightDocument">The patch document containing the changes.</param>
+		/// <returns>The updated flight.</returns>
 		/// <remarks>
 		/// The JSON document should follow the JSON Patch standard (RFC 6902) and contain one or more operations.
 		/// Example operation:
@@ -212,12 +226,12 @@ namespace AirportАutomationApi.Controllers
 		///     "value": "NewName"
 		/// }
 		/// </remarks>
-		/// <response code="200">The partial update was successful.</response>
+		/// <response code="200">Returns the updated flight if successful.</response>
 		/// <response code="400">If the request is invalid or if there's a validation error.</response>
 		/// <response code="404">If the flight with the specified ID is not found.</response>
 		/// <response code="401">If user do not have permission to access the requested resource.</response>
 		[HttpPatch("{id}")]
-		[ProducesResponseType(200)]
+		[ProducesResponseType(200, Type = typeof(FlightDto))]
 		[ProducesResponseType(400)]
 		[ProducesResponseType(404)]
 		[ProducesResponseType(401)]
@@ -234,16 +248,18 @@ namespace AirportАutomationApi.Controllers
 				return NotFound();
 			}
 			var updatedFlight = await _flightService.PatchFlight(id, flightDocument);
-			return Ok(updatedFlight);
+			var flightDto = _mapper.Map<FlightDto>(updatedFlight);
+			return Ok(flightDto);
 		}
 
 		/// <summary>
-		/// Endpoint for deleting a single flight by ID.
+		/// Endpoint for deleting a single flight.
 		/// </summary>
 		/// <param name="id">The ID of the flight to delete.</param>
-		/// <response code="204">No content. The deletion was successful.</response>
+		/// <returns>No content.</returns>
+		/// <response code="204">Returns no content if successful.</response>
 		/// <response code="400">If the request is invalid or if there's a validation error.</response>
-		/// <response code="404">If the flight with the specified ID is not found.</response>
+		/// <response code="404">If no flight is found.</response>
 		/// <response code="401">If user do not have permission to access the requested resource.</response>
 		/// <response code="409">Conflict. If the passenger cannot be deleted because it is being referenced by other entities.</response>
 		[HttpDelete("{id}")]

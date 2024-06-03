@@ -40,7 +40,7 @@ namespace AirportAutomation.Infrastructure.Repositories
 				.FirstOrDefaultAsync(k => k.Id == id);
 		}
 
-		public async Task<IList<PlaneTicketEntity?>> GetPlaneTicketsForPrice(int? minPrice, int? maxPrice)
+		public async Task<IList<PlaneTicketEntity?>> GetPlaneTicketsForPrice(int page, int pageSize, int? minPrice, int? maxPrice)
 		{
 			IQueryable<PlaneTicketEntity> query = _context.PlaneTicket
 				.Include(k => k.Passenger)
@@ -56,7 +56,12 @@ namespace AirportAutomation.Infrastructure.Repositories
 			{
 				query = query.Where(p => p.Price <= maxPrice.Value);
 			}
-			return await query.ToListAsync().ConfigureAwait(false);
+
+			return await query.OrderBy(c => c.Id)
+								.Skip(pageSize * (page - 1))
+								.Take(pageSize)
+								.ToListAsync()
+								.ConfigureAwait(false);
 		}
 
 		public async Task<PlaneTicketEntity> PostPlaneTicket(PlaneTicketEntity planeTicket)
@@ -93,9 +98,19 @@ namespace AirportAutomation.Infrastructure.Repositories
 			return (_context.PlaneTicket?.Any(e => e.Id == id)).GetValueOrDefault();
 		}
 
-		public int PlaneTicketsCount()
+		public async Task<int> PlaneTicketsCount(int? minPrice, int? maxPrice)
 		{
-			return _context.PlaneTicket.Count();
+			IQueryable<PlaneTicketEntity> query = _context.PlaneTicket;
+
+			if (minPrice.HasValue)
+			{
+				query = query.Where(p => p.Price >= minPrice.Value);
+			}
+			if (maxPrice.HasValue)
+			{
+				query = query.Where(p => p.Price <= maxPrice.Value);
+			}
+			return await query.CountAsync().ConfigureAwait(false);
 		}
 	}
 }

@@ -23,9 +23,9 @@ namespace AirportAutomation.Application.Services
 			return await _flightRepository.GetFlight(id);
 		}
 
-		public async Task<IList<FlightEntity?>> GetFlightsBetweenDates(DateOnly? startDate, DateOnly? endDate)
+		public async Task<IList<FlightEntity?>> GetFlightsBetweenDates(int page, int pageSize, DateOnly? startDate, DateOnly? endDate)
 		{
-			return await _flightRepository.GetFlightsBetweenDates(startDate, endDate);
+			return await _flightRepository.GetFlightsBetweenDates(page, pageSize, startDate, endDate);
 		}
 
 		public async Task<FlightEntity> PostFlight(FlightEntity flight)
@@ -53,9 +53,9 @@ namespace AirportAutomation.Application.Services
 			return await _flightRepository.FlightExists(id);
 		}
 
-		public int FlightsCount()
+		public async Task<int> FlightsCount(DateOnly? startDate = null, DateOnly? endDate = null)
 		{
-			return _flightRepository.FlightsCount();
+			return await _flightRepository.FlightsCount(startDate, endDate);
 		}
 	}
 }

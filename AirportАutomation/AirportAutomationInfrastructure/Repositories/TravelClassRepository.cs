@@ -34,9 +34,9 @@ namespace AirportAutomation.Infrastructure.Repositories
 			return (_context.TravelClass?.Any(e => e.Id == id)).GetValueOrDefault();
 		}
 
-		public int TravelClassesCount()
+		public async Task<int> TravelClassesCount()
 		{
-			return _context.TravelClass.Count();
+			return await _context.TravelClass.CountAsync();
 		}
 
 	}

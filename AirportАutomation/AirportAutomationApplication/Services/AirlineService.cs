@@ -2,6 +2,7 @@
 using AirportAutomation.Core.Interfaces.IRepositories;
 using AirportAutomation.Core.Interfaces.IServices;
 using Microsoft.AspNetCore.JsonPatch;
+using System.Xml.Linq;
 
 namespace AirportAutomation.Application.Services
 {
@@ -23,9 +24,9 @@ namespace AirportAutomation.Application.Services
 			return await _airlineRepository.GetAirline(id);
 		}
 
-		public async Task<IList<AirlineEntity?>> GetAirlinesByName(string name)
+		public async Task<IList<AirlineEntity?>> GetAirlinesByName(int page, int pageSize, string name)
 		{
-			return await _airlineRepository.GetAirlinesByName(name);
+			return await _airlineRepository.GetAirlinesByName(page, pageSize, name);
 		}
 
 		public async Task<AirlineEntity> PostAirline(AirlineEntity airline)
@@ -53,9 +54,10 @@ namespace AirportAutomation.Application.Services
 			return await _airlineRepository.AirlineExists(id);
 		}
 
-		public int AirlinesCount()
+		public async Task<int> AirlinesCount(string? name = null)
 		{
-			return _airlineRepository.AirlinesCount();
+			return await _airlineRepository.AirlinesCount(name);
 		}
+
 	}
 }
