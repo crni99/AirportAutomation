@@ -23,6 +23,11 @@ namespace AirportAutomation.Application.Services
 			return await _destinationRepository.GetDestination(id);
 		}
 
+		public async Task<IList<DestinationEntity?>> GetDestinationsByCityOrAirport(int page, int pageSize, string city, string airport)
+		{
+			return await _destinationRepository.GetDestinationsByCityOrAirport(page, pageSize, city, airport);
+		}
+
 		public async Task<DestinationEntity> PostDestination(DestinationEntity destination)
 		{
 			return await _destinationRepository.PostDestination(destination);
@@ -47,9 +52,9 @@ namespace AirportAutomation.Application.Services
 		{
 			return await _destinationRepository.DestinationExists(id);
 		}
-		public async Task<int> DestinationsCount()
+		public async Task<int> DestinationsCount(string city = null, string airport = null)
 		{
-			return await _destinationRepository.DestinationsCount();
+			return await _destinationRepository.DestinationsCount(city, airport);
 		}
 	}
 }

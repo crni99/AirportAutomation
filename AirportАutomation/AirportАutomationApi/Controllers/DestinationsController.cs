@@ -1,5 +1,7 @@
 ﻿using AirportAutomation.Api.Interfaces;
+using AirportAutomation.Application.Services;
 using AirportAutomation.Core.Dtos.Destination;
+using AirportAutomation.Core.Dtos.Passenger;
 using AirportAutomation.Core.Dtos.Response;
 using AirportAutomation.Core.Entities;
 using AirportAutomation.Core.Interfaces.IServices;
@@ -102,6 +104,51 @@ namespace AirportАutomationApi.Controllers
 			var destination = await _destinationService.GetDestination(id);
 			var destinationDto = _mapper.Map<DestinationDto>(destination);
 			return Ok(destinationDto);
+		}
+
+		/// <summary>
+		/// Endpoint for retrieving a paginated list of destinations containing the specified name.
+		/// </summary>
+		/// <param name="city">The city name to search for.</param>
+		/// <param name="airport">The airport name to search for.</param>
+		/// <param name="page">The page number for pagination (optional, defaults to 1).</param>
+		/// <param name="pageSize">The size of each page for pagination (optional, defaults to 10).</param>
+		/// <returns>A paginated list of destinations that match the specified criteria.</returns>
+		/// <response code="200">Returns a paged list of destinations if found.</response>
+		/// <response code="400">If the request is invalid or if there's a validation error.</response>
+		/// <response code="404">If no destinations are found.</response>
+		/// <response code="401">If user does not have permission to access the requested resource.</response>
+		[HttpGet("search/")]
+		[ProducesResponseType(200, Type = typeof(PagedResponse<DestinationDto>))]
+		[ProducesResponseType(400, Type = typeof(string))]
+		[ProducesResponseType(404)]
+		[ProducesResponseType(401)]
+		public async Task<ActionResult<PagedResponse<DestinationDto>>> GetDestinationsByCityOrAirport(
+			[FromQuery] string? city = null,
+			[FromQuery] string? airport = null,
+			[FromQuery] int page = 1,
+			[FromQuery] int pageSize = 10)
+		{
+			if (string.IsNullOrEmpty(city) && string.IsNullOrEmpty(airport))
+			{
+				_logger.LogInformation("Both city and airport are missing in the request.");
+				return BadRequest("Both city and airport are missing in the request.");
+			}
+			var (isValid, correctedPageSize, result) = _paginationValidationService.ValidatePaginationParameters(page, pageSize, maxPageSize);
+			if (!isValid)
+			{
+				return result;
+			}
+			var destinations = await _destinationService.GetDestinationsByCityOrAirport(page, correctedPageSize, city, airport);
+			if (destinations == null || destinations.Count == 0)
+			{
+				_logger.LogInformation("Destinations not found.");
+				return NotFound();
+			}
+			var totalItems = await _destinationService.DestinationsCount(city, airport);
+			var data = _mapper.Map<IEnumerable<DestinationDto>>(destinations);
+			var response = new PagedResponse<DestinationDto>(data, page, correctedPageSize, totalItems);
+			return Ok(response);
 		}
 
 		/// <summary>

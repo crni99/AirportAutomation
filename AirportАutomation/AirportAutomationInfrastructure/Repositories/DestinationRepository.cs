@@ -30,6 +30,26 @@ namespace AirportAutomation.Infrastructure.Repositories
 			return await _context.Destination.FindAsync(id);
 		}
 
+		public async Task<IList<DestinationEntity?>> GetDestinationsByCityOrAirport(int page, int pageSize, string city = null, string airport = null)
+		{
+			IQueryable<DestinationEntity> query = _context.Destination.AsNoTracking();
+
+			if (!string.IsNullOrEmpty(city))
+			{
+				query = query.Where(p => p.City.Contains(city));
+			}
+			if (!string.IsNullOrEmpty(airport))
+			{
+				query = query.Where(p => p.Airport.Contains(airport));
+			}
+
+			return await query.OrderBy(c => c.Id)
+								.Skip(pageSize * (page - 1))
+								.Take(pageSize)
+								.ToListAsync()
+								.ConfigureAwait(false);
+		}
+
 		public async Task<DestinationEntity> PostDestination(DestinationEntity destination)
 		{
 			_context.Destination.Add(destination);
@@ -69,9 +89,19 @@ namespace AirportAutomation.Infrastructure.Repositories
 			return (_context.Destination?.Any(e => e.Id == id)).GetValueOrDefault();
 		}
 
-		public async Task<int> DestinationsCount()
+		public async Task<int> DestinationsCount(string city = null, string airport = null)
 		{
-			return await _context.Destination.CountAsync();
+			IQueryable<DestinationEntity> query = _context.Destination;
+
+			if (!string.IsNullOrEmpty(city))
+			{
+				query = query.Where(p => p.City.Contains(city));
+			}
+			if (!string.IsNullOrEmpty(airport))
+			{
+				query = query.Where(p => p.Airport.Contains(airport));
+			}
+			return await query.CountAsync().ConfigureAwait(false);
 		}
 	}
 }

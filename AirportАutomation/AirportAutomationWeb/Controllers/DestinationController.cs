@@ -55,6 +55,19 @@ namespace AirportAutomation.Web.Controllers
 		}
 
 		[HttpGet]
+		[Route("GetDestinationsByCityOrAirport")]
+		public async Task<IActionResult> GetDestinationsByCityOrAirport([FromQuery] string city, [FromQuery] string airport)
+		{
+			if (string.IsNullOrEmpty(city) && string.IsNullOrEmpty(airport))
+			{
+				_alertService.SetAlertMessage(TempData, "missing_field", false);
+				return RedirectToAction("Index");
+			}
+			var response = await _httpCallService.GetDataByCityOrAirport<DestinationEntity>(city, airport);
+			return Json(response);
+		}
+
+		[HttpGet]
 		[Route("Create")]
 		public IActionResult Create()
 		{

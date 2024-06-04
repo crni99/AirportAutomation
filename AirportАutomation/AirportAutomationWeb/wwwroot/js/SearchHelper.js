@@ -166,3 +166,42 @@ function searchByPrice(searchUrl, tableBody, entityType) {
         });
     });
 }
+
+function searchByCityOrAirport(searchUrl, tableBody, entityType) {
+    $('#searchButton').click(function () {
+        var city = $('#city').val();
+        var airport = $('#airport').val();
+        if ((!city || city.trim() === '') && (!airport || airport.trim() === '')) {
+            return;
+        }
+        var urlWithParams = searchUrl + '/?city=' + city + '&airport=' + airport;
+
+        $.ajax({
+            url: urlWithParams,
+            type: 'GET',
+            success: function (data) {
+                if (data === null || data.trim() === "") {
+                    showAlertInContainer('No data found for the given search term.', 'danger');
+                    return;
+                }
+                var jsonData = JSON.parse(data);
+                tableBody.empty();
+
+                $.each(jsonData.data, function (index, item) {
+                    var row = document.createElement("tr");
+                    row.innerHTML = '<td>' + item.id + '</td>' +
+                        '<td>' + item.city + '</td>' +
+                        '<td>' + item.airport + '</td>';
+                    row.classList.add("clickable-row");
+                    row.addEventListener("click", function () {
+                        window.open('/' + entityType + '/' + item.id, '_blank');
+                    });
+                    tableBody.append(row);
+                });
+            },
+            error: function (error) {
+                console.error('Error:', error);
+            }
+        });
+    });
+}

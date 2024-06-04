@@ -117,7 +117,7 @@ namespace AirportАutomationApi.Controllers
 		/// <response code="400">If the request is invalid or if there's a validation error.</response>
 		/// <response code="404">If no passengers are found.</response>
 		/// <response code="401">If user do not have permission to access the requested resource.</response>
-		[HttpGet("byName/")]
+		[HttpGet("byName")]
 		[ProducesResponseType(200, Type = typeof(PagedResponse<PassengerDto>))]
 		[ProducesResponseType(400)]
 		[ProducesResponseType(404)]

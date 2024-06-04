@@ -5,13 +5,25 @@
 }
 
 <div class="container mt-5">
-	<div class="row">
-		<div class="col-md-6 d-flex justify-content-between">
-			<div class="custom-navbar">
+	<div class="row justify-content-between">
+		<div class="col-md-6">
+			<div class="d-flex justify-content-start mb-3">
 				<div>
 					<a class="btn btn-success" asp-area="" asp-controller="Destination" asp-action="Create">Create Destination</a>
 				</div>
 			</div>
+			@if (Model != null)
+			{
+				<div class="input-group justify-content-start" style="width: 100%;">
+					<label for="city" class="input-group-text">City:</label>
+					<input type="text" class="form-control" id="city" name="city">
+
+					<label for="airport" class="input-group-text">Airport:</label>
+					<input type="text" class="form-control" id="airport" name="airport">
+
+					<button id="searchButton" class="btn btn-primary">Search</button>
+				</div>
+			}
 		</div>
 	</div>
 </div>
@@ -42,20 +54,22 @@
 						</th>
 					</tr>
 				</thead>
-				@foreach (var item in Model.Data)
-				{
-					<tr class="clickable-row">
-						<td onclick="openDetails('@item.Id')">
-							@Html.DisplayFor(modelItem => item.Id)
-						</td>
-						<td onclick="openMap('@item.City')" class="link-primary">
-							@Html.DisplayFor(modelItem => item.City)
-						</td>
-						<td onclick="openMap('@item.Airport')" class="link-primary">
-							@Html.DisplayFor(modelItem => item.Airport)
-						</td>
-					</tr>
-				}
+				<tbody id="tableBody">
+					@foreach (var item in Model.Data)
+					{
+						<tr class="clickable-row">
+							<td onclick="openDetails('@item.Id')">
+								@Html.DisplayFor(modelItem => item.Id)
+							</td>
+							<td onclick="openMap('@item.City')" class="link-primary">
+								@Html.DisplayFor(modelItem => item.City)
+							</td>
+							<td onclick="openMap('@item.Airport')" class="link-primary">
+								@Html.DisplayFor(modelItem => item.Airport)
+							</td>
+						</tr>
+					}
+				</tbody>
 			</table>
 			@await Html.PartialAsync("_Pagination", Model)
 		}
@@ -71,5 +85,13 @@
 			window.open('@Url.Action("Details", new { id = "__id__" })'.replace('__id__', id), '_blank');
 		}
 	</script>
+	<script>
+		$(document).ready(function () {
+			var searchUrl = '@Url.Action("GetDestinationsByCityOrAirport", "Destination", new { area = "", name = "" })';
+			var tableBody = $('#tableBody');
+			searchByCityOrAirport(searchUrl, tableBody, 'Destination');
+		});
+	</script>
 	<script src="~/js/OpenHelper.js"></script>
+	<script src="~/js/SearchHelper.js"></script>
 }

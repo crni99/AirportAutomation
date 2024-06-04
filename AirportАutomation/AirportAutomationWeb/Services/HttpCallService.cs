@@ -469,6 +469,61 @@ namespace AirportAutomation.Web.Services
 		}
 
 		/// <summary>
+		/// Gets data of a specified type by city or airport in JSON format.
+		/// </summary>
+		/// <typeparam name="T">The type of data to retrieve.</typeparam>
+		/// <param name="city">The city used to filter the data.</param>
+		/// <param name="airport">The airport used to filter the data.</param>
+		/// <returns>
+		/// Returns a JSON string containing the data of type <typeparamref name="T"/> filtered by the specified first name and/or last name.
+		/// If the retrieval fails, returns null with an error logged.
+		/// </returns>
+		public async Task<string> GetDataByCityOrAirport<T>(string city, string airport)
+		{
+			var modelName = GetModelName<T>();
+
+			string requestUri = $"{apiURL}/{modelName}";
+			if (modelName.Equals("TravelClass"))
+			{
+				requestUri += $"es/search";
+			}
+			else
+			{
+				requestUri += $"s/search/";
+			}
+			UriBuilder uriBuilder = new(requestUri);
+			var query = HttpUtility.ParseQueryString(uriBuilder.Query);
+
+			if (!string.IsNullOrEmpty(city))
+			{
+				query["city"] = city;
+			}
+			if (!string.IsNullOrEmpty(airport))
+			{
+				query["airport"] = airport;
+			}
+			uriBuilder.Query = query.ToString();
+			requestUri = uriBuilder.ToString();
+
+			var httpRequestMessage = new HttpRequestMessage(HttpMethod.Get, requestUri);
+
+			using var httpClient = _httpClientFactory.CreateClient("AirportAutomationApi");
+			ConfigureHttpClient(httpClient);
+
+			var response = await httpClient.SendAsync(httpRequestMessage);
+
+			if (response.IsSuccessStatusCode)
+			{
+				return await response.Content.ReadAsStringAsync();
+			}
+			else
+			{
+				_logger.LogError("Failed to retrieve data. Status code: {StatusCode}", response.StatusCode);
+			}
+			return null;
+		}
+
+		/// <summary>
 		/// Creates a new data entry of a specified type.
 		/// </summary>
 		/// <typeparam name="T">The type of data to create.</typeparam>
