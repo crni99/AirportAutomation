@@ -112,7 +112,7 @@ namespace AirportАutomationApi.Controllers
 
 		/// <summary>
 		/// Endpoint for retrieving a paginated list of flights containing the specified name.
-		/// </summary
+		/// </summary>
 		/// <param name="startDate">The start date for the search.</param>
 		/// <param name = "endDate" > The end date for the search.</param>
 		/// <param name="page">The page number for pagination (optional).</param>
@@ -304,6 +304,8 @@ namespace AirportАutomationApi.Controllers
 		/// <param name="page">The page number for pagination (optional, default is 1).</param>
 		/// <param name="pageSize">The page size for pagination (optional, default is 10).</param>
 		/// <param name="getAll">Flag indicating whether to retrieve all data (optional, default is false).</param>
+		/// <param name="startDate">The start date for the search (optional, default is null).</param>
+		/// <param name = "endDate" > The end date for the search (optional, default is null).</param>
 		/// <returns>Returns the generated PDF document.</returns>
 		/// <response code="200">Returns the generated PDF document.</response>
 		/// <response code="400">If the request is invalid or if there's a validation error.</response>
