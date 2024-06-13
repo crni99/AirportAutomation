@@ -54,6 +54,8 @@ namespace AirportАutomation.Api.Binders
 
 			services.AddScoped<IPaginationValidationService, PaginationValidationService>();
 			services.AddScoped<IInputValidationService, InputValidationService>();
+			services.AddScoped<IUtilityService, UtilityService>();
+			services.AddScoped<IExportService, ExportService>();
 		}
 	}
 }

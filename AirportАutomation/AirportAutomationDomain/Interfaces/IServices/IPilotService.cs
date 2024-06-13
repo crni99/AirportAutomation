@@ -5,6 +5,7 @@ namespace AirportAutomation.Core.Interfaces.IServices
 {
 	public interface IPilotService
 	{
+		Task<IList<PilotEntity>> GetAllPilots();
 		Task<IList<PilotEntity>> GetPilots(int page, int pageSize);
 		Task<PilotEntity?> GetPilot(int id);
 		Task<IList<PilotEntity?>> GetPilotsByName(int page, int pageSize, string firstName, string lastName);

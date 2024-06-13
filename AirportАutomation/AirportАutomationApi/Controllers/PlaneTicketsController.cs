@@ -20,6 +20,8 @@ namespace AirportАutomationApi.Controllers
 		private readonly IPlaneTicketService _planeTicketService;
 		private readonly IPaginationValidationService _paginationValidationService;
 		private readonly IInputValidationService _inputValidationService;
+		private readonly IUtilityService _utilityService;
+		private readonly IExportService _exportService;
 		private readonly IMapper _mapper;
 		private readonly ILogger<PlaneTicketsController> _logger;
 		private readonly int maxPageSize;
@@ -28,6 +30,8 @@ namespace AirportАutomationApi.Controllers
 			IPlaneTicketService planeTicketService,
 			IPaginationValidationService paginationValidationService,
 			IInputValidationService inputValidationService,
+			IUtilityService utilityService,
+			IExportService exportService,
 			IMapper mapper,
 			ILogger<PlaneTicketsController> logger,
 			IConfiguration configuration)
@@ -35,6 +39,8 @@ namespace AirportАutomationApi.Controllers
 			_planeTicketService = planeTicketService ?? throw new ArgumentNullException(nameof(planeTicketService));
 			_paginationValidationService = paginationValidationService ?? throw new ArgumentNullException(nameof(paginationValidationService));
 			_inputValidationService = inputValidationService ?? throw new ArgumentNullException(nameof(inputValidationService));
+			_utilityService = utilityService ?? throw new ArgumentNullException(nameof(utilityService));
+			_exportService = exportService ?? throw new ArgumentNullException(nameof(exportService));
 			_mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
 			_logger = logger ?? throw new ArgumentNullException(nameof(logger));
 			maxPageSize = configuration.GetValue<int>("pageSettings:maxPageSize");
@@ -286,6 +292,46 @@ namespace AirportАutomationApi.Controllers
 			}
 			await _planeTicketService.DeletePlaneTicket(id);
 			return NoContent();
+		}
+
+		/// <summary>
+		/// Endpoint for exporting plane ticket data to PDF.
+		/// </summary>
+		/// <param name="page">The page number for pagination (optional, default is 1).</param>
+		/// <param name="pageSize">The page size for pagination (optional, default is 10).</param>
+		/// <param name="getAll">Flag indicating whether to retrieve all data (optional, default is false).</param>
+		/// <returns>Returns the generated PDF document.</returns>
+		/// <response code="200">Returns the generated PDF document.</response>
+		/// <response code="400">If the request is invalid or if there's a validation error.</response>
+		/// <response code="401">If user do not have permission to access the requested resource.</response>
+		[HttpGet("export/pdf")]
+		[ProducesResponseType(200)]
+		[ProducesResponseType(400)]
+		[ProducesResponseType(401)]
+		public async Task<ActionResult> ExportToPdf([FromQuery] int page = 1, [FromQuery] int pageSize = 10, [FromQuery] bool getAll = false)
+		{
+			IList<PlaneTicketEntity> planeTickets;
+			if (getAll)
+			{
+				planeTickets = await _planeTicketService.GetAllPlaneTickets();
+			}
+			else
+			{
+				var (isValid, correctedPageSize, result) = _paginationValidationService.ValidatePaginationParameters(page, pageSize, maxPageSize);
+				if (!isValid)
+				{
+					return result;
+				}
+				planeTickets = await _planeTicketService.GetPlaneTickets(page, correctedPageSize);
+			}
+			if (planeTickets is null || !planeTickets.Any())
+			{
+				_logger.LogInformation("Plane Tickets not found.");
+				return NoContent();
+			}
+			var pdf = _exportService.ExportToPDF<PlaneTicketEntity>("Plane Tickets", planeTickets);
+			string fileName = _utilityService.GenerateUniqueFileName("PlaneTickets");
+			return File(pdf, "application/pdf", fileName);
 		}
 
 	}

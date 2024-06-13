@@ -3,7 +3,6 @@ using AirportAutomation.Core.Interfaces.IRepositories;
 using AirportAutomation.Infrastructure.Data;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.EntityFrameworkCore;
-using System.Xml.Linq;
 
 namespace AirportAutomation.Infrastructure.Repositories
 {
@@ -14,6 +13,14 @@ namespace AirportAutomation.Infrastructure.Repositories
 		public AirlineRepository(DatabaseContext context)
 		{
 			_context = context ?? throw new ArgumentNullException(nameof(context));
+		}
+
+		public async Task<IList<AirlineEntity>> GetAllAirlines()
+		{
+			return await _context.Airline
+				.OrderBy(c => c.Id)
+				.AsNoTracking()
+				.ToListAsync();
 		}
 
 		public async Task<IList<AirlineEntity>> GetAirlines(int page, int pageSize)

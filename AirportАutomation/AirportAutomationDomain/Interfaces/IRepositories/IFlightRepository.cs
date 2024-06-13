@@ -5,6 +5,7 @@ namespace AirportAutomation.Core.Interfaces.IRepositories
 {
 	public interface IFlightRepository
 	{
+		Task<IList<FlightEntity>> GetAllFlights();
 		Task<IList<FlightEntity>> GetFlights(int page, int pageSize);
 		Task<FlightEntity?> GetFlight(int id);
 		Task<IList<FlightEntity?>> GetFlightsBetweenDates(int page, int pageSize, DateOnly? startDate, DateOnly? endDate);

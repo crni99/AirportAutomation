@@ -5,6 +5,7 @@ namespace AirportAutomation.Core.Interfaces.IRepositories
 {
 	public interface IDestinationRepository
 	{
+		Task<IList<DestinationEntity>> GetAllDestinations();
 		Task<IList<DestinationEntity>> GetDestinations(int page, int pageSize);
 		Task<DestinationEntity?> GetDestination(int id);
 		Task<IList<DestinationEntity?>> GetDestinationsByCityOrAirport(int page, int pageSize, string city, string airport);

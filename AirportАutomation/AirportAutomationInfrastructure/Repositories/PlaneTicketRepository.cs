@@ -15,6 +15,19 @@ namespace AirportAutomation.Infrastructure.Repositories
 			_context = context ?? throw new ArgumentNullException(nameof(context));
 		}
 
+		public async Task<IList<PlaneTicketEntity>> GetAllPlaneTickets()
+		{
+			var collection = _context.PlaneTicket
+				.Include(k => k.Passenger)
+				.Include(k => k.TravelClass)
+				.Include(k => k.Flight)
+				.AsNoTracking();
+
+			return await collection
+				.OrderBy(c => c.Id)
+				.ToListAsync();
+		}
+
 		public async Task<IList<PlaneTicketEntity>> GetPlaneTickets(int page, int pageSize)
 		{
 			var collection = _context.PlaneTicket

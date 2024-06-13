@@ -5,6 +5,7 @@ namespace AirportAutomation.Core.Interfaces.IRepositories
 {
 	public interface IPassengerRepository
 	{
+		Task<IList<PassengerEntity>> GetAllPassengers();
 		Task<IList<PassengerEntity>> GetPassengers(int page, int pageSize);
 		Task<PassengerEntity?> GetPassenger(int id);
 		Task<IList<PassengerEntity?>> GetPassengersByName(int page, int pageSize, string firstName, string lastName);

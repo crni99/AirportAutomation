@@ -1,5 +1,4 @@
 ﻿using AirportAutomation.Api.Interfaces;
-using AirportAutomation.Core.Dtos.Airline;
 using AirportAutomation.Core.Dtos.Passenger;
 using AirportAutomation.Core.Dtos.Response;
 using AirportAutomation.Core.Entities;
@@ -20,6 +19,8 @@ namespace AirportАutomationApi.Controllers
 		private readonly IPassengerService _passengerService;
 		private readonly IPaginationValidationService _paginationValidationService;
 		private readonly IInputValidationService _inputValidationService;
+		private readonly IUtilityService _utilityService;
+		private readonly IExportService _exportService;
 		private readonly IMapper _mapper;
 		private readonly ILogger<PassengersController> _logger;
 		private readonly int maxPageSize;
@@ -28,6 +29,8 @@ namespace AirportАutomationApi.Controllers
 			IPassengerService passengerService,
 			IPaginationValidationService paginationValidationService,
 			IInputValidationService inputValidationService,
+			IUtilityService utilityService,
+			IExportService exportService,
 			IMapper mapper,
 			ILogger<PassengersController> logger,
 			IConfiguration configuration)
@@ -35,6 +38,8 @@ namespace AirportАutomationApi.Controllers
 			_passengerService = passengerService ?? throw new ArgumentNullException(nameof(passengerService));
 			_paginationValidationService = paginationValidationService ?? throw new ArgumentNullException(nameof(paginationValidationService));
 			_inputValidationService = inputValidationService ?? throw new ArgumentNullException(nameof(inputValidationService));
+			_utilityService = utilityService ?? throw new ArgumentNullException(nameof(utilityService));
+			_exportService = exportService ?? throw new ArgumentNullException(nameof(exportService));
 			_mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
 			_logger = logger ?? throw new ArgumentNullException(nameof(logger));
 			maxPageSize = configuration.GetValue<int>("pageSettings:maxPageSize");
@@ -286,6 +291,46 @@ namespace AirportАutomationApi.Controllers
 				_logger.LogInformation("Passenger with id {id} is being referenced by other entities and cannot be deleted.", id);
 				return Conflict("Passenger cannot be deleted because it is being referenced by other entities.");
 			}
+		}
+
+		/// <summary>
+		/// Endpoint for exporting passenger data to PDF.
+		/// </summary>
+		/// <param name="page">The page number for pagination (optional, default is 1).</param>
+		/// <param name="pageSize">The page size for pagination (optional, default is 10).</param>
+		/// <param name="getAll">Flag indicating whether to retrieve all data (optional, default is false).</param>
+		/// <returns>Returns the generated PDF document.</returns>
+		/// <response code="200">Returns the generated PDF document.</response>
+		/// <response code="400">If the request is invalid or if there's a validation error.</response>
+		/// <response code="401">If user do not have permission to access the requested resource.</response>
+		[HttpGet("export/pdf")]
+		[ProducesResponseType(200)]
+		[ProducesResponseType(400)]
+		[ProducesResponseType(401)]
+		public async Task<ActionResult> ExportToPdf([FromQuery] int page = 1, [FromQuery] int pageSize = 10, [FromQuery] bool getAll = false)
+		{
+			IList<PassengerEntity> passengers;
+			if (getAll)
+			{
+				passengers = await _passengerService.GetAllPassengers();
+			}
+			else
+			{
+				var (isValid, correctedPageSize, result) = _paginationValidationService.ValidatePaginationParameters(page, pageSize, maxPageSize);
+				if (!isValid)
+				{
+					return result;
+				}
+				passengers = await _passengerService.GetPassengers(page, correctedPageSize);
+			}
+			if (passengers is null || !passengers.Any())
+			{
+				_logger.LogInformation("Passengers not found.");
+				return NoContent();
+			}
+			var pdf = _exportService.ExportToPDF<PassengerEntity>("Passengers", passengers);
+			string fileName = _utilityService.GenerateUniqueFileName("Passengers");
+			return File(pdf, "application/pdf", fileName);
 		}
 
 	}

@@ -15,6 +15,14 @@ namespace AirportAutomation.Infrastructure.Repositories
 			_context = context ?? throw new ArgumentNullException(nameof(context));
 		}
 
+		public async Task<IList<PassengerEntity>> GetAllPassengers()
+		{
+			return await _context.Passenger
+				.OrderBy(c => c.Id)
+				.AsNoTracking()
+				.ToListAsync();
+		}
+
 		public async Task<IList<PassengerEntity>> GetPassengers(int page, int pageSize)
 		{
 			return await _context.Passenger

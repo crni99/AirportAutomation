@@ -15,6 +15,14 @@ namespace AirportAutomation.Infrastructure.Repositories
 			_context = context ?? throw new ArgumentNullException(nameof(context));
 		}
 
+		public async Task<IList<DestinationEntity>> GetAllDestinations()
+		{
+			return await _context.Destination
+				.OrderBy(c => c.Id)
+				.AsNoTracking()
+				.ToListAsync();
+		}
+
 		public async Task<IList<DestinationEntity>> GetDestinations(int page, int pageSize)
 		{
 			return await _context.Destination

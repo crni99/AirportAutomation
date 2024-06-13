@@ -1,6 +1,7 @@
 ﻿using AirportAutomation.Api.Interfaces;
 using AirportAutomation.Core.Dtos.Response;
 using AirportAutomation.Core.Dtos.TravelClass;
+using AirportAutomation.Core.Entities;
 using AirportAutomation.Core.Interfaces.IServices;
 using AirportАutomation.Api.Controllers;
 using AirportАutomation.Api.Interfaces;
@@ -17,6 +18,8 @@ namespace AirportАutomationApi.Controllers
 		private readonly ITravelClassService _travelClassService;
 		private readonly IPaginationValidationService _paginationValidationService;
 		private readonly IInputValidationService _inputValidationService;
+		private readonly IUtilityService _utilityService;
+		private readonly IExportService _exportService;
 		private readonly IMapper _mapper;
 		private readonly ILogger<TravelClassesController> _logger;
 		private readonly int maxPageSize;
@@ -25,6 +28,8 @@ namespace AirportАutomationApi.Controllers
 			ITravelClassService travelClassService,
 			IPaginationValidationService paginationValidationService,
 			IInputValidationService inputValidationService,
+			IUtilityService utilityService,
+			IExportService exportService,
 			IMapper mapper,
 			ILogger<TravelClassesController> logger,
 			IConfiguration configuration
@@ -33,6 +38,8 @@ namespace AirportАutomationApi.Controllers
 			_travelClassService = travelClassService ?? throw new ArgumentNullException(nameof(travelClassService));
 			_paginationValidationService = paginationValidationService ?? throw new ArgumentNullException(nameof(paginationValidationService));
 			_inputValidationService = inputValidationService ?? throw new ArgumentNullException(nameof(inputValidationService));
+			_utilityService = utilityService ?? throw new ArgumentNullException(nameof(utilityService));
+			_exportService = exportService ?? throw new ArgumentNullException(nameof(exportService));
 			_mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
 			_logger = logger ?? throw new ArgumentNullException(nameof(logger));
 			maxPageSize = configuration.GetValue<int>("pageSettings:maxPageSize");
@@ -101,6 +108,38 @@ namespace AirportАutomationApi.Controllers
 			var travelClass = await _travelClassService.GetTravelClass(id);
 			var travelClassDto = _mapper.Map<TravelClassDto>(travelClass);
 			return Ok(travelClassDto);
+		}
+
+		/// <summary>
+		/// Endpoint for exporting travel class data to PDF.
+		/// </summary>
+		/// <param name="page">The page number for pagination (optional, default is 1).</param>
+		/// <param name="pageSize">The page size for pagination (optional, default is 10).</param>
+		/// <param name="getAll">Flag indicating whether to retrieve all data (optional, default is false).</param>
+		/// <returns>Returns the generated PDF document.</returns>
+		/// <response code="200">Returns the generated PDF document.</response>
+		/// <response code="400">If the request is invalid or if there's a validation error.</response>
+		/// <response code="401">If user do not have permission to access the requested resource.</response>
+		[HttpGet("export/pdf")]
+		[ProducesResponseType(200)]
+		[ProducesResponseType(400)]
+		[ProducesResponseType(401)]
+		public async Task<ActionResult> ExportToPdf([FromQuery] int page = 1, [FromQuery] int pageSize = 10, [FromQuery] bool getAll = false)
+		{
+			var (isValid, correctedPageSize, result) = _paginationValidationService.ValidatePaginationParameters(page, pageSize, maxPageSize);
+			if (!isValid)
+			{
+				return result;
+			}
+			var travelClasses = await _travelClassService.GetTravelClasses(page, correctedPageSize);
+			if (travelClasses is null || !travelClasses.Any())
+			{
+				_logger.LogInformation("Travel Classes not found.");
+				return NoContent();
+			}
+			var pdf = _exportService.ExportToPDF<TravelClassEntity>("Travel Classes", travelClasses);
+			string fileName = _utilityService.GenerateUniqueFileName("TravelClasses");
+			return File(pdf, "application/pdf", fileName);
 		}
 
 	}

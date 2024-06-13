@@ -1,11 +1,11 @@
 ﻿using AirportAutomation.Core.Entities;
 using Microsoft.AspNetCore.JsonPatch;
-using System.Xml.Linq;
 
 namespace AirportAutomation.Core.Interfaces.IServices
 {
 	public interface IAirlineService
 	{
+		Task<IList<AirlineEntity>> GetAllAirlines();
 		Task<IList<AirlineEntity>> GetAirlines(int page, int pageSize);
 		Task<AirlineEntity?> GetAirline(int id);
 		Task<IList<AirlineEntity?>> GetAirlinesByName(int page, int pageSize, string name);

@@ -14,6 +14,11 @@ namespace AirportAutomation.Application.Services
 			_planeTicketRepository = planeTicketRepository;
 		}
 
+		public async Task<IList<PlaneTicketEntity>> GetAllPlaneTickets()
+		{
+			return await _planeTicketRepository.GetAllPlaneTickets();
+		}
+
 		public async Task<IList<PlaneTicketEntity>> GetPlaneTickets(int page, int pageSize)
 		{
 			return await _planeTicketRepository.GetPlaneTickets(page, pageSize);

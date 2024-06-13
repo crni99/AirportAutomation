@@ -14,10 +14,16 @@ namespace AirportAutomation.Application.Services
 			_passengerRepository = passengerRepository;
 		}
 
+		public async Task<IList<PassengerEntity>> GetAllPassengers()
+		{
+			return await _passengerRepository.GetAllPassengers();
+		}
+
 		public async Task<IList<PassengerEntity>> GetPassengers(int page, int pageSize)
 		{
 			return await _passengerRepository.GetPassengers(page, pageSize);
 		}
+
 		public async Task<PassengerEntity?> GetPassenger(int id)
 		{
 			return await _passengerRepository.GetPassenger(id);

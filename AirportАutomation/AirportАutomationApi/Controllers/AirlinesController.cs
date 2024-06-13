@@ -19,6 +19,8 @@ namespace AirportАutomationApi.Controllers
 		private readonly IAirlineService _airlineService;
 		private readonly IPaginationValidationService _paginationValidationService;
 		private readonly IInputValidationService _inputValidationService;
+		private readonly IUtilityService _utilityService;
+		private readonly IExportService _exportService;
 		private readonly IMapper _mapper;
 		private readonly ILogger<AirlinesController> _logger;
 		private readonly int maxPageSize;
@@ -27,6 +29,8 @@ namespace AirportАutomationApi.Controllers
 			IAirlineService airlineService,
 			IPaginationValidationService paginationValidationService,
 			IInputValidationService inputValidationService,
+			IUtilityService utilityService,
+			IExportService exportService,
 			IMapper mapper,
 			ILogger<AirlinesController> logger,
 			IConfiguration configuration
@@ -35,6 +39,8 @@ namespace AirportАutomationApi.Controllers
 			_airlineService = airlineService ?? throw new ArgumentNullException(nameof(airlineService));
 			_paginationValidationService = paginationValidationService ?? throw new ArgumentNullException(nameof(paginationValidationService));
 			_inputValidationService = inputValidationService ?? throw new ArgumentNullException(nameof(inputValidationService));
+			_utilityService = utilityService ?? throw new ArgumentNullException(nameof(utilityService));
+			_exportService = exportService ?? throw new ArgumentNullException(nameof(exportService));
 			_mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
 			_logger = logger ?? throw new ArgumentNullException(nameof(logger));
 			maxPageSize = configuration.GetValue<int>("pageSettings:maxPageSize");
@@ -282,6 +288,46 @@ namespace AirportАutomationApi.Controllers
 				_logger.LogInformation("Airline with id {id} is being referenced by other entities and cannot be deleted.", id);
 				return Conflict("Airline cannot be deleted because it is being referenced by other entities.");
 			}
+		}
+
+		/// <summary>
+		/// Endpoint for exporting airline data to PDF.
+		/// </summary>
+		/// <param name="page">The page number for pagination (optional, default is 1).</param>
+		/// <param name="pageSize">The page size for pagination (optional, default is 10).</param>
+		/// <param name="getAll">Flag indicating whether to retrieve all data (optional, default is false).</param>
+		/// <returns>Returns the generated PDF document.</returns>
+		/// <response code="200">Returns the generated PDF document.</response>
+		/// <response code="400">If the request is invalid or if there's a validation error.</response>
+		/// <response code="401">If user do not have permission to access the requested resource.</response>
+		[HttpGet("export/pdf")]
+		[ProducesResponseType(200)]
+		[ProducesResponseType(400)]
+		[ProducesResponseType(401)]
+		public async Task<ActionResult> ExportToPdf([FromQuery] int page = 1, [FromQuery] int pageSize = 10, [FromQuery] bool getAll = false)
+		{
+			IList<AirlineEntity> airlines;
+			if (getAll)
+			{
+				airlines = await _airlineService.GetAllAirlines();
+			}
+			else
+			{
+				var (isValid, correctedPageSize, result) = _paginationValidationService.ValidatePaginationParameters(page, pageSize, maxPageSize);
+				if (!isValid)
+				{
+					return result;
+				}
+				airlines = await _airlineService.GetAirlines(page, correctedPageSize);
+			}
+			if (airlines is null || !airlines.Any())
+			{
+				_logger.LogInformation("Airlines not found.");
+				return NoContent();
+			}
+			var pdf = _exportService.ExportToPDF<AirlineEntity>("Airlines", airlines);
+			string fileName = _utilityService.GenerateUniqueFileName("Airlines");
+			return File(pdf, "application/pdf", fileName);
 		}
 
 	}

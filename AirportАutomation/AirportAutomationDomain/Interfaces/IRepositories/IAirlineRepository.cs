@@ -5,6 +5,7 @@ namespace AirportAutomation.Core.Interfaces.IRepositories
 {
 	public interface IAirlineRepository
 	{
+		Task<IList<AirlineEntity>> GetAllAirlines();
 		Task<IList<AirlineEntity>> GetAirlines(int page, int pageSize);
 		Task<AirlineEntity?> GetAirline(int id);
 		Task<IList<AirlineEntity?>> GetAirlinesByName(int page, int pageSize, string name);
