@@ -307,7 +307,12 @@ namespace AirportАutomationApi.Controllers
 		[ProducesResponseType(200)]
 		[ProducesResponseType(400)]
 		[ProducesResponseType(401)]
-		public async Task<ActionResult> ExportToPdf([FromQuery] int page = 1, [FromQuery] int pageSize = 10, [FromQuery] bool getAll = false)
+		public async Task<ActionResult> ExportToPdf(
+			[FromQuery] int page = 1,
+			[FromQuery] int pageSize = 10,
+			[FromQuery] bool getAll = false,
+			[FromQuery] string? city = null,
+			[FromQuery] string? airport = null)
 		{
 			IList<DestinationEntity> destinations;
 			if (getAll)
@@ -321,7 +326,14 @@ namespace AirportАutomationApi.Controllers
 				{
 					return result;
 				}
-				destinations = await _destinationService.GetDestinations(page, correctedPageSize);
+				if (string.IsNullOrEmpty(city) && string.IsNullOrEmpty(airport))
+				{
+					destinations = await _destinationService.GetDestinations(page, correctedPageSize);
+				}
+				else
+				{
+					destinations = await _destinationService.GetDestinationsByCityOrAirport(page, correctedPageSize, city, airport);
+				}
 			}
 			if (destinations is null || !destinations.Any())
 			{

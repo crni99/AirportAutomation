@@ -138,15 +138,15 @@ namespace AirportАutomationApi.Controllers
 			{
 				return result;
 			}
-			if (!_inputValidationService.IsValidDateOnly(startDate) && !_inputValidationService.IsValidDateOnly(endDate))
-			{
-				_logger.LogInformation("Invalid input. The start and end dates must be valid dates.");
-				return BadRequest("Invalid input. The start and end dates must be valid dates.");
-			}
 			if (!startDate.HasValue && !endDate.HasValue)
 			{
 				_logger.LogInformation("Both start date and end date are missing in the request.");
 				return BadRequest("Both start date and end date are missing in the request.");
+			}
+			if (!_inputValidationService.IsValidDateOnly(startDate) && !_inputValidationService.IsValidDateOnly(endDate))
+			{
+				_logger.LogInformation("Invalid input. The start and end dates must be valid dates.");
+				return BadRequest("Invalid input. The start and end dates must be valid dates.");
 			}
 			var flights = await _flightService.GetFlightsBetweenDates(page, correctedPageSize, startDate, endDate);
 			if (flights == null || flights.Count == 0)
@@ -312,9 +312,14 @@ namespace AirportАutomationApi.Controllers
 		[ProducesResponseType(200)]
 		[ProducesResponseType(400)]
 		[ProducesResponseType(401)]
-		public async Task<ActionResult> ExportToPdf([FromQuery] int page = 1, [FromQuery] int pageSize = 10, [FromQuery] bool getAll = false)
+		public async Task<ActionResult> ExportToPdf(
+			[FromQuery] int page = 1,
+			[FromQuery] int pageSize = 10,
+			[FromQuery] bool getAll = false,
+			[FromQuery] DateOnly? startDate = null,
+			[FromQuery] DateOnly? endDate = null)
 		{
-			IList<FlightEntity> flights;
+			IList<FlightEntity> flights = new List<FlightEntity>();
 			if (getAll)
 			{
 				flights = await _flightService.GetAllFlights();
@@ -326,7 +331,17 @@ namespace AirportАutomationApi.Controllers
 				{
 					return result;
 				}
-				flights = await _flightService.GetFlights(page, correctedPageSize);
+				if (startDate.HasValue && endDate.HasValue)
+				{
+					if (_inputValidationService.IsValidDateOnly(startDate) && _inputValidationService.IsValidDateOnly(endDate))
+					{
+						flights = await _flightService.GetFlightsBetweenDates(page, correctedPageSize, startDate, endDate);
+					}
+				}
+				else
+				{
+					flights = await _flightService.GetFlights(page, correctedPageSize);
+				}
 			}
 			if (flights is null || !flights.Any())
 			{

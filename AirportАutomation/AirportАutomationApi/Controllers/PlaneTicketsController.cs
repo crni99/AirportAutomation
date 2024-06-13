@@ -308,7 +308,12 @@ namespace AirportАutomationApi.Controllers
 		[ProducesResponseType(200)]
 		[ProducesResponseType(400)]
 		[ProducesResponseType(401)]
-		public async Task<ActionResult> ExportToPdf([FromQuery] int page = 1, [FromQuery] int pageSize = 10, [FromQuery] bool getAll = false)
+		public async Task<ActionResult> ExportToPdf(
+			[FromQuery] int page = 1,
+			[FromQuery] int pageSize = 10,
+			[FromQuery] bool getAll = false,
+			[FromQuery] int? minPrice = null,
+			[FromQuery] int? maxPrice = null)
 		{
 			IList<PlaneTicketEntity> planeTickets;
 			if (getAll)
@@ -322,7 +327,14 @@ namespace AirportАutomationApi.Controllers
 				{
 					return result;
 				}
-				planeTickets = await _planeTicketService.GetPlaneTickets(page, correctedPageSize);
+				if (!minPrice.HasValue && !maxPrice.HasValue)
+				{
+					planeTickets = await _planeTicketService.GetPlaneTickets(page, correctedPageSize);
+				}
+				else
+				{
+					planeTickets = await _planeTicketService.GetPlaneTicketsForPrice(page, correctedPageSize, minPrice, maxPrice);
+				}
 			}
 			if (planeTickets is null || !planeTickets.Any())
 			{
