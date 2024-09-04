@@ -1,4 +1,4 @@
-﻿using AirportAutomation.Core.Dtos.TravelClass;
+﻿using AirportAutomation.Application.Dtos.TravelClass;
 using AirportAutomation.Core.Entities;
 using AutoMapper;
 

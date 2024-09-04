@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace AirportAutomation.Core.Dtos.ApiUser;
+namespace AirportAutomation.Application.Dtos.ApiUser;
 
 public class ApiUserDto
 {

@@ -1,4 +1,4 @@
-﻿namespace AirportAutomation.Core.Dtos.Airline
+﻿namespace AirportAutomation.Application.Dtos.Airline
 {
 	public class AirlineDto
 	{

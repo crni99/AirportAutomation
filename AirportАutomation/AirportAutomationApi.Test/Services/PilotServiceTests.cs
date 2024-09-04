@@ -1,6 +1,6 @@
-﻿using AirportAutomationApi.Entities;
-using AirportAutomationApi.IRepository;
-using AirportAutomationApi.Services;
+﻿using AirportAutomation.Application.Services;
+using AirportAutomation.Core.Entities;
+using AirportAutomation.Core.Interfaces.IRepositories;
 using Microsoft.AspNetCore.JsonPatch;
 using Moq;
 
@@ -15,6 +15,14 @@ namespace AirportAutomationApi.Test.Services
 		{
 			_repositoryMock = new Mock<IPilotRepository>();
 			_service = new PilotService(_repositoryMock.Object);
+		}
+
+		[Fact]
+		public async Task GetAllPilots_Should_Call_Repository_GetAllPilots()
+		{
+			await _service.GetAllPilots();
+
+			_repositoryMock.Verify(repo => repo.GetAllPilots(), Times.Once);
 		}
 
 		[Fact]
@@ -36,15 +44,15 @@ namespace AirportAutomationApi.Test.Services
 		[Fact]
 		public async Task GetPilotsByName_Should_Call_Repository_GetPilotsByName()
 		{
-			await _service.GetPilotsByName("John", "Doe");
+			await _service.GetPilotsByName(1, 10, "John", "Doe");
 
-			_repositoryMock.Verify(repo => repo.GetPilotsByName("John", "Doe"), Times.Once);
+			_repositoryMock.Verify(repo => repo.GetPilotsByName(1, 10, "John", "Doe"), Times.Once);
 		}
 
 		[Fact]
 		public async Task PostPilot_Should_Call_Repository_PostPilot()
 		{
-			var pilot = new Pilot();
+			var pilot = new PilotEntity();
 
 			await _service.PostPilot(pilot);
 
@@ -54,7 +62,7 @@ namespace AirportAutomationApi.Test.Services
 		[Fact]
 		public async Task PutPilot_Should_Call_Repository_PutPilot()
 		{
-			var pilot = new Pilot();
+			var pilot = new PilotEntity();
 
 			await _service.PutPilot(pilot);
 
@@ -89,14 +97,15 @@ namespace AirportAutomationApi.Test.Services
 		}
 
 		[Fact]
-		public void PilotsCount_ShouldReturnCorrectCount()
+		public async Task PilotsCount_ShouldReturnCorrectCount()
 		{
 			var expectedCount = 5;
-			_repositoryMock.Setup(repo => repo.PilotsCount()).Returns(expectedCount);
+			_repositoryMock.Setup(repo => repo.PilotsCount(null, null)).ReturnsAsync(expectedCount);
 
-			int count = _service.PilotsCount();
+			int count = await _service.PilotsCount();
 
 			Assert.Equal(expectedCount, count);
 		}
+
 	}
 }

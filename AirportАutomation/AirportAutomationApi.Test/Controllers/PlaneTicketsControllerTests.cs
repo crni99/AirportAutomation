@@ -1,10 +1,11 @@
-﻿using AirportAutomationApi.Dtos.PlaneTicket;
-using AirportAutomationApi.Entities;
-using AirportAutomationApi.IService;
+﻿using AirportAutomation.Api.Interfaces;
+using AirportAutomation.Application.Dtos.PlaneTicket;
+using AirportAutomation.Application.Dtos.PlaneTicket;
+using AirportAutomation.Application.Dtos.Response;
+using AirportAutomation.Core.Entities;
+using AirportAutomation.Core.Interfaces.IServices;
+using AirportАutomation.Api.Interfaces;
 using AirportАutomationApi.Controllers;
-using AirportАutomationApi.Dtos.PlaneTicket;
-using AirportАutomationApi.Dtos.Response;
-using AirportАutomationApi.IServices;
 using AutoMapper;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
@@ -14,42 +15,22 @@ using Moq;
 
 namespace AirportAutomationApi.Test.Controllers
 {
+
 	public class PlaneTicketsControllerTests
 	{
 		private readonly PlaneTicketsController _controller;
 		private readonly Mock<IPlaneTicketService> _planeTicketServiceMock;
 		private readonly Mock<IPaginationValidationService> _paginationValidationServiceMock;
+		private readonly Mock<IInputValidationService> _inputValidationServiceMock;
+		private readonly Mock<IUtilityService> _utilityServiceMock;
+		private readonly Mock<IExportService> _exportServiceMock;
 		private readonly Mock<IMapper> _mapperMock;
 		private readonly Mock<ILogger<PlaneTicketsController>> _loggerMock;
 		private readonly Mock<IConfiguration> _configurationMock;
 
-		private readonly int page = 1;
-		private readonly int pageSize = 10;
-
-		private readonly PlaneTicket planeTicket = new()
+		private readonly PlaneTicketEntity planeTicketEntity = new()
 		{
 			Id = 1,
-			Price = 200,
-			PurchaseDate = new DateOnly(2023, 09, 20),
-			SeatNumber = 1,
-			PassengerId = 1,
-			TravelClassId = 1,
-			FlightId = 1
-		};
-
-		private readonly PlaneTicket planeTicket2 = new()
-		{
-			Id = 2,
-			Price = 400,
-			PurchaseDate = new DateOnly(2023, 09, 20),
-			SeatNumber = 2,
-			PassengerId = 2,
-			TravelClassId = 2,
-			FlightId = 2
-		};
-
-		private readonly PlaneTicketCreateDto planeTicketCreateDto = new()
-		{
 			Price = 200,
 			PurchaseDate = new DateOnly(2023, 09, 20),
 			SeatNumber = 1,
@@ -60,30 +41,22 @@ namespace AirportAutomationApi.Test.Controllers
 
 		private readonly PlaneTicketDto planeTicketDto = new()
 		{
-			Id = 1,
-			Price = 200,
+			Id = 2,
+			Price = 400,
 			PurchaseDate = new DateOnly(2023, 09, 20),
-			SeatNumber = 1,
-			PassengerId = 1,
-			TravelClassId = 1,
-			FlightId = 1
-		};
-
-		private readonly PlaneTicketUpdateDto planeTicketUpdateDto = new()
-		{
-			Id = 1,
-			Price = 200,
-			PurchaseDate = new DateOnly(2023, 09, 20),
-			SeatNumber = 1,
-			PassengerId = 1,
-			TravelClassId = 1,
-			FlightId = 1
+			SeatNumber = 2,
+			PassengerId = 2,
+			TravelClassId = 2,
+			FlightId = 2
 		};
 
 		public PlaneTicketsControllerTests()
 		{
 			_planeTicketServiceMock = new Mock<IPlaneTicketService>();
 			_paginationValidationServiceMock = new Mock<IPaginationValidationService>();
+			_inputValidationServiceMock = new Mock<IInputValidationService>();
+			_utilityServiceMock = new Mock<IUtilityService>();
+			_exportServiceMock = new Mock<IExportService>();
 			_mapperMock = new Mock<IMapper>();
 			_loggerMock = new Mock<ILogger<PlaneTicketsController>>();
 			_configurationMock = new Mock<IConfiguration>();
@@ -98,6 +71,9 @@ namespace AirportAutomationApi.Test.Controllers
 			_controller = new PlaneTicketsController(
 				_planeTicketServiceMock.Object,
 				_paginationValidationServiceMock.Object,
+				_inputValidationServiceMock.Object,
+				_utilityServiceMock.Object,
+				_exportServiceMock.Object,
 				_mapperMock.Object,
 				_loggerMock.Object,
 				_configurationMock.Object
@@ -108,6 +84,7 @@ namespace AirportAutomationApi.Test.Controllers
 		[Trait("Category", "GetPlaneTickets")]
 		public async Task GetPlaneTickets_InvalidPaginationParameters_ReturnsBadRequest()
 		{
+			// Arrange
 			int invalidPage = -1;
 			int invalidPageSize = 0;
 			var expectedBadRequestResult = new BadRequestObjectResult("Invalid pagination parameters.");
@@ -116,8 +93,10 @@ namespace AirportAutomationApi.Test.Controllers
 				.Setup(x => x.ValidatePaginationParameters(invalidPage, invalidPageSize, It.IsAny<int>()))
 				.Returns((false, 0, expectedBadRequestResult));
 
+			// Act
 			var result = await _controller.GetPlaneTickets(invalidPage, invalidPageSize);
 
+			// Assert
 			Assert.IsType<BadRequestObjectResult>(result.Result);
 		}
 
@@ -125,14 +104,20 @@ namespace AirportAutomationApi.Test.Controllers
 		[Trait("Category", "GetPlaneTickets")]
 		public async Task GetPlaneTickets_ReturnsNoContent_WhenNoPlaneTicketsFound()
 		{
+			// Arrange
+			int page = 1;
+			int pageSize = 10;
+
 			_paginationValidationServiceMock
 				.Setup(x => x.ValidatePaginationParameters(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<int>()))
-				.Returns((true, 0, null));
+				.Returns((true, pageSize, null));
 			_planeTicketServiceMock.Setup(service => service.GetPlaneTickets(It.IsAny<int>(), It.IsAny<int>()))
-				.ReturnsAsync(new List<PlaneTicket>());
+				.ReturnsAsync(new List<PlaneTicketEntity>());
 
-			var result = await _controller.GetPlaneTickets();
+			// Act
+			var result = await _controller.GetPlaneTickets(page, pageSize);
 
+			// Assert
 			Assert.IsType<NoContentResult>(result.Result);
 		}
 
@@ -140,306 +125,536 @@ namespace AirportAutomationApi.Test.Controllers
 		[Trait("Category", "GetPlaneTickets")]
 		public async Task GetPlaneTickets_ReturnsInternalServerError_WhenExceptionThrown()
 		{
+			// Arrange
+			int page = 1;
+			int pageSize = 10;
+
 			_paginationValidationServiceMock
 				.Setup(x => x.ValidatePaginationParameters(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<int>()))
-				.Returns((true, 0, null));
+				.Returns((true, pageSize, null));
 			_planeTicketServiceMock.Setup(service => service.GetPlaneTickets(It.IsAny<int>(), It.IsAny<int>()))
 				.ThrowsAsync(new Exception("Simulated exception"));
 
-			await Assert.ThrowsAsync<Exception>(async () => await _controller.GetPlaneTickets());
+			// Act & Assert
+			await Assert.ThrowsAsync<Exception>(async () => await _controller.GetPlaneTickets(page, pageSize));
 		}
 
 		[Fact]
 		[Trait("Category", "GetPlaneTickets")]
-		public async Task GetPlaneTickets_ReturnsNoContent_WhenNoData()
+		public async Task GetPlaneTickets_ReturnsOk_WithPaginatedPlaneTickets()
 		{
-			List<PlaneTicket> planeTickets = null;
+			// Arrange
+			int page = 1;
+			int pageSize = 10;
+			var planeTickets = new List<PlaneTicketEntity>
+			{
+				new PlaneTicketEntity { /* Initialize properties */ },
+				new PlaneTicketEntity { /* Initialize properties */ }
+			};
+			var totalItems = 2;
+
 			_paginationValidationServiceMock
 				.Setup(x => x.ValidatePaginationParameters(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<int>()))
-				.Returns((true, 0, null));
-			_planeTicketServiceMock.Setup(service => service.GetPlaneTickets(page, pageSize))
+				.Returns((true, pageSize, null));
+			_planeTicketServiceMock
+				.Setup(service => service.GetPlaneTickets(page, pageSize))
 				.ReturnsAsync(planeTickets);
+			_planeTicketServiceMock
+				.Setup(service => service.PlaneTicketsCount(null, null))
+				.ReturnsAsync(totalItems);
 
+			var expectedData = new List<PlaneTicketDto>
+			{
+				new PlaneTicketDto { /* Initialize properties */ },
+				new PlaneTicketDto { /* Initialize properties */ }
+			};
+			_mapperMock
+				.Setup(m => m.Map<IEnumerable<PlaneTicketDto>>(It.IsAny<IEnumerable<PlaneTicketEntity>>()))
+				.Returns(expectedData);
+
+			// Act
 			var result = await _controller.GetPlaneTickets(page, pageSize);
 
+			// Assert
 			var actionResult = Assert.IsType<ActionResult<PagedResponse<PlaneTicketDto>>>(result);
-			Assert.IsType<NoContentResult>(actionResult.Result);
-		}
-
-		[Fact]
-		[Trait("Category", "GetPlaneTicketById")]
-		public async Task GetPlaneTicketById_ReturnsOkResult_WhenPlaneTicketExists()
-		{
-			var planeTicketId = 1;
-			_planeTicketServiceMock.Setup(service => service.PlaneTicketExists(planeTicketId))
-				.ReturnsAsync(true);
-			_planeTicketServiceMock.Setup(service => service.GetPlaneTicket(planeTicketId))
-				.ReturnsAsync(planeTicket);
-			_mapperMock.Setup(mapper => mapper.Map<PlaneTicketDto>(It.IsAny<PlaneTicket>()))
-				.Returns(new PlaneTicketDto());
-
-			var result = await _controller.GetPlaneTicket(planeTicketId);
-
-			var actionResult = Assert.IsType<ActionResult<PlaneTicketDto>>(result);
 			var okResult = Assert.IsType<OkObjectResult>(actionResult.Result);
-			Assert.IsType<PlaneTicketDto>(okResult.Value);
+			var pagedResponse = Assert.IsType<PagedResponse<PlaneTicketDto>>(okResult.Value);
+			Assert.Equal(page, pagedResponse.PageNumber);
+			Assert.Equal(pageSize, pagedResponse.PageSize);
+			Assert.Equal(totalItems, pagedResponse.TotalCount);
+			Assert.Equal(expectedData, pagedResponse.Data);
 		}
 
 		[Fact]
-		[Trait("Category", "GetPlaneTicketById")]
-		public async Task GetPlaneTicketById_ReturnsNotFound_WhenPlaneTicketDoesNotExist()
+		[Trait("Category", "GetPlaneTickets")]
+		public async Task GetPlaneTickets_ReturnsCorrectPageData()
 		{
-			var planeTicketId = 2;
-			_planeTicketServiceMock.Setup(service => service.PlaneTicketExists(planeTicketId))
+			// Arrange
+			int page = 2;
+			int pageSize = 5;
+			var allPlaneTickets = new List<PlaneTicketEntity>
+			{
+				new PlaneTicketEntity { /* Initialize properties */ },
+				new PlaneTicketEntity { /* Initialize properties */ },
+				new PlaneTicketEntity { /* Initialize properties */ },
+				new PlaneTicketEntity { /* Initialize properties */ },
+				new PlaneTicketEntity { /* Initialize properties */ },
+				new PlaneTicketEntity { /* Initialize properties */ },
+				new PlaneTicketEntity { /* Initialize properties */ },
+				new PlaneTicketEntity { /* Initialize properties */ },
+				new PlaneTicketEntity { /* Initialize properties */ },
+				new PlaneTicketEntity { /* Initialize properties */ }
+			};
+			var pagedPlaneTickets = allPlaneTickets.Skip((page - 1) * pageSize).Take(pageSize).ToList();
+
+			_paginationValidationServiceMock
+				.Setup(x => x.ValidatePaginationParameters(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<int>()))
+				.Returns((true, pageSize, null));
+			_planeTicketServiceMock
+				.Setup(service => service.GetPlaneTickets(page, pageSize))
+				.ReturnsAsync(pagedPlaneTickets);
+			_planeTicketServiceMock
+				.Setup(service => service.PlaneTicketsCount(null, null))
+				.ReturnsAsync(allPlaneTickets.Count);
+
+			var expectedData = new List<PlaneTicketDto>
+			{
+				new PlaneTicketDto { /* Initialize properties */ },
+				new PlaneTicketDto { /* Initialize properties */ },
+				new PlaneTicketDto { /* Initialize properties */ },
+				new PlaneTicketDto { /* Initialize properties */ },
+				new PlaneTicketDto { /* Initialize properties */ }
+			};
+			_mapperMock
+				.Setup(m => m.Map<IEnumerable<PlaneTicketDto>>(It.IsAny<IEnumerable<PlaneTicketEntity>>()))
+				.Returns(expectedData);
+
+			// Act
+			var result = await _controller.GetPlaneTickets(page, pageSize);
+
+			// Assert
+			var actionResult = Assert.IsType<ActionResult<PagedResponse<PlaneTicketDto>>>(result);
+			var okResult = Assert.IsType<OkObjectResult>(actionResult.Result);
+			var pagedResponse = Assert.IsType<PagedResponse<PlaneTicketDto>>(okResult.Value);
+			Assert.Equal(page, pagedResponse.PageNumber);
+			Assert.Equal(pageSize, pagedResponse.PageSize);
+			Assert.Equal(allPlaneTickets.Count, pagedResponse.TotalCount);
+			Assert.Equal(expectedData, pagedResponse.Data);
+		}
+
+		[Fact]
+		[Trait("Category", "GetPlaneTicket")]
+		public async Task GetPlaneTicket_InvalidId_ReturnsBadRequest()
+		{
+			// Arrange
+			int invalidId = -1;
+			var expectedBadRequestResult = new BadRequestObjectResult("Invalid input. The ID must be a non-negative integer.");
+
+			_inputValidationServiceMock
+				.Setup(x => x.IsNonNegativeInt(invalidId))
+				.Returns(false);
+
+			// Act
+			var result = await _controller.GetPlaneTicket(invalidId);
+
+			// Assert
+			Assert.IsType<BadRequestObjectResult>(result.Result);
+			var badRequestResult = result.Result as BadRequestObjectResult;
+			Assert.Equal(expectedBadRequestResult.Value, badRequestResult.Value);
+		}
+
+		[Fact]
+		[Trait("Category", "GetPlaneTicket")]
+		public async Task GetPlaneTicket_PlaneTicketNotFound_ReturnsNotFound()
+		{
+			// Arrange
+			int validId = 1;
+
+			_inputValidationServiceMock
+				.Setup(x => x.IsNonNegativeInt(validId))
+				.Returns(true);
+			_planeTicketServiceMock
+				.Setup(service => service.PlaneTicketExists(validId))
 				.ReturnsAsync(false);
 
-			var result = await _controller.GetPlaneTicket(planeTicketId);
+			// Act
+			var result = await _controller.GetPlaneTicket(validId);
 
+			// Assert
+			Assert.IsType<NotFoundResult>(result.Result);
+		}
+
+		[Fact]
+		[Trait("Category", "GetPlaneTicket")]
+		public async Task GetPlaneTicket_ReturnsPlaneTicketDto_WhenPlaneTicketExists()
+		{
+			// Arrange
+			int validId = 1;
+
+			_inputValidationServiceMock
+				.Setup(x => x.IsNonNegativeInt(validId))
+				.Returns(true);
+			_planeTicketServiceMock
+				.Setup(service => service.PlaneTicketExists(validId))
+				.ReturnsAsync(true);
+			_planeTicketServiceMock
+				.Setup(service => service.GetPlaneTicket(validId))
+				.ReturnsAsync(planeTicketEntity);
+			_mapperMock
+				.Setup(m => m.Map<PlaneTicketDto>(planeTicketEntity))
+				.Returns(planeTicketDto);
+
+			// Act
+			var result = await _controller.GetPlaneTicket(validId);
+
+			// Assert
 			var actionResult = Assert.IsType<ActionResult<PlaneTicketDto>>(result);
-			Assert.IsType<NotFoundResult>(actionResult.Result);
+			var okResult = Assert.IsType<OkObjectResult>(actionResult.Result);
+			var returnedPlaneTicketDto = Assert.IsType<PlaneTicketDto>(okResult.Value);
+			Assert.Equal(planeTicketDto, returnedPlaneTicketDto);
 		}
 
 		[Fact]
-		[Trait("Category", "GetPlaneTicketById")]
-		public async Task GetPlaneTicketById_ThrowsException_WhenServiceThrowsException()
+		public async Task GetPlaneTicketsForPrice_ReturnsBadRequest_WhenMinPriceAndMaxPriceAreMissing()
 		{
-			var planeTicketId = 1;
-			_planeTicketServiceMock.Setup(service => service.PlaneTicketExists(planeTicketId))
-				.Throws(new Exception("Simulated exception"));
+			// Arrange
+			int page = 1;
+			int pageSize = 10;
 
-			await Assert.ThrowsAsync<Exception>(async () => await _controller.GetPlaneTicket(planeTicketId));
+			// Act
+			var result = await _controller.GetPlaneTicketsForPrice(null, null, page, pageSize);
+
+			// Assert
+			Assert.NotNull(result);
 		}
 
 		[Fact]
-		[Trait("Category", "GetPlaneTicketsForPrice")]
-		public async Task GetPlaneTicketsForPrice_ReturnsOkResult_WithValidInput()
+		[Trait("Category", "GetPlaneTicketsByPrice")]
+		public async Task GetPlaneTicketsByPrice_InvalidPaginationParameters_ReturnsBadRequest()
 		{
-			var minPrice = 1;
-			var maxPrice = 1000;
-			var expectedPlaneTickets = new List<PlaneTicket>
-			{
-				planeTicket
-			};
-			var expectedPlaneTicketDto = expectedPlaneTickets.Select(a => new PlaneTicketDto
-			{
-				Id = a.Id,
-			});
+			// Arrange
+			int minPrice = 100;
+			int maxPrice = 200;
+			int invalidPage = -1;
+			int invalidPageSize = 0;
+			var expectedBadRequestResult = new BadRequestObjectResult("Invalid pagination parameters.");
 
-			_planeTicketServiceMock.Setup(service => service.GetPlaneTicketsForPrice(minPrice, maxPrice))
-					.ReturnsAsync(expectedPlaneTickets);
+			_paginationValidationServiceMock
+				.Setup(x => x.ValidatePaginationParameters(invalidPage, invalidPageSize, It.IsAny<int>()))
+				.Returns((false, 0, expectedBadRequestResult));
 
-			var result = await _controller.GetPlaneTicketsForPrice(minPrice, maxPrice);
+			// Act
+			var result = await _controller.GetPlaneTicketsForPrice(minPrice, maxPrice, invalidPage, invalidPageSize);
 
-			Assert.IsType<ActionResult<IEnumerable<PlaneTicketDto>>>(result);
+			// Assert
+			Assert.IsType<BadRequestObjectResult>(result.Result);
 		}
 
 		[Fact]
-		[Trait("Category", "GetPlaneTicketsForPrice")]
-		public async Task GetPlaneTicketsForPrice_ReturnsBadRequest_WhenBothPricesAreMissing()
+		[Trait("Category", "GetPlaneTicketsByPrice")]
+		public async Task GetPlaneTicketsByPrice_PlaneTicketsNotFound_ReturnsNotFound()
 		{
-			int? minPrice = null;
-			int? maxPrice = null;
-			List<PlaneTicket> planeTickets = null;
-			_planeTicketServiceMock.Setup(service => service.GetPlaneTicketsForPrice(minPrice, maxPrice))
-				.ReturnsAsync(planeTickets);
+			// Arrange
+			int minPrice = 100;
+			int maxPrice = 200;
+			int validPage = 1;
+			int validPageSize = 10;
 
-			var result = await _controller.GetPlaneTicketsForPrice(minPrice, maxPrice);
+			_paginationValidationServiceMock
+				.Setup(x => x.ValidatePaginationParameters(validPage, validPageSize, It.IsAny<int>()))
+				.Returns((true, validPageSize, null));
+			_planeTicketServiceMock
+				.Setup(service => service.GetPlaneTicketsForPrice(validPage, validPageSize, minPrice, maxPrice))
+				.ReturnsAsync(new List<PlaneTicketEntity>());
 
-			var badRequestObjectResult = Assert.IsType<ActionResult<IEnumerable<PlaneTicketDto>>>(result);
-			Assert.IsType<BadRequestObjectResult>(badRequestObjectResult.Result);
-			Assert.True(string.IsNullOrEmpty(badRequestObjectResult.Value?.ToString()));
+			// Act
+			var result = await _controller.GetPlaneTicketsForPrice(minPrice, maxPrice, validPage, validPageSize);
+
+			// Assert
+			Assert.IsType<NotFoundResult>(result.Result);
 		}
 
 		[Fact]
-		[Trait("Category", "GetPlaneTicketsForPrice")]
-		public async Task GetPlaneTicketsForPrice_ReturnsNoContent_WhenNoData()
+		[Trait("Category", "GetPlaneTicketsByPrice")]
+		public async Task GetPlaneTicketsByPrice_ReturnsPagedListOfPlaneTickets_WhenPlaneTicketsFound()
 		{
-			List<PlaneTicket> planeTickets = null;
-			_planeTicketServiceMock.Setup(service => service.GetPlaneTicketsForPrice(page, pageSize))
-				.ReturnsAsync(planeTickets);
+			// Arrange
+			int minPrice = 100;
+			int maxPrice = 200;
+			int validPage = 1;
+			int validPageSize = 10;
+			var planeTicketEntities = new List<PlaneTicketEntity> { planeTicketEntity };
+			var planeTicketDtos = new List<PlaneTicketDto> { planeTicketDto };
+			var totalItems = 1;
 
-			var result = await _controller.GetPlaneTicketsForPrice(page, pageSize);
+			_paginationValidationServiceMock
+				.Setup(x => x.ValidatePaginationParameters(validPage, validPageSize, It.IsAny<int>()))
+				.Returns((true, validPageSize, null));
+			_planeTicketServiceMock
+				.Setup(service => service.GetPlaneTicketsForPrice(validPage, validPageSize, minPrice, maxPrice))
+				.ReturnsAsync(planeTicketEntities);
+			_planeTicketServiceMock
+				.Setup(service => service.PlaneTicketsCount(minPrice, maxPrice))
+				.ReturnsAsync(totalItems);
+			_mapperMock
+				.Setup(m => m.Map<IEnumerable<PlaneTicketDto>>(planeTicketEntities))
+				.Returns(planeTicketDtos);
 
-			var actionResult = Assert.IsType<ActionResult<IEnumerable<PlaneTicketDto>>>(result);
-			Assert.IsType<NoContentResult>(actionResult.Result);
-		}
+			// Act
+			var result = await _controller.GetPlaneTicketsForPrice(minPrice, maxPrice, validPage, validPageSize);
 
-		[Fact]
-		[Trait("Category", "GetPlaneTicketsForPrice")]
-		public async Task GetPlaneTicketsForPrice_ThrowsException_WhenServiceThrowsException()
-		{
-			int minPrice = 1;
-			int maxPrice = 2;
-
-			_planeTicketServiceMock.Setup(service => service.GetPlaneTicketsForPrice(minPrice, maxPrice))
-				.ThrowsAsync(new Exception("Simulated exception"));
-
-			await Assert.ThrowsAsync<Exception>(async () => await _controller.GetPlaneTicketsForPrice(minPrice, maxPrice));
+			// Assert
+			var actionResult = Assert.IsType<ActionResult<PagedResponse<PlaneTicketDto>>>(result);
+			var okResult = Assert.IsType<OkObjectResult>(actionResult.Result);
+			var response = Assert.IsType<PagedResponse<PlaneTicketDto>>(okResult.Value);
+			Assert.Equal(validPage, response.PageNumber);
+			Assert.Equal(validPageSize, response.PageSize);
+			Assert.Equal(totalItems, response.TotalCount);
+			Assert.Equal(planeTicketDtos, response.Data);
 		}
 
 		[Fact]
 		[Trait("Category", "PostPlaneTicket")]
-		public async Task PostPlaneTicket_ReturnsCreatedAtAction_WhenPlaneTicketCreatedSuccessfully()
+		public async Task PostPlaneTicket_ReturnsCreatedAtActionResult_WhenPlaneTicketIsCreatedSuccessfully()
 		{
-			_mapperMock.Setup(mapper => mapper.Map<PlaneTicket>(planeTicketCreateDto))
-			.Returns(planeTicket);
-			_planeTicketServiceMock.Setup(service => service.PostPlaneTicket(It.IsAny<PlaneTicket>()))
-			.ReturnsAsync(planeTicket);
+			// Arrange
+			var planeTicketCreateDto = new PlaneTicketCreateDto();
+			var planeTicketEntity = new PlaneTicketEntity { Id = 1 };
+			var planeTicketDto = new PlaneTicketDto { Id = 1 };
 
+			// Set up the mapper to return the expected values
+			_mapperMock.Setup(m => m.Map<PlaneTicketEntity>(planeTicketCreateDto)).Returns(planeTicketEntity);
+			_mapperMock.Setup(m => m.Map<PlaneTicketDto>(planeTicketEntity)).Returns(planeTicketDto);
+
+			// Adjust service setup to return the planeTicketEntity wrapped in a Task
+			_planeTicketServiceMock.Setup(service => service.PostPlaneTicket(planeTicketEntity))
+							   .ReturnsAsync(planeTicketEntity);
+
+			// Act
 			var result = await _controller.PostPlaneTicket(planeTicketCreateDto);
 
-			var actionResult = Assert.IsType<ActionResult<PlaneTicket>>(result);
-			var createdAtActionResult = Assert.IsType<CreatedAtActionResult>(actionResult.Result);
-			Assert.Equal("GetPlaneTicket", createdAtActionResult.ActionName);
-			Assert.Equal(planeTicket.Id, createdAtActionResult.RouteValues["id"]);
-			Assert.Equal(planeTicket, createdAtActionResult.Value);
+			// Assert
+			var actionResult = Assert.IsType<CreatedAtActionResult>(result.Result);
+			var returnedValue = Assert.IsType<PlaneTicketDto>(actionResult.Value);
+			Assert.Equal(planeTicketDto.Id, returnedValue.Id);
+			Assert.Equal("GetPlaneTicket", actionResult.ActionName);
+			Assert.Equal(1, actionResult.RouteValues["id"]);
 		}
 
 		[Fact]
 		[Trait("Category", "PostPlaneTicket")]
-		public async Task PostPlaneTicket_ReturnsNullReferenceException_WhenPlaneTicketCreationFails()
+		public async Task PostPlaneTicket_ThrowsException_WhenServiceFails()
 		{
-			_planeTicketServiceMock.Setup(service => service.PostPlaneTicket(planeTicket))
-				.ThrowsAsync(new NullReferenceException("Simulated exception"));
+			// Arrange
+			var planeTicketCreateDto = new PlaneTicketCreateDto();
+			var planeTicketEntity = new PlaneTicketEntity();
+			_mapperMock.Setup(m => m.Map<PlaneTicketEntity>(planeTicketCreateDto)).Returns(planeTicketEntity);
 
-			await Assert.ThrowsAsync<NullReferenceException>(async () => await _controller.PostPlaneTicket(planeTicketCreateDto));
+			// Set up the service to throw an exception
+			_planeTicketServiceMock.Setup(service => service.PostPlaneTicket(planeTicketEntity))
+							   .ThrowsAsync(new Exception("Simulated exception"));
+
+			// Act & Assert
+			await Assert.ThrowsAsync<Exception>(async () => await _controller.PostPlaneTicket(planeTicketCreateDto));
 		}
 
 		[Fact]
 		[Trait("Category", "PutPlaneTicket")]
-		public async Task PutPlaneTicket_ValidUpdate_ReturnsNoContentResult()
+		public async Task PutPlaneTicket_ReturnsNoContent_WhenUpdateIsSuccessful()
 		{
-			var id = 1;
-			_planeTicketServiceMock.Setup(service => service.PlaneTicketExists(id)).ReturnsAsync(true);
-			_planeTicketServiceMock.Setup(service => service.PutPlaneTicket(It.IsAny<PlaneTicket>())).Returns(Task.CompletedTask);
+			// Arrange
+			int id = 1;
+			var planeTicketUpdateDto = new PlaneTicketUpdateDto { Id = id };
+			var planeTicketEntity = new PlaneTicketEntity { Id = id };
 
+			_inputValidationServiceMock.Setup(service => service.IsNonNegativeInt(id)).Returns(true);
+			_mapperMock.Setup(m => m.Map<PlaneTicketEntity>(planeTicketUpdateDto)).Returns(planeTicketEntity);
+			_planeTicketServiceMock.Setup(service => service.PlaneTicketExists(id)).ReturnsAsync(true);
+			_planeTicketServiceMock.Setup(service => service.PutPlaneTicket(planeTicketEntity)).Returns(Task.CompletedTask);
+
+			// Act
 			var result = await _controller.PutPlaneTicket(id, planeTicketUpdateDto);
 
+			// Assert
 			Assert.IsType<NoContentResult>(result);
 		}
 
 		[Fact]
 		[Trait("Category", "PutPlaneTicket")]
-		public async Task PutPlaneTicket_PlaneTicketNotFound_ReturnsNotFoundResult()
+		public async Task PutPlaneTicket_ReturnsBadRequest_WhenIdIsInvalid()
 		{
-			var id = 1;
-			_planeTicketServiceMock.Setup(service => service.PlaneTicketExists(id)).ReturnsAsync(false);
+			// Arrange
+			int invalidId = -1;
+			var planeTicketUpdateDto = new PlaneTicketUpdateDto { Id = invalidId };
 
-			var result = await _controller.PutPlaneTicket(id, planeTicketUpdateDto);
+			_inputValidationServiceMock.Setup(service => service.IsNonNegativeInt(invalidId)).Returns(false);
 
-			Assert.IsType<NotFoundResult>(result);
+			// Act
+			var result = await _controller.PutPlaneTicket(invalidId, planeTicketUpdateDto);
+
+			// Assert
+			var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
+			Assert.Equal("Invalid input. The ID must be a non-negative integer.", badRequestResult.Value);
 		}
 
 		[Fact]
 		[Trait("Category", "PutPlaneTicket")]
-		public async Task PutPlaneTicket_IdsMismatch_ReturnsBadRequestResult()
+		public async Task PutPlaneTicket_ReturnsBadRequest_WhenIdInDtoDoesNotMatchIdInUrl()
 		{
-			var id = 2;
+			// Arrange
+			int id = 1;
+			var planeTicketUpdateDto = new PlaneTicketUpdateDto { Id = 2 };
 
+			_inputValidationServiceMock.Setup(service => service.IsNonNegativeInt(id)).Returns(true);
+
+			// Act
 			var result = await _controller.PutPlaneTicket(id, planeTicketUpdateDto);
 
+			// Assert
 			Assert.IsType<BadRequestResult>(result);
 		}
 
 		[Fact]
 		[Trait("Category", "PutPlaneTicket")]
-		public async Task PutPlaneTicket_ReturnsNullReferenceException_WhenPlaneTicketUpdateFails()
+		public async Task PutPlaneTicket_ReturnsNotFound_WhenPlaneTicketDoesNotExist()
 		{
-			var id = 1;
-			_planeTicketServiceMock.Setup(service => service.PlaneTicketExists(id)).ReturnsAsync(true);
-			_planeTicketServiceMock.Setup(service => service.PutPlaneTicket(It.IsAny<PlaneTicket>()))
-				.ThrowsAsync(new Exception("Simulated error"));
+			// Arrange
+			int id = 1;
+			var planeTicketUpdateDto = new PlaneTicketUpdateDto { Id = id };
 
-			await Assert.ThrowsAsync<Exception>(async () =>
-			{
-				await _controller.PutPlaneTicket(id, planeTicketUpdateDto);
-			});
-		}
-
-		[Fact]
-		[Trait("Category", "PatchPlaneTicket")]
-		public async Task PatchPlaneTicket_ValidUpdate_ReturnsOkResult()
-		{
-			var id = 1;
-			var planeTicketDocument = new JsonPatchDocument();
-			var updatedPlaneTicket = new PlaneTicket { Id = id, Price = 600 };
-			_planeTicketServiceMock.Setup(service => service.PlaneTicketExists(id)).ReturnsAsync(true);
-			_planeTicketServiceMock.Setup(service => service.PatchPlaneTicket(id, planeTicketDocument)).ReturnsAsync(updatedPlaneTicket);
-
-			var result = await _controller.PatchPlaneTicket(id, planeTicketDocument);
-
-			var okResult = Assert.IsType<OkObjectResult>(result);
-			var returnedPlaneTicket = Assert.IsType<PlaneTicket>(okResult.Value);
-			Assert.Equal(id, returnedPlaneTicket.Id);
-			Assert.Equal(600, returnedPlaneTicket.Price);
-		}
-
-		[Fact]
-		[Trait("Category", "PatchPlaneTicket")]
-		public async Task PatchPlaneTicket_PlaneTicketNotFound_ReturnsNotFoundResult()
-		{
-			var id = 1;
-			var planeTicketDocument = new JsonPatchDocument();
+			_inputValidationServiceMock.Setup(service => service.IsNonNegativeInt(id)).Returns(true);
 			_planeTicketServiceMock.Setup(service => service.PlaneTicketExists(id)).ReturnsAsync(false);
 
-			var result = await _controller.PatchPlaneTicket(id, planeTicketDocument);
+			// Act
+			var result = await _controller.PutPlaneTicket(id, planeTicketUpdateDto);
 
+			// Assert
 			Assert.IsType<NotFoundResult>(result);
 		}
 
 		[Fact]
 		[Trait("Category", "PatchPlaneTicket")]
-		public async Task PatchPlaneTicket_ReturnsNullReferenceException_WhenPlaneTicketPatchFails()
+		public async Task PatchPlaneTicket_ReturnsOk_WhenUpdateIsSuccessful()
 		{
-			var id = 1;
-			_planeTicketServiceMock.Setup(service => service.PlaneTicketExists(id)).ReturnsAsync(true);
-			_planeTicketServiceMock.Setup(service => service.PatchPlaneTicket(id, It.IsAny<JsonPatchDocument>()))
-				.ThrowsAsync(new Exception("Simulated error"));
+			// Arrange
+			int id = 1;
+			var planeTicketDocument = new JsonPatchDocument();
+			var updatedPlaneTicket = new PlaneTicketEntity { Id = id };
+			var planeTicketDto = new PlaneTicketDto { Id = id };
 
-			await Assert.ThrowsAsync<Exception>(async () =>
-			{
-				await _controller.PatchPlaneTicket(id, It.IsAny<JsonPatchDocument>());
-			});
+			_inputValidationServiceMock.Setup(service => service.IsNonNegativeInt(id)).Returns(true);
+			_planeTicketServiceMock.Setup(service => service.PlaneTicketExists(id)).ReturnsAsync(true);
+			_planeTicketServiceMock.Setup(service => service.PatchPlaneTicket(id, planeTicketDocument)).ReturnsAsync(updatedPlaneTicket);
+			_mapperMock.Setup(m => m.Map<PlaneTicketDto>(updatedPlaneTicket)).Returns(planeTicketDto);
+
+			// Act
+			var result = await _controller.PatchPlaneTicket(id, planeTicketDocument);
+
+			// Assert
+			var okResult = Assert.IsType<OkObjectResult>(result);
+			Assert.Equal(planeTicketDto, okResult.Value);
+		}
+
+		[Fact]
+		[Trait("Category", "PatchPlaneTicket")]
+		public async Task PatchPlaneTicket_ReturnsBadRequest_WhenIdIsInvalid()
+		{
+			// Arrange
+			int invalidId = -1;
+			var planeTicketDocument = new JsonPatchDocument();
+
+			_inputValidationServiceMock.Setup(service => service.IsNonNegativeInt(invalidId)).Returns(false);
+
+			// Act
+			var result = await _controller.PatchPlaneTicket(invalidId, planeTicketDocument);
+
+			// Assert
+			var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
+			Assert.Equal("Invalid input. The ID must be a non-negative integer.", badRequestResult.Value);
+		}
+
+		[Fact]
+		[Trait("Category", "PatchPlaneTicket")]
+		public async Task PatchPlaneTicket_ReturnsNotFound_WhenPlaneTicketDoesNotExist()
+		{
+			// Arrange
+			int id = 1;
+			var planeTicketDocument = new JsonPatchDocument();
+
+			_inputValidationServiceMock.Setup(service => service.IsNonNegativeInt(id)).Returns(true);
+			_planeTicketServiceMock.Setup(service => service.PlaneTicketExists(id)).ReturnsAsync(false);
+
+			// Act
+			var result = await _controller.PatchPlaneTicket(id, planeTicketDocument);
+
+			// Assert
+			Assert.IsType<NotFoundResult>(result);
 		}
 
 		[Fact]
 		[Trait("Category", "DeletePlaneTicket")]
-		public async Task DeletePlaneTicket_ValidDelete_ReturnsNoContentResult()
+		public async Task DeletePlaneTicket_ReturnsNoContent_WhenDeletionIsSuccessful()
 		{
-			var id = 1;
+			// Arrange
+			int id = 1;
+			_inputValidationServiceMock.Setup(service => service.IsNonNegativeInt(id)).Returns(true);
 			_planeTicketServiceMock.Setup(service => service.PlaneTicketExists(id)).ReturnsAsync(true);
-			_planeTicketServiceMock.Setup(service => service.DeletePlaneTicket(id)).Returns(Task.CompletedTask);
+			_planeTicketServiceMock.Setup(service => service.DeletePlaneTicket(id)).ReturnsAsync(true);
 
+			// Act
 			var result = await _controller.DeletePlaneTicket(id);
 
+			// Assert
 			Assert.IsType<NoContentResult>(result);
 		}
 
 		[Fact]
 		[Trait("Category", "DeletePlaneTicket")]
-		public async Task DeletePlaneTicket_PlaneTicketNotFound_ReturnsNotFoundResult()
+		public async Task DeletePlaneTicket_ReturnsBadRequest_WhenIdIsInvalid()
 		{
-			var id = 1;
+			// Arrange
+			int invalidId = -1;
+			_inputValidationServiceMock.Setup(service => service.IsNonNegativeInt(invalidId)).Returns(false);
+
+			// Act
+			var result = await _controller.DeletePlaneTicket(invalidId);
+
+			// Assert
+			var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
+			Assert.Equal("Invalid input. The ID must be a non-negative integer.", badRequestResult.Value);
+		}
+
+		[Fact]
+		[Trait("Category", "DeletePlaneTicket")]
+		public async Task DeletePlaneTicket_ReturnsNotFound_WhenPlaneTicketDoesNotExist()
+		{
+			// Arrange
+			int id = 1;
+			_inputValidationServiceMock.Setup(service => service.IsNonNegativeInt(id)).Returns(true);
 			_planeTicketServiceMock.Setup(service => service.PlaneTicketExists(id)).ReturnsAsync(false);
 
+			// Act
 			var result = await _controller.DeletePlaneTicket(id);
 
+			// Assert
 			Assert.IsType<NotFoundResult>(result);
 		}
 
 		[Fact]
 		[Trait("Category", "DeletePlaneTicket")]
-		public async Task DeletePlaneTicket_ReturnsNullReferenceException_WhenPlaneTicketDeleteFails()
+		public async Task DeletePlaneTicket_ReturnsConflict_WhenPlaneTicketCannotBeDeleted()
 		{
-			var id = 1;
+			// Arrange
+			int id = 1;
+			_inputValidationServiceMock.Setup(service => service.IsNonNegativeInt(id)).Returns(true);
 			_planeTicketServiceMock.Setup(service => service.PlaneTicketExists(id)).ReturnsAsync(true);
-			_planeTicketServiceMock.Setup(service => service.DeletePlaneTicket(id))
-				.ThrowsAsync(new Exception("Simulated error"));
+			_planeTicketServiceMock.Setup(service => service.DeletePlaneTicket(id)).ReturnsAsync(false);
 
-			await Assert.ThrowsAsync<Exception>(async () =>
-			{
-				await _controller.DeletePlaneTicket(id);
-			});
+			// Act
+			var result = await _controller.DeletePlaneTicket(id);
+
+			// Assert
+			var conflictResult = Assert.IsType<ConflictResult>(result);
 		}
 
 	}

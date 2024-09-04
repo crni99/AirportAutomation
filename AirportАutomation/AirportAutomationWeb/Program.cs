@@ -1,6 +1,6 @@
-﻿using AirportAutomation.Infrastructure.Middlewares;
+﻿using AirportAutomation.Core.Converters;
+using AirportAutomation.Infrastructure.Middlewares;
 using AirportAutomation.Web.Binders;
-using AirportAutomation.Web.Converters;
 using Serilog;
 using Serilog.Events;
 

@@ -1,8 +1,8 @@
-﻿using AirportAutomation.Core.Dtos.Airline;
-using AirportAutomation.Core.Dtos.Destination;
-using AirportAutomation.Core.Dtos.Pilot;
+﻿using AirportAutomation.Application.Dtos.Airline;
+using AirportAutomation.Application.Dtos.Destination;
+using AirportAutomation.Application.Dtos.Pilot;
 
-namespace AirportAutomation.Core.Dtos.Flight
+namespace AirportAutomation.Application.Dtos.Flight
 {
 	public class FlightDto
 	{

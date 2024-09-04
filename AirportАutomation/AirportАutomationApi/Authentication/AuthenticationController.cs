@@ -1,4 +1,4 @@
-﻿using AirportAutomation.Core.Dtos.ApiUser;
+﻿using AirportAutomation.Application.Dtos.ApiUser;
 using AirportAutomation.Core.Entities;
 using AirportАutomation.Api.Controllers;
 using AutoMapper;

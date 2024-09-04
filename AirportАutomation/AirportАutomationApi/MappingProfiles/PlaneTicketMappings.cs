@@ -1,6 +1,5 @@
-﻿using AirportAutomation.Core.Dtos.PlaneTicket;
+﻿using AirportAutomation.Application.Dtos.PlaneTicket;
 using AirportAutomation.Core.Entities;
-using AirportAutomationDomain.Dtos.PlaneTicket;
 using AutoMapper;
 
 namespace AirportAutomation.Api.MappingProfiles

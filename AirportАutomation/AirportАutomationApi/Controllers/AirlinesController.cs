@@ -1,6 +1,6 @@
 ﻿using AirportAutomation.Api.Interfaces;
-using AirportAutomation.Core.Dtos.Airline;
-using AirportAutomation.Core.Dtos.Response;
+using AirportAutomation.Application.Dtos.Airline;
+using AirportAutomation.Application.Dtos.Response;
 using AirportAutomation.Core.Entities;
 using AirportAutomation.Core.Interfaces.IServices;
 using AirportАutomation.Api.Controllers;

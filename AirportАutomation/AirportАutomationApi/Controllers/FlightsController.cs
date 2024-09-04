@@ -1,6 +1,6 @@
 ﻿using AirportAutomation.Api.Interfaces;
-using AirportAutomation.Core.Dtos.Flight;
-using AirportAutomation.Core.Dtos.Response;
+using AirportAutomation.Application.Dtos.Flight;
+using AirportAutomation.Application.Dtos.Response;
 using AirportAutomation.Core.Entities;
 using AirportAutomation.Core.Interfaces.IServices;
 using AirportАutomation.Api.Controllers;
@@ -143,7 +143,7 @@ namespace AirportАutomationApi.Controllers
 				_logger.LogInformation("Both start date and end date are missing in the request.");
 				return BadRequest("Both start date and end date are missing in the request.");
 			}
-			if (!_inputValidationService.IsValidDateOnly(startDate) && !_inputValidationService.IsValidDateOnly(endDate))
+			if (!_inputValidationService.IsValidDateOnly(startDate) || !_inputValidationService.IsValidDateOnly(endDate))
 			{
 				_logger.LogInformation("Invalid input. The start and end dates must be valid dates.");
 				return BadRequest("Invalid input. The start and end dates must be valid dates.");

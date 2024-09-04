@@ -49,9 +49,9 @@ namespace AirportAutomation.Application.Services
 			return await _planeTicketRepository.PatchPlaneTicket(id, planeTicketDocument);
 		}
 
-		public async Task DeletePlaneTicket(int id)
+		public async Task<bool> DeletePlaneTicket(int id)
 		{
-			await _planeTicketRepository.DeletePlaneTicket(id);
+			return await _planeTicketRepository.DeletePlaneTicket(id);
 		}
 
 		public async Task<bool> PlaneTicketExists(int id)

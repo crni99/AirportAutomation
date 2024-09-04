@@ -1,6 +1,6 @@
-﻿using AirportAutomationApi.Entities;
-using AirportAutomationApi.IRepository;
-using AirportAutomationApi.Services;
+﻿using AirportAutomation.Application.Services;
+using AirportAutomation.Core.Entities;
+using AirportAutomation.Core.Interfaces.IRepositories;
 using Microsoft.AspNetCore.JsonPatch;
 using Moq;
 
@@ -17,6 +17,13 @@ namespace AirportAutomationApi.Test.Services
 			_service = new FlightService(_repositoryMock.Object);
 		}
 
+		[Fact]
+		public async Task GetAllFlights_Should_Call_Repository_GetAllFlights()
+		{
+			await _service.GetAllFlights();
+
+			_repositoryMock.Verify(repo => repo.GetAllFlights(), Times.Once);
+		}
 
 		[Fact]
 		public async Task GetFlights_Should_Call_Repository_GetFlights()
@@ -40,15 +47,15 @@ namespace AirportAutomationApi.Test.Services
 			var startDate = new DateOnly(1999, 12, 01);
 			var endDate = new DateOnly(2023, 9, 20);
 
-			await _service.GetFlightsBetweenDates(startDate, endDate);
+			await _service.GetFlightsBetweenDates(1, 10, startDate, endDate);
 
-			_repositoryMock.Verify(repo => repo.GetFlightsBetweenDates(startDate, endDate), Times.Once);
+			_repositoryMock.Verify(repo => repo.GetFlightsBetweenDates(1, 10, startDate, endDate), Times.Once);
 		}
 
 		[Fact]
 		public async Task PostFlight_Should_Call_Repository_PostFlight()
 		{
-			var fLight = new Flight();
+			var fLight = new FlightEntity();
 
 			await _service.PostFlight(fLight);
 
@@ -58,7 +65,7 @@ namespace AirportAutomationApi.Test.Services
 		[Fact]
 		public async Task PutFlight_Should_Call_Repository_PutFlight()
 		{
-			var fLight = new Flight();
+			var fLight = new FlightEntity();
 
 			await _service.PutFlight(fLight);
 
@@ -93,14 +100,15 @@ namespace AirportAutomationApi.Test.Services
 		}
 
 		[Fact]
-		public void FlightsCount_ShouldReturnCorrectCount()
+		public async Task FlightsCount_ShouldReturnCorrectCount()
 		{
 			var expectedCount = 5;
-			_repositoryMock.Setup(repo => repo.FlightsCount()).Returns(expectedCount);
+			_repositoryMock.Setup(repo => repo.FlightsCount(null, null)).ReturnsAsync(expectedCount);
 
-			int count = _service.FlightsCount();
+			int count = await _service.FlightsCount();
 
 			Assert.Equal(expectedCount, count);
 		}
+
 	}
 }

@@ -1,6 +1,6 @@
-﻿using AirportAutomationApi.Entities;
-using AirportAutomationApi.IRepository;
-using AirportAutomationApi.Services;
+﻿using AirportAutomation.Application.Services;
+using AirportAutomation.Core.Entities;
+using AirportAutomation.Core.Interfaces.IRepositories;
 using Microsoft.AspNetCore.JsonPatch;
 using Moq;
 
@@ -15,6 +15,14 @@ namespace AirportAutomationApi.Test.Services
 		{
 			_repositoryMock = new Mock<IPlaneTicketRepository>();
 			_service = new PlaneTicketService(_repositoryMock.Object);
+		}
+
+		[Fact]
+		public async Task GetAllPlaneTickets_Should_Call_Repository_GetAllPlaneTickets()
+		{
+			await _service.GetAllPlaneTickets();
+
+			_repositoryMock.Verify(repo => repo.GetAllPlaneTickets(), Times.Once);
 		}
 
 		[Fact]
@@ -36,15 +44,15 @@ namespace AirportAutomationApi.Test.Services
 		[Fact]
 		public async Task GetPlaneTicketsForPrice_Should_Call_Repository_GetPlaneTicketsForPrice()
 		{
-			await _service.GetPlaneTicketsForPrice(1, 10);
+			await _service.GetPlaneTicketsForPrice(1, 10, 100, 200);
 
-			_repositoryMock.Verify(repo => repo.GetPlaneTicketsForPrice(1, 10), Times.Once);
+			_repositoryMock.Verify(repo => repo.GetPlaneTicketsForPrice(1, 10, 100, 200), Times.Once);
 		}
 
 		[Fact]
 		public async Task PostPlaneTicket_Should_Call_Repository_PostPlaneTicket()
 		{
-			var pilot = new PlaneTicket();
+			var pilot = new PlaneTicketEntity();
 
 			await _service.PostPlaneTicket(pilot);
 
@@ -54,7 +62,7 @@ namespace AirportAutomationApi.Test.Services
 		[Fact]
 		public async Task PutPlaneTicket_Should_Call_Repository_PutPlaneTicket()
 		{
-			var pilot = new PlaneTicket();
+			var pilot = new PlaneTicketEntity();
 
 			await _service.PutPlaneTicket(pilot);
 
@@ -89,14 +97,15 @@ namespace AirportAutomationApi.Test.Services
 		}
 
 		[Fact]
-		public void PlaneTicketClassesCount_ShouldReturnCorrectCount()
+		public async Task PlaneTicketClassesCount_ShouldReturnCorrectCount()
 		{
 			var expectedCount = 5;
-			_repositoryMock.Setup(repo => repo.PlaneTicketsCount()).Returns(expectedCount);
+			_repositoryMock.Setup(repo => repo.PlaneTicketsCount(null, null)).ReturnsAsync(expectedCount);
 
-			int count = _service.PlaneTicketsCount();
+			int count = await _service.PlaneTicketsCount();
 
 			Assert.Equal(expectedCount, count);
 		}
+
 	}
 }

@@ -1,6 +1,6 @@
-﻿using AirportAutomationApi.Entities;
-using AirportAutomationApi.IRepository;
-using AirportAutomationApi.Services;
+﻿using AirportAutomation.Application.Services;
+using AirportAutomation.Core.Entities;
+using AirportAutomation.Core.Interfaces.IRepositories;
 using Microsoft.AspNetCore.JsonPatch;
 using Moq;
 
@@ -15,6 +15,14 @@ namespace AirportAutomationApi.Test.Services
 		{
 			_repositoryMock = new Mock<IPassengerRepository>();
 			_service = new PassengerService(_repositoryMock.Object);
+		}
+
+		[Fact]
+		public async Task GetAllPassengers_Should_Call_Repository_GetAllPassengers()
+		{
+			await _service.GetAllPassengers();
+
+			_repositoryMock.Verify(repo => repo.GetAllPassengers(), Times.Once);
 		}
 
 		[Fact]
@@ -36,15 +44,15 @@ namespace AirportAutomationApi.Test.Services
 		[Fact]
 		public async Task GetPassengersByName_Should_Call_Repository_GetPassengersByName()
 		{
-			await _service.GetPassengersByName("John", "Doe");
+			await _service.GetPassengersByName(1, 10, "John", "Doe");
 
-			_repositoryMock.Verify(repo => repo.GetPassengersByName("John", "Doe"), Times.Once);
+			_repositoryMock.Verify(repo => repo.GetPassengersByName(1, 10, "John", "Doe"), Times.Once);
 		}
 
 		[Fact]
 		public async Task PostPassenger_Should_Call_Repository_PostPassenger()
 		{
-			var passenger = new Passenger();
+			var passenger = new PassengerEntity();
 
 			await _service.PostPassenger(passenger);
 
@@ -54,7 +62,7 @@ namespace AirportAutomationApi.Test.Services
 		[Fact]
 		public async Task PutPassenger_Should_Call_Repository_PutPassenger()
 		{
-			var passenger = new Passenger();
+			var passenger = new PassengerEntity();
 
 			await _service.PutPassenger(passenger);
 
@@ -89,15 +97,16 @@ namespace AirportAutomationApi.Test.Services
 		}
 
 		[Fact]
-		public void PassengersCount_ShouldReturnCorrectCount()
+		public async Task PassengersCount_ShouldReturnCorrectCount()
 		{
 			var expectedCount = 5;
-			_repositoryMock.Setup(repo => repo.PassengersCount()).Returns(expectedCount);
+			_repositoryMock.Setup(repo => repo.PassengersCount(null, null)).ReturnsAsync(expectedCount);
 
-			int count = _service.PassengersCount();
+			int count = await _service.PassengersCount();
 
 			Assert.Equal(expectedCount, count);
 		}
+
 	}
 }
 

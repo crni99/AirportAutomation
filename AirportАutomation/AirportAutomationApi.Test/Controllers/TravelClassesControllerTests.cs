@@ -1,9 +1,11 @@
-﻿using AirportAutomationApi.Dtos.TravelClass;
-using AirportAutomationApi.Entities;
-using AirportAutomationApi.IService;
+﻿using AirportAutomation.Api.Interfaces;
+using AirportAutomation.Application.Dtos.Response;
+using AirportAutomation.Application.Dtos.TravelClass;
+using AirportAutomation.Application.Dtos.TravelClass;
+using AirportAutomation.Core.Entities;
+using AirportAutomation.Core.Interfaces.IServices;
+using AirportАutomation.Api.Interfaces;
 using AirportАutomationApi.Controllers;
-using AirportАutomationApi.Dtos.Response;
-using AirportАutomationApi.IServices;
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
@@ -17,20 +19,20 @@ namespace AirportAutomationApi.Test.Controllers
 		private readonly TravelClassesController _controller;
 		private readonly Mock<ITravelClassService> _travelClassServiceMock;
 		private readonly Mock<IPaginationValidationService> _paginationValidationServiceMock;
+		private readonly Mock<IInputValidationService> _inputValidationServiceMock;
+		private readonly Mock<IUtilityService> _utilityServiceMock;
+		private readonly Mock<IExportService> _exportServiceMock;
 		private readonly Mock<IMapper> _mapperMock;
 		private readonly Mock<ILogger<TravelClassesController>> _loggerMock;
 		private readonly Mock<IConfiguration> _configurationMock;
 
-		private readonly int page = 1;
-		private readonly int pageSize = 10;
-
-		private readonly TravelClass travelClass = new()
+		private readonly TravelClassEntity travelClassEntity = new()
 		{
 			Id = 1,
 			Type = "Business"
 		};
 
-		private readonly TravelClass travelClass2 = new()
+		private readonly TravelClassDto travelClassDto = new()
 		{
 			Id = 2,
 			Type = "First"
@@ -40,6 +42,9 @@ namespace AirportAutomationApi.Test.Controllers
 		{
 			_travelClassServiceMock = new Mock<ITravelClassService>();
 			_paginationValidationServiceMock = new Mock<IPaginationValidationService>();
+			_inputValidationServiceMock = new Mock<IInputValidationService>();
+			_utilityServiceMock = new Mock<IUtilityService>();
+			_exportServiceMock = new Mock<IExportService>();
 			_mapperMock = new Mock<IMapper>();
 			_loggerMock = new Mock<ILogger<TravelClassesController>>();
 			_configurationMock = new Mock<IConfiguration>();
@@ -54,6 +59,9 @@ namespace AirportAutomationApi.Test.Controllers
 			_controller = new TravelClassesController(
 				_travelClassServiceMock.Object,
 				_paginationValidationServiceMock.Object,
+				_inputValidationServiceMock.Object,
+				_utilityServiceMock.Object,
+				_exportServiceMock.Object,
 				_mapperMock.Object,
 				_loggerMock.Object,
 				_configurationMock.Object
@@ -64,6 +72,7 @@ namespace AirportAutomationApi.Test.Controllers
 		[Trait("Category", "GetTravelClasses")]
 		public async Task GetTravelClasses_InvalidPaginationParameters_ReturnsBadRequest()
 		{
+			// Arrange
 			int invalidPage = -1;
 			int invalidPageSize = 0;
 			var expectedBadRequestResult = new BadRequestObjectResult("Invalid pagination parameters.");
@@ -72,8 +81,10 @@ namespace AirportAutomationApi.Test.Controllers
 				.Setup(x => x.ValidatePaginationParameters(invalidPage, invalidPageSize, It.IsAny<int>()))
 				.Returns((false, 0, expectedBadRequestResult));
 
+			// Act
 			var result = await _controller.GetTravelClasses(invalidPage, invalidPageSize);
 
+			// Assert
 			Assert.IsType<BadRequestObjectResult>(result.Result);
 		}
 
@@ -81,14 +92,20 @@ namespace AirportAutomationApi.Test.Controllers
 		[Trait("Category", "GetTravelClasses")]
 		public async Task GetTravelClasses_ReturnsNoContent_WhenNoTravelClassesFound()
 		{
+			// Arrange
+			int page = 1;
+			int pageSize = 10;
+
 			_paginationValidationServiceMock
 				.Setup(x => x.ValidatePaginationParameters(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<int>()))
-				.Returns((true, 0, null));
+				.Returns((true, pageSize, null));
 			_travelClassServiceMock.Setup(service => service.GetTravelClasses(It.IsAny<int>(), It.IsAny<int>()))
-				.ReturnsAsync(new List<TravelClass>());
+				.ReturnsAsync(new List<TravelClassEntity>());
 
-			var result = await _controller.GetTravelClasses();
+			// Act
+			var result = await _controller.GetTravelClasses(page, pageSize);
 
+			// Assert
 			Assert.IsType<NoContentResult>(result.Result);
 		}
 
@@ -96,74 +113,194 @@ namespace AirportAutomationApi.Test.Controllers
 		[Trait("Category", "GetTravelClasses")]
 		public async Task GetTravelClasses_ReturnsInternalServerError_WhenExceptionThrown()
 		{
+			// Arrange
+			int page = 1;
+			int pageSize = 10;
+
 			_paginationValidationServiceMock
 				.Setup(x => x.ValidatePaginationParameters(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<int>()))
-				.Returns((true, 0, null));
+				.Returns((true, pageSize, null));
 			_travelClassServiceMock.Setup(service => service.GetTravelClasses(It.IsAny<int>(), It.IsAny<int>()))
 				.ThrowsAsync(new Exception("Simulated exception"));
 
-			await Assert.ThrowsAsync<Exception>(async () => await _controller.GetTravelClasses());
+			// Act & Assert
+			await Assert.ThrowsAsync<Exception>(async () => await _controller.GetTravelClasses(page, pageSize));
 		}
 
 		[Fact]
 		[Trait("Category", "GetTravelClasses")]
-		public async Task GetTravelClasses_ReturnsNoContent_WhenNoData()
+		public async Task GetTravelClasses_ReturnsOk_WithPaginatedTravelClasses()
 		{
-			List<TravelClass> travelClasses = null;
+			// Arrange
+			int page = 1;
+			int pageSize = 10;
+			var travelClasses = new List<TravelClassEntity>
+			{
+				new TravelClassEntity { /* Initialize properties */ },
+				new TravelClassEntity { /* Initialize properties */ }
+			};
+			var totalItems = 2;
+
 			_paginationValidationServiceMock
 				.Setup(x => x.ValidatePaginationParameters(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<int>()))
-				.Returns((true, 0, null));
-			_travelClassServiceMock.Setup(service => service.GetTravelClasses(page, pageSize))
+				.Returns((true, pageSize, null));
+			_travelClassServiceMock
+				.Setup(service => service.GetTravelClasses(page, pageSize))
 				.ReturnsAsync(travelClasses);
+			_travelClassServiceMock
+				.Setup(service => service.TravelClassesCount())
+				.ReturnsAsync(totalItems);
 
+			var expectedData = new List<TravelClassDto>
+			{
+				new TravelClassDto { /* Initialize properties */ },
+				new TravelClassDto { /* Initialize properties */ }
+			};
+			_mapperMock
+				.Setup(m => m.Map<IEnumerable<TravelClassDto>>(It.IsAny<IEnumerable<TravelClassEntity>>()))
+				.Returns(expectedData);
+
+			// Act
 			var result = await _controller.GetTravelClasses(page, pageSize);
 
+			// Assert
 			var actionResult = Assert.IsType<ActionResult<PagedResponse<TravelClassDto>>>(result);
-			Assert.IsType<NoContentResult>(actionResult.Result);
-		}
-
-		[Fact]
-		[Trait("Category", "GetTravelClassById")]
-		public async Task GetTravelClassById_ReturnsOkResult_WhenTravelClassExists()
-		{
-			var travelClassId = 1;
-			_travelClassServiceMock.Setup(service => service.TravelClassExists(travelClassId))
-				.ReturnsAsync(true);
-			_travelClassServiceMock.Setup(service => service.GetTravelClass(travelClassId))
-				.ReturnsAsync(travelClass);
-			_mapperMock.Setup(mapper => mapper.Map<TravelClassDto>(It.IsAny<TravelClass>()))
-				.Returns(new TravelClassDto());
-
-			var result = await _controller.GetTravelClass(travelClassId);
-
-			var actionResult = Assert.IsType<ActionResult<TravelClassDto>>(result);
 			var okResult = Assert.IsType<OkObjectResult>(actionResult.Result);
-			Assert.IsType<TravelClassDto>(okResult.Value);
+			var pagedResponse = Assert.IsType<PagedResponse<TravelClassDto>>(okResult.Value);
+			Assert.Equal(page, pagedResponse.PageNumber);
+			Assert.Equal(pageSize, pagedResponse.PageSize);
+			Assert.Equal(totalItems, pagedResponse.TotalCount);
+			Assert.Equal(expectedData, pagedResponse.Data);
 		}
 
 		[Fact]
-		[Trait("Category", "GetTravelClassById")]
-		public async Task GetTravelClassById_ReturnsNotFound_WhenTravelClassDoesNotExist()
+		[Trait("Category", "GetTravelClasses")]
+		public async Task GetTravelClasses_ReturnsCorrectPageData()
 		{
-			var travelClassId = 2;
-			_travelClassServiceMock.Setup(service => service.TravelClassExists(travelClassId))
+			// Arrange
+			int page = 2;
+			int pageSize = 5;
+			var allTravelClasses = new List<TravelClassEntity>
+			{
+				new TravelClassEntity { /* Initialize properties */ },
+				new TravelClassEntity { /* Initialize properties */ },
+				new TravelClassEntity { /* Initialize properties */ },
+				new TravelClassEntity { /* Initialize properties */ },
+				new TravelClassEntity { /* Initialize properties */ },
+				new TravelClassEntity { /* Initialize properties */ },
+				new TravelClassEntity { /* Initialize properties */ },
+				new TravelClassEntity { /* Initialize properties */ },
+				new TravelClassEntity { /* Initialize properties */ },
+				new TravelClassEntity { /* Initialize properties */ }
+			};
+			var pagedTravelClasses = allTravelClasses.Skip((page - 1) * pageSize).Take(pageSize).ToList();
+
+			_paginationValidationServiceMock
+				.Setup(x => x.ValidatePaginationParameters(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<int>()))
+				.Returns((true, pageSize, null));
+			_travelClassServiceMock
+				.Setup(service => service.GetTravelClasses(page, pageSize))
+				.ReturnsAsync(pagedTravelClasses);
+			_travelClassServiceMock
+				.Setup(service => service.TravelClassesCount())
+				.ReturnsAsync(allTravelClasses.Count);
+
+			var expectedData = new List<TravelClassDto>
+			{
+				new TravelClassDto { /* Initialize properties */ },
+				new TravelClassDto { /* Initialize properties */ },
+				new TravelClassDto { /* Initialize properties */ },
+				new TravelClassDto { /* Initialize properties */ },
+				new TravelClassDto { /* Initialize properties */ }
+			};
+			_mapperMock
+				.Setup(m => m.Map<IEnumerable<TravelClassDto>>(It.IsAny<IEnumerable<TravelClassEntity>>()))
+				.Returns(expectedData);
+
+			// Act
+			var result = await _controller.GetTravelClasses(page, pageSize);
+
+			// Assert
+			var actionResult = Assert.IsType<ActionResult<PagedResponse<TravelClassDto>>>(result);
+			var okResult = Assert.IsType<OkObjectResult>(actionResult.Result);
+			var pagedResponse = Assert.IsType<PagedResponse<TravelClassDto>>(okResult.Value);
+			Assert.Equal(page, pagedResponse.PageNumber);
+			Assert.Equal(pageSize, pagedResponse.PageSize);
+			Assert.Equal(allTravelClasses.Count, pagedResponse.TotalCount);
+			Assert.Equal(expectedData, pagedResponse.Data);
+		}
+
+		[Fact]
+		[Trait("Category", "GetTravelClass")]
+		public async Task GetTravelClass_InvalidId_ReturnsBadRequest()
+		{
+			// Arrange
+			int invalidId = -1;
+			var expectedBadRequestResult = new BadRequestObjectResult("Invalid input. The ID must be a non-negative integer.");
+
+			_inputValidationServiceMock
+				.Setup(x => x.IsNonNegativeInt(invalidId))
+				.Returns(false);
+
+			// Act
+			var result = await _controller.GetTravelClass(invalidId);
+
+			// Assert
+			Assert.IsType<BadRequestObjectResult>(result.Result);
+			var badRequestResult = result.Result as BadRequestObjectResult;
+			Assert.Equal(expectedBadRequestResult.Value, badRequestResult.Value);
+		}
+
+		[Fact]
+		[Trait("Category", "GetTravelClass")]
+		public async Task GetTravelClass_TravelClassNotFound_ReturnsNotFound()
+		{
+			// Arrange
+			int validId = 1;
+
+			_inputValidationServiceMock
+				.Setup(x => x.IsNonNegativeInt(validId))
+				.Returns(true);
+			_travelClassServiceMock
+				.Setup(service => service.TravelClassExists(validId))
 				.ReturnsAsync(false);
 
-			var result = await _controller.GetTravelClass(travelClassId);
+			// Act
+			var result = await _controller.GetTravelClass(validId);
 
-			var actionResult = Assert.IsType<ActionResult<TravelClassDto>>(result);
-			Assert.IsType<NotFoundResult>(actionResult.Result);
+			// Assert
+			Assert.IsType<NotFoundResult>(result.Result);
 		}
 
 		[Fact]
-		[Trait("Category", "GetTravelClassById")]
-		public async Task GetTravelClassById_ThrowsException_WhenServiceThrowsException()
+		[Trait("Category", "GetTravelClass")]
+		public async Task GetTravelClass_ReturnsTravelClassDto_WhenTravelClassExists()
 		{
-			var travelClassId = 1;
-			_travelClassServiceMock.Setup(service => service.TravelClassExists(travelClassId))
-				.Throws(new Exception("Simulated exception"));
+			// Arrange
+			int validId = 1;
 
-			await Assert.ThrowsAsync<Exception>(async () => await _controller.GetTravelClass(travelClassId));
+			_inputValidationServiceMock
+				.Setup(x => x.IsNonNegativeInt(validId))
+				.Returns(true);
+			_travelClassServiceMock
+				.Setup(service => service.TravelClassExists(validId))
+				.ReturnsAsync(true);
+			_travelClassServiceMock
+				.Setup(service => service.GetTravelClass(validId))
+				.ReturnsAsync(travelClassEntity);
+			_mapperMock
+				.Setup(m => m.Map<TravelClassDto>(travelClassEntity))
+				.Returns(travelClassDto);
+
+			// Act
+			var result = await _controller.GetTravelClass(validId);
+
+			// Assert
+			var actionResult = Assert.IsType<ActionResult<TravelClassDto>>(result);
+			var okResult = Assert.IsType<OkObjectResult>(actionResult.Result);
+			var returnedTravelClassDto = Assert.IsType<TravelClassDto>(okResult.Value);
+			Assert.Equal(travelClassDto, returnedTravelClassDto);
 		}
+
 	}
 }

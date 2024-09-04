@@ -1,9 +1,8 @@
 ﻿using AirportAutomation.Api.Interfaces;
-using AirportAutomation.Core.Dtos.PlaneTicket;
-using AirportAutomation.Core.Dtos.Response;
+using AirportAutomation.Application.Dtos.PlaneTicket;
+using AirportAutomation.Application.Dtos.Response;
 using AirportAutomation.Core.Entities;
 using AirportAutomation.Core.Interfaces.IServices;
-using AirportAutomationDomain.Dtos.PlaneTicket;
 using AirportАutomation.Api.Controllers;
 using AirportАutomation.Api.Interfaces;
 using AutoMapper;
@@ -134,7 +133,7 @@ namespace AirportАutomationApi.Controllers
 			[FromQuery] int page = 1,
 			[FromQuery] int pageSize = 10)
 		{
-			if (!minPrice.HasValue && !maxPrice.HasValue)
+			if (minPrice == null && maxPrice == null)
 			{
 				_logger.LogInformation("Both min price and max price are missing in the request.");
 				return BadRequest("Both min price and max price are missing in the request.");
@@ -290,8 +289,15 @@ namespace AirportАutomationApi.Controllers
 				_logger.LogInformation("Plane ticket with id {id} not found.", id);
 				return NotFound();
 			}
-			await _planeTicketService.DeletePlaneTicket(id);
-			return NoContent();
+			bool deleted = await _planeTicketService.DeletePlaneTicket(id);
+			if (deleted)
+			{
+				return NoContent();
+			}
+			else
+			{
+				return Conflict();
+			}
 		}
 
 		/// <summary>

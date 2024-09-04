@@ -12,7 +12,7 @@ namespace AirportAutomation.Core.Interfaces.IServices
 		Task<PlaneTicketEntity> PostPlaneTicket(PlaneTicketEntity planeTicket);
 		Task PutPlaneTicket(PlaneTicketEntity planeTicket);
 		Task<PlaneTicketEntity> PatchPlaneTicket(int id, JsonPatchDocument planeTicketDocument);
-		Task DeletePlaneTicket(int id);
+		Task<bool> DeletePlaneTicket(int id);
 		Task<bool> PlaneTicketExists(int id);
 		Task<int> PlaneTicketsCount(int? minPrice = null, int? maxPrice = null);
 	}

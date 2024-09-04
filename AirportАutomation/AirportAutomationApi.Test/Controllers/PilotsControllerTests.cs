@@ -1,9 +1,10 @@
-﻿using AirportAutomationApi.Dtos.Pilot;
-using AirportAutomationApi.Entities;
-using AirportAutomationApi.IService;
+﻿using AirportAutomation.Api.Interfaces;
+using AirportAutomation.Application.Dtos.Pilot;
+using AirportAutomation.Application.Dtos.Response;
+using AirportAutomation.Core.Entities;
+using AirportAutomation.Core.Interfaces.IServices;
+using AirportАutomation.Api.Interfaces;
 using AirportАutomationApi.Controllers;
-using AirportАutomationApi.Dtos.Response;
-using AirportАutomationApi.IServices;
 using AutoMapper;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
@@ -18,33 +19,16 @@ namespace AirportAutomationApi.Test.Controllers
 		private readonly PilotsController _controller;
 		private readonly Mock<IPilotService> _pilotServiceMock;
 		private readonly Mock<IPaginationValidationService> _paginationValidationServiceMock;
+		private readonly Mock<IInputValidationService> _inputValidationServiceMock;
+		private readonly Mock<IUtilityService> _utilityServiceMock;
+		private readonly Mock<IExportService> _exportServiceMock;
 		private readonly Mock<IMapper> _mapperMock;
 		private readonly Mock<ILogger<PilotsController>> _loggerMock;
 		private readonly Mock<IConfiguration> _configurationMock;
 
-		private readonly int page = 1;
-		private readonly int pageSize = 10;
-
-		private readonly Pilot pilot = new()
+		private readonly PilotEntity pilotEntity = new()
 		{
 			Id = 1,
-			FirstName = "Ognjen",
-			LastName = "Andjelic",
-			UPRN = "1234567890123",
-			FlyingHours = 100
-		};
-
-		private readonly Pilot pilot2 = new()
-		{
-			Id = 1,
-			FirstName = "Alex",
-			LastName = "Walker",
-			UPRN = "1234567890123",
-			FlyingHours = 300
-		};
-
-		private readonly PilotCreateDto pilotCreateDto = new()
-		{
 			FirstName = "Ognjen",
 			LastName = "Andjelic",
 			UPRN = "1234567890123",
@@ -59,11 +43,13 @@ namespace AirportAutomationApi.Test.Controllers
 			UPRN = "1234567890123",
 			FlyingHours = 100
 		};
-
 		public PilotsControllerTests()
 		{
 			_pilotServiceMock = new Mock<IPilotService>();
 			_paginationValidationServiceMock = new Mock<IPaginationValidationService>();
+			_inputValidationServiceMock = new Mock<IInputValidationService>();
+			_utilityServiceMock = new Mock<IUtilityService>();
+			_exportServiceMock = new Mock<IExportService>();
 			_mapperMock = new Mock<IMapper>();
 			_loggerMock = new Mock<ILogger<PilotsController>>();
 			_configurationMock = new Mock<IConfiguration>();
@@ -78,6 +64,9 @@ namespace AirportAutomationApi.Test.Controllers
 			_controller = new PilotsController(
 				_pilotServiceMock.Object,
 				_paginationValidationServiceMock.Object,
+				_inputValidationServiceMock.Object,
+				_utilityServiceMock.Object,
+				_exportServiceMock.Object,
 				_mapperMock.Object,
 				_loggerMock.Object,
 				_configurationMock.Object
@@ -88,6 +77,7 @@ namespace AirportAutomationApi.Test.Controllers
 		[Trait("Category", "GetPilots")]
 		public async Task GetPilots_InvalidPaginationParameters_ReturnsBadRequest()
 		{
+			// Arrange
 			int invalidPage = -1;
 			int invalidPageSize = 0;
 			var expectedBadRequestResult = new BadRequestObjectResult("Invalid pagination parameters.");
@@ -96,8 +86,10 @@ namespace AirportAutomationApi.Test.Controllers
 				.Setup(x => x.ValidatePaginationParameters(invalidPage, invalidPageSize, It.IsAny<int>()))
 				.Returns((false, 0, expectedBadRequestResult));
 
+			// Act
 			var result = await _controller.GetPilots(invalidPage, invalidPageSize);
 
+			// Assert
 			Assert.IsType<BadRequestObjectResult>(result.Result);
 		}
 
@@ -105,14 +97,20 @@ namespace AirportAutomationApi.Test.Controllers
 		[Trait("Category", "GetPilots")]
 		public async Task GetPilots_ReturnsNoContent_WhenNoPilotsFound()
 		{
+			// Arrange
+			int page = 1;
+			int pageSize = 10;
+
 			_paginationValidationServiceMock
 				.Setup(x => x.ValidatePaginationParameters(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<int>()))
-				.Returns((true, 0, null));
+				.Returns((true, pageSize, null));
 			_pilotServiceMock.Setup(service => service.GetPilots(It.IsAny<int>(), It.IsAny<int>()))
-				.ReturnsAsync(new List<Pilot>());
+				.ReturnsAsync(new List<PilotEntity>());
 
-			var result = await _controller.GetPilots();
+			// Act
+			var result = await _controller.GetPilots(page, pageSize);
 
+			// Assert
 			Assert.IsType<NoContentResult>(result.Result);
 		}
 
@@ -120,315 +118,560 @@ namespace AirportAutomationApi.Test.Controllers
 		[Trait("Category", "GetPilots")]
 		public async Task GetPilots_ReturnsInternalServerError_WhenExceptionThrown()
 		{
+			// Arrange
+			int page = 1;
+			int pageSize = 10;
+
 			_paginationValidationServiceMock
 				.Setup(x => x.ValidatePaginationParameters(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<int>()))
-				.Returns((true, 0, null));
+				.Returns((true, pageSize, null));
 			_pilotServiceMock.Setup(service => service.GetPilots(It.IsAny<int>(), It.IsAny<int>()))
 				.ThrowsAsync(new Exception("Simulated exception"));
 
-			await Assert.ThrowsAsync<Exception>(async () => await _controller.GetPilots());
+			// Act & Assert
+			await Assert.ThrowsAsync<Exception>(async () => await _controller.GetPilots(page, pageSize));
 		}
 
 		[Fact]
 		[Trait("Category", "GetPilots")]
-		public async Task GetPilots_ReturnsNoContent_WhenNoData()
+		public async Task GetPilots_ReturnsOk_WithPaginatedPilots()
 		{
-			List<Pilot> pilots = null;
+			// Arrange
+			int page = 1;
+			int pageSize = 10;
+			var pilots = new List<PilotEntity>
+			{
+				new PilotEntity { /* Initialize properties */ },
+				new PilotEntity { /* Initialize properties */ }
+			};
+			var totalItems = 2;
+
 			_paginationValidationServiceMock
 				.Setup(x => x.ValidatePaginationParameters(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<int>()))
-				.Returns((true, 0, null));
-			_pilotServiceMock.Setup(service => service.GetPilots(page, pageSize))
+				.Returns((true, pageSize, null));
+			_pilotServiceMock
+				.Setup(service => service.GetPilots(page, pageSize))
 				.ReturnsAsync(pilots);
+			_pilotServiceMock
+				.Setup(service => service.PilotsCount(null, null))
+				.ReturnsAsync(totalItems);
 
+			var expectedData = new List<PilotDto>
+			{
+				new PilotDto { /* Initialize properties */ },
+				new PilotDto { /* Initialize properties */ }
+			};
+			_mapperMock
+				.Setup(m => m.Map<IEnumerable<PilotDto>>(It.IsAny<IEnumerable<PilotEntity>>()))
+				.Returns(expectedData);
+
+			// Act
 			var result = await _controller.GetPilots(page, pageSize);
 
+			// Assert
 			var actionResult = Assert.IsType<ActionResult<PagedResponse<PilotDto>>>(result);
-			Assert.IsType<NoContentResult>(actionResult.Result);
-		}
-
-		[Fact]
-		[Trait("Category", "GetPilotById")]
-		public async Task GetPilotById_ReturnsOkResult_WhenPilotExists()
-		{
-			var pilotId = 1;
-			_pilotServiceMock.Setup(service => service.PilotExists(pilotId))
-				.ReturnsAsync(true);
-			_pilotServiceMock.Setup(service => service.GetPilot(pilotId))
-				.ReturnsAsync(pilot);
-			_mapperMock.Setup(mapper => mapper.Map<PilotDto>(It.IsAny<Pilot>()))
-				.Returns(new PilotDto());
-
-			var result = await _controller.GetPilot(pilotId);
-
-			var actionResult = Assert.IsType<ActionResult<PilotDto>>(result);
 			var okResult = Assert.IsType<OkObjectResult>(actionResult.Result);
-			Assert.IsType<PilotDto>(okResult.Value);
+			var pagedResponse = Assert.IsType<PagedResponse<PilotDto>>(okResult.Value);
+			Assert.Equal(page, pagedResponse.PageNumber);
+			Assert.Equal(pageSize, pagedResponse.PageSize);
+			Assert.Equal(totalItems, pagedResponse.TotalCount);
+			Assert.Equal(expectedData, pagedResponse.Data);
 		}
 
 		[Fact]
-		[Trait("Category", "GetPilotById")]
-		public async Task GetPilotById_ReturnsNotFound_WhenPilotDoesNotExist()
+		[Trait("Category", "GetPilots")]
+		public async Task GetPilots_ReturnsCorrectPageData()
 		{
-			var pilotId = 2;
-			_pilotServiceMock.Setup(service => service.PilotExists(pilotId))
+			// Arrange
+			int page = 2;
+			int pageSize = 5;
+			var allPilots = new List<PilotEntity>
+			{
+				new PilotEntity { /* Initialize properties */ },
+				new PilotEntity { /* Initialize properties */ },
+				new PilotEntity { /* Initialize properties */ },
+				new PilotEntity { /* Initialize properties */ },
+				new PilotEntity { /* Initialize properties */ },
+				new PilotEntity { /* Initialize properties */ },
+				new PilotEntity { /* Initialize properties */ },
+				new PilotEntity { /* Initialize properties */ },
+				new PilotEntity { /* Initialize properties */ },
+				new PilotEntity { /* Initialize properties */ }
+			};
+			var pagedPilots = allPilots.Skip((page - 1) * pageSize).Take(pageSize).ToList();
+
+			_paginationValidationServiceMock
+				.Setup(x => x.ValidatePaginationParameters(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<int>()))
+				.Returns((true, pageSize, null));
+			_pilotServiceMock
+				.Setup(service => service.GetPilots(page, pageSize))
+				.ReturnsAsync(pagedPilots);
+			_pilotServiceMock
+				.Setup(service => service.PilotsCount(null, null))
+				.ReturnsAsync(allPilots.Count);
+
+			var expectedData = new List<PilotDto>
+			{
+				new PilotDto { /* Initialize properties */ },
+				new PilotDto { /* Initialize properties */ },
+				new PilotDto { /* Initialize properties */ },
+				new PilotDto { /* Initialize properties */ },
+				new PilotDto { /* Initialize properties */ }
+			};
+			_mapperMock
+				.Setup(m => m.Map<IEnumerable<PilotDto>>(It.IsAny<IEnumerable<PilotEntity>>()))
+				.Returns(expectedData);
+
+			// Act
+			var result = await _controller.GetPilots(page, pageSize);
+
+			// Assert
+			var actionResult = Assert.IsType<ActionResult<PagedResponse<PilotDto>>>(result);
+			var okResult = Assert.IsType<OkObjectResult>(actionResult.Result);
+			var pagedResponse = Assert.IsType<PagedResponse<PilotDto>>(okResult.Value);
+			Assert.Equal(page, pagedResponse.PageNumber);
+			Assert.Equal(pageSize, pagedResponse.PageSize);
+			Assert.Equal(allPilots.Count, pagedResponse.TotalCount);
+			Assert.Equal(expectedData, pagedResponse.Data);
+		}
+
+		[Fact]
+		[Trait("Category", "GetPilot")]
+		public async Task GetPilot_InvalidId_ReturnsBadRequest()
+		{
+			// Arrange
+			int invalidId = -1;
+			var expectedBadRequestResult = new BadRequestObjectResult("Invalid input. The ID must be a non-negative integer.");
+
+			_inputValidationServiceMock
+				.Setup(x => x.IsNonNegativeInt(invalidId))
+				.Returns(false);
+
+			// Act
+			var result = await _controller.GetPilot(invalidId);
+
+			// Assert
+			Assert.IsType<BadRequestObjectResult>(result.Result);
+			var badRequestResult = result.Result as BadRequestObjectResult;
+			Assert.Equal(expectedBadRequestResult.Value, badRequestResult.Value);
+		}
+
+		[Fact]
+		[Trait("Category", "GetPilot")]
+		public async Task GetPilot_PilotNotFound_ReturnsNotFound()
+		{
+			// Arrange
+			int validId = 1;
+
+			_inputValidationServiceMock
+				.Setup(x => x.IsNonNegativeInt(validId))
+				.Returns(true);
+			_pilotServiceMock
+				.Setup(service => service.PilotExists(validId))
 				.ReturnsAsync(false);
 
-			var result = await _controller.GetPilot(pilotId);
+			// Act
+			var result = await _controller.GetPilot(validId);
 
+			// Assert
+			Assert.IsType<NotFoundResult>(result.Result);
+		}
+
+		[Fact]
+		[Trait("Category", "GetPilot")]
+		public async Task GetPilot_ReturnsPilotDto_WhenPilotExists()
+		{
+			// Arrange
+			int validId = 1;
+
+			_inputValidationServiceMock
+				.Setup(x => x.IsNonNegativeInt(validId))
+				.Returns(true);
+			_pilotServiceMock
+				.Setup(service => service.PilotExists(validId))
+				.ReturnsAsync(true);
+			_pilotServiceMock
+				.Setup(service => service.GetPilot(validId))
+				.ReturnsAsync(pilotEntity);
+			_mapperMock
+				.Setup(m => m.Map<PilotDto>(pilotEntity))
+				.Returns(pilotDto);
+
+			// Act
+			var result = await _controller.GetPilot(validId);
+
+			// Assert
 			var actionResult = Assert.IsType<ActionResult<PilotDto>>(result);
-			Assert.IsType<NotFoundResult>(actionResult.Result);
+			var okResult = Assert.IsType<OkObjectResult>(actionResult.Result);
+			var returnedPilotDto = Assert.IsType<PilotDto>(okResult.Value);
+			Assert.Equal(pilotDto, returnedPilotDto);
 		}
 
 		[Fact]
-		[Trait("Category", "GetPilotById")]
-		public async Task GetPilotById_ThrowsException_WhenServiceThrowsException()
+		[Trait("Category", "GetPilotsByName")]
+		public async Task GetPilotsByName_InvalidName_ReturnsBadRequest()
 		{
-			var pilotId = 1;
-			_pilotServiceMock.Setup(service => service.PilotExists(pilotId))
-				.Throws(new Exception("Simulated exception"));
+			// Arrange
+			string invalidName = string.Empty;
+			var expectedBadRequestResult = new BadRequestObjectResult("Both first name and last name are missing in the request.");
 
-			await Assert.ThrowsAsync<Exception>(async () => await _controller.GetPilot(pilotId));
+			_inputValidationServiceMock
+				.Setup(x => x.IsValidString(invalidName))
+				.Returns(false);
+
+			// Act
+			var result = await _controller.GetPilotsByName(invalidName);
+
+			// Assert
+			Assert.IsType<BadRequestObjectResult>(result.Result);
+			var badRequestResult = result.Result as BadRequestObjectResult;
+			Assert.Equal(expectedBadRequestResult.Value, badRequestResult.Value);
 		}
 
 		[Fact]
-		[Trait("Category", "GetPilotByName")]
-		public async Task GetPilotsByName_ReturnsOkResult_WithValidInput()
+		[Trait("Category", "GetPilotsByName")]
+		public async Task GetPilotsByName_InvalidPaginationParameters_ReturnsBadRequest()
 		{
-			var firstName = "Ognjen";
-			var lastName = "Andjelic";
-			var expectedPilots = new List<Pilot>
-			{
-				pilot
-			};
-			_pilotServiceMock.Setup(service => service.GetPilotsByName(firstName, lastName))
-					.ReturnsAsync(expectedPilots);
+			// Arrange
+			string validName1 = "ValidName1";
+			string validName2 = "ValidName2";
+			int invalidPage = -1;
+			int invalidPageSize = 0;
+			var expectedBadRequestResult = new BadRequestObjectResult("Invalid pagination parameters.");
 
-			var result = await _controller.GetPilotsByName(firstName, lastName);
+			_inputValidationServiceMock
+				.Setup(x => x.IsValidString(validName1))
+				.Returns(true);
+			_inputValidationServiceMock
+				.Setup(x => x.IsValidString(validName2))
+				.Returns(true);
+			_paginationValidationServiceMock
+				.Setup(x => x.ValidatePaginationParameters(invalidPage, invalidPageSize, It.IsAny<int>()))
+				.Returns((false, 0, expectedBadRequestResult));
 
-			Assert.IsType<ActionResult<IEnumerable<PilotDto>>>(result);
+			// Act
+			var result = await _controller.GetPilotsByName(validName1, validName2, invalidPage, invalidPageSize);
+
+			// Assert
+			Assert.IsType<BadRequestObjectResult>(result.Result);
 		}
 
 		[Fact]
-		[Trait("Category", "GetPilotByName")]
-		public async Task GetPilotsByName_ReturnsBadRequest_WhenBothNamesAreMissing()
+		[Trait("Category", "GetPilotsByName")]
+		public async Task GetPilotsByName_PilotsNotFound_ReturnsNotFound()
 		{
-			string firstName = string.Empty;
-			string lastName = string.Empty;
-			List<Pilot> pilots = null;
-			_pilotServiceMock.Setup(service => service.GetPilotsByName(firstName, lastName))
-				.ReturnsAsync(pilots);
+			// Arrange
+			string validName = "NonExistentName";
+			int validPage = 1;
+			int validPageSize = 10;
 
-			var result = await _controller.GetPilotsByName(firstName, lastName);
+			_inputValidationServiceMock
+				.Setup(x => x.IsValidString(validName))
+				.Returns(true);
+			_paginationValidationServiceMock
+				.Setup(x => x.ValidatePaginationParameters(validPage, validPageSize, It.IsAny<int>()))
+				.Returns((true, validPageSize, null));
+			_pilotServiceMock
+				.Setup(service => service.GetPilotsByName(validPage, validPageSize, validName, null))
+				.ReturnsAsync(new List<PilotEntity>());
 
-			var badRequestResult = Assert.IsType<ActionResult<IEnumerable<PilotDto>>>(result);
-			Assert.IsType<BadRequestObjectResult>(badRequestResult.Result);
-			Assert.True(string.IsNullOrEmpty(badRequestResult.Value?.ToString()));
+			// Act
+			var result = await _controller.GetPilotsByName(validName, null, validPage, validPageSize);
+
+			// Assert
+			Assert.IsType<NotFoundResult>(result.Result);
 		}
 
 		[Fact]
-		[Trait("Category", "GetPilotByName")]
-		public async Task GetPilotByName_ReturnsNotFound_WhenNoData()
+		[Trait("Category", "GetPilotsByName")]
+		public async Task GetPilotsByName_ReturnsPagedListOfPilots_WhenPilotsFound()
 		{
-			List<Pilot> pilots = null;
-			_pilotServiceMock.Setup(service => service.GetPilotsByName(pilot.FirstName, pilot.LastName))
-				.ReturnsAsync(pilots);
+			// Arrange
+			string validName1 = "ValidName1";
+			string validName2 = "ValidName2";
+			int validPage = 1;
+			int validPageSize = 10;
+			var pilotEntities = new List<PilotEntity> { pilotEntity };
+			var pilotDtos = new List<PilotDto> { pilotDto };
+			var totalItems = 1;
 
-			var result = await _controller.GetPilotsByName(pilot.FirstName, pilot.LastName);
+			_inputValidationServiceMock
+				.Setup(x => x.IsValidString(validName1))
+				.Returns(true);
+			_inputValidationServiceMock
+				.Setup(x => x.IsValidString(validName2))
+				.Returns(true);
+			_paginationValidationServiceMock
+				.Setup(x => x.ValidatePaginationParameters(validPage, validPageSize, It.IsAny<int>()))
+				.Returns((true, validPageSize, null));
+			_pilotServiceMock
+				.Setup(service => service.GetPilotsByName(validPage, validPageSize, validName1, validName2))
+				.ReturnsAsync(pilotEntities);
+			_pilotServiceMock
+				.Setup(service => service.PilotsCount(validName1, validName2))
+				.ReturnsAsync(totalItems);
+			_mapperMock
+				.Setup(m => m.Map<IEnumerable<PilotDto>>(pilotEntities))
+				.Returns(pilotDtos);
 
-			var actionResult = Assert.IsType<ActionResult<IEnumerable<PilotDto>>>(result);
-			Assert.IsType<NotFoundResult>(actionResult.Result);
-		}
+			// Act
+			var result = await _controller.GetPilotsByName(validName1, validName2, validPage, validPageSize);
 
-		[Fact]
-		[Trait("Category", "GetPilotByName")]
-		public async Task GetPilotByName_ThrowsException_WhenServiceThrowsException()
-		{
-			var firstName = "Og";
-			var lastName = "An";
-
-			_pilotServiceMock.Setup(service => service.GetPilotsByName(firstName, lastName))
-				.ThrowsAsync(new Exception("Simulated exception"));
-
-			await Assert.ThrowsAsync<Exception>(async () => await _controller.GetPilotsByName(firstName, lastName));
+			// Assert
+			var actionResult = Assert.IsType<ActionResult<PagedResponse<PilotDto>>>(result);
+			var okResult = Assert.IsType<OkObjectResult>(actionResult.Result);
+			var response = Assert.IsType<PagedResponse<PilotDto>>(okResult.Value);
+			Assert.Equal(validPage, response.PageNumber);
+			Assert.Equal(validPageSize, response.PageSize);
+			Assert.Equal(totalItems, response.TotalCount);
+			Assert.Equal(pilotDtos, response.Data);
 		}
 
 		[Fact]
 		[Trait("Category", "PostPilot")]
-		public async Task PostPilot_ReturnsCreatedAtAction_WhenPilotCreatedSuccessfully()
+		public async Task PostPilot_ReturnsCreatedAtActionResult_WhenPilotIsCreatedSuccessfully()
 		{
-			_mapperMock.Setup(mapper => mapper.Map<Pilot>(pilotCreateDto))
-			.Returns(pilot);
-			_pilotServiceMock.Setup(service => service.PostPilot(It.IsAny<Pilot>()))
-			.ReturnsAsync(pilot);
+			// Arrange
+			var pilotCreateDto = new PilotCreateDto();
+			var pilotEntity = new PilotEntity { Id = 1 };
+			var pilotDto = new PilotDto { Id = 1 };
 
+			// Set up the mapper to return the expected values
+			_mapperMock.Setup(m => m.Map<PilotEntity>(pilotCreateDto)).Returns(pilotEntity);
+			_mapperMock.Setup(m => m.Map<PilotDto>(pilotEntity)).Returns(pilotDto);
+
+			// Adjust service setup to return the pilotEntity wrapped in a Task
+			_pilotServiceMock.Setup(service => service.PostPilot(pilotEntity))
+							   .ReturnsAsync(pilotEntity);
+
+			// Act
 			var result = await _controller.PostPilot(pilotCreateDto);
 
-			var actionResult = Assert.IsType<ActionResult<Pilot>>(result);
-			var createdAtActionResult = Assert.IsType<CreatedAtActionResult>(actionResult.Result);
-			Assert.Equal("GetPilot", createdAtActionResult.ActionName);
-			Assert.Equal(pilot.Id, createdAtActionResult.RouteValues["id"]);
-			Assert.Equal(pilot, createdAtActionResult.Value);
+			// Assert
+			var actionResult = Assert.IsType<CreatedAtActionResult>(result.Result);
+			var returnedValue = Assert.IsType<PilotDto>(actionResult.Value);
+			Assert.Equal(pilotDto.Id, returnedValue.Id);
+			Assert.Equal("GetPilot", actionResult.ActionName);
+			Assert.Equal(1, actionResult.RouteValues["id"]);
 		}
 
 		[Fact]
 		[Trait("Category", "PostPilot")]
-		public async Task PostPilot_ReturnsNullReferenceException_WhenPilotCreationFails()
+		public async Task PostPilot_ThrowsException_WhenServiceFails()
 		{
-			_pilotServiceMock.Setup(service => service.PostPilot(pilot))
-				.ThrowsAsync(new NullReferenceException("Simulated exception"));
+			// Arrange
+			var pilotCreateDto = new PilotCreateDto();
+			var pilotEntity = new PilotEntity();
+			_mapperMock.Setup(m => m.Map<PilotEntity>(pilotCreateDto)).Returns(pilotEntity);
 
-			await Assert.ThrowsAsync<NullReferenceException>(async () => await _controller.PostPilot(pilotCreateDto));
+			// Set up the service to throw an exception
+			_pilotServiceMock.Setup(service => service.PostPilot(pilotEntity))
+							   .ThrowsAsync(new Exception("Simulated exception"));
+
+			// Act & Assert
+			await Assert.ThrowsAsync<Exception>(async () => await _controller.PostPilot(pilotCreateDto));
 		}
 
 		[Fact]
 		[Trait("Category", "PutPilot")]
-		public async Task PutPilot_ValidUpdate_ReturnsNoContentResult()
+		public async Task PutPilot_ReturnsNoContent_WhenUpdateIsSuccessful()
 		{
-			var id = 1;
-			_pilotServiceMock.Setup(service => service.PilotExists(id)).ReturnsAsync(true);
-			_pilotServiceMock.Setup(service => service.PutPilot(It.IsAny<Pilot>())).Returns(Task.CompletedTask);
+			// Arrange
+			int id = 1;
+			var pilotDto = new PilotDto { Id = id };
+			var pilotEntity = new PilotEntity { Id = id };
 
+			_inputValidationServiceMock.Setup(service => service.IsNonNegativeInt(id)).Returns(true);
+			_mapperMock.Setup(m => m.Map<PilotEntity>(pilotDto)).Returns(pilotEntity);
+			_pilotServiceMock.Setup(service => service.PilotExists(id)).ReturnsAsync(true);
+			_pilotServiceMock.Setup(service => service.PutPilot(pilotEntity)).Returns(Task.CompletedTask);
+
+			// Act
 			var result = await _controller.PutPilot(id, pilotDto);
 
+			// Assert
 			Assert.IsType<NoContentResult>(result);
 		}
 
 		[Fact]
 		[Trait("Category", "PutPilot")]
-		public async Task PutPilot_PilotNotFound_ReturnsNotFoundResult()
+		public async Task PutPilot_ReturnsBadRequest_WhenIdIsInvalid()
 		{
-			var id = 1;
-			_pilotServiceMock.Setup(service => service.PilotExists(id)).ReturnsAsync(false);
+			// Arrange
+			int invalidId = -1;
+			var pilotDto = new PilotDto { Id = invalidId };
 
-			var result = await _controller.PutPilot(id, pilotDto);
+			_inputValidationServiceMock.Setup(service => service.IsNonNegativeInt(invalidId)).Returns(false);
 
-			Assert.IsType<NotFoundResult>(result);
+			// Act
+			var result = await _controller.PutPilot(invalidId, pilotDto);
+
+			// Assert
+			var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
+			Assert.Equal("Invalid input. The ID must be a non-negative integer.", badRequestResult.Value);
 		}
 
 		[Fact]
 		[Trait("Category", "PutPilot")]
-		public async Task PutPilot_IdsMismatch_ReturnsBadRequestResult()
+		public async Task PutPilot_ReturnsBadRequest_WhenIdInDtoDoesNotMatchIdInUrl()
 		{
-			var id = 2;
+			// Arrange
+			int id = 1;
+			var pilotDto = new PilotDto { Id = 2 };
 
+			_inputValidationServiceMock.Setup(service => service.IsNonNegativeInt(id)).Returns(true);
+
+			// Act
 			var result = await _controller.PutPilot(id, pilotDto);
 
+			// Assert
 			Assert.IsType<BadRequestResult>(result);
 		}
 
 		[Fact]
 		[Trait("Category", "PutPilot")]
-		public async Task PutPilot_ReturnsNullReferenceException_WhenPilotUpdateFails()
+		public async Task PutPilot_ReturnsNotFound_WhenPilotDoesNotExist()
 		{
-			var id = 1;
-			_pilotServiceMock.Setup(service => service.PilotExists(id)).ReturnsAsync(true);
-			_pilotServiceMock.Setup(service => service.PutPilot(It.IsAny<Pilot>()))
-				.ThrowsAsync(new Exception("Simulated error"));
+			// Arrange
+			int id = 1;
+			var pilotDto = new PilotDto { Id = id };
 
-			await Assert.ThrowsAsync<Exception>(async () =>
-			{
-				await _controller.PutPilot(id, pilotDto);
-			});
-		}
-
-		[Fact]
-		[Trait("Category", "PatchPilot")]
-		public async Task PatchPilot_ValidUpdate_ReturnsOkResult()
-		{
-			var id = 1;
-			var pilotDocument = new JsonPatchDocument();
-			var updatedPilot = new Pilot { Id = id, FirstName = "OG" };
-			_pilotServiceMock.Setup(service => service.PilotExists(id)).ReturnsAsync(true);
-			_pilotServiceMock.Setup(service => service.PatchPilot(id, pilotDocument)).ReturnsAsync(updatedPilot);
-
-			var result = await _controller.PatchPilot(id, pilotDocument);
-
-			var okResult = Assert.IsType<OkObjectResult>(result);
-			var returnedPilot = Assert.IsType<Pilot>(okResult.Value);
-			Assert.Equal(id, returnedPilot.Id);
-			Assert.Equal("OG", returnedPilot.FirstName);
-		}
-
-		[Fact]
-		[Trait("Category", "PatchPilot")]
-		public async Task PatchPilot_PilotNotFound_ReturnsNotFoundResult()
-		{
-			var id = 1;
-			var pilotDocument = new JsonPatchDocument();
+			_inputValidationServiceMock.Setup(service => service.IsNonNegativeInt(id)).Returns(true);
 			_pilotServiceMock.Setup(service => service.PilotExists(id)).ReturnsAsync(false);
 
-			var result = await _controller.PatchPilot(id, pilotDocument);
+			// Act
+			var result = await _controller.PutPilot(id, pilotDto);
 
+			// Assert
 			Assert.IsType<NotFoundResult>(result);
 		}
 
 		[Fact]
 		[Trait("Category", "PatchPilot")]
-		public async Task PatchPilot_ReturnsNullReferenceException_WhenPilotPatchFails()
+		public async Task PatchPilot_ReturnsOk_WhenUpdateIsSuccessful()
 		{
-			var id = 1;
-			_pilotServiceMock.Setup(service => service.PilotExists(id)).ReturnsAsync(true);
-			_pilotServiceMock.Setup(service => service.PatchPilot(id, It.IsAny<JsonPatchDocument>()))
-				.ThrowsAsync(new Exception("Simulated error"));
+			// Arrange
+			int id = 1;
+			var pilotDocument = new JsonPatchDocument();
+			var updatedPilot = new PilotEntity { Id = id };
+			var pilotDto = new PilotDto { Id = id };
 
-			await Assert.ThrowsAsync<Exception>(async () =>
-			{
-				await _controller.PatchPilot(id, It.IsAny<JsonPatchDocument>());
-			});
+			_inputValidationServiceMock.Setup(service => service.IsNonNegativeInt(id)).Returns(true);
+			_pilotServiceMock.Setup(service => service.PilotExists(id)).ReturnsAsync(true);
+			_pilotServiceMock.Setup(service => service.PatchPilot(id, pilotDocument)).ReturnsAsync(updatedPilot);
+			_mapperMock.Setup(m => m.Map<PilotDto>(updatedPilot)).Returns(pilotDto);
+
+			// Act
+			var result = await _controller.PatchPilot(id, pilotDocument);
+
+			// Assert
+			var okResult = Assert.IsType<OkObjectResult>(result);
+			Assert.Equal(pilotDto, okResult.Value);
+		}
+
+		[Fact]
+		[Trait("Category", "PatchPilot")]
+		public async Task PatchPilot_ReturnsBadRequest_WhenIdIsInvalid()
+		{
+			// Arrange
+			int invalidId = -1;
+			var pilotDocument = new JsonPatchDocument();
+
+			_inputValidationServiceMock.Setup(service => service.IsNonNegativeInt(invalidId)).Returns(false);
+
+			// Act
+			var result = await _controller.PatchPilot(invalidId, pilotDocument);
+
+			// Assert
+			var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
+			Assert.Equal("Invalid input. The ID must be a non-negative integer.", badRequestResult.Value);
+		}
+
+		[Fact]
+		[Trait("Category", "PatchPilot")]
+		public async Task PatchPilot_ReturnsNotFound_WhenPilotDoesNotExist()
+		{
+			// Arrange
+			int id = 1;
+			var pilotDocument = new JsonPatchDocument();
+
+			_inputValidationServiceMock.Setup(service => service.IsNonNegativeInt(id)).Returns(true);
+			_pilotServiceMock.Setup(service => service.PilotExists(id)).ReturnsAsync(false);
+
+			// Act
+			var result = await _controller.PatchPilot(id, pilotDocument);
+
+			// Assert
+			Assert.IsType<NotFoundResult>(result);
 		}
 
 		[Fact]
 		[Trait("Category", "DeletePilot")]
-		public async Task DeletePilot_ValidDelete_ReturnsNoContentResult()
+		public async Task DeletePilot_ReturnsNoContent_WhenDeletionIsSuccessful()
 		{
-			var id = 1;
+			// Arrange
+			int id = 1;
+			_inputValidationServiceMock.Setup(service => service.IsNonNegativeInt(id)).Returns(true);
 			_pilotServiceMock.Setup(service => service.PilotExists(id)).ReturnsAsync(true);
 			_pilotServiceMock.Setup(service => service.DeletePilot(id)).ReturnsAsync(true);
 
+			// Act
 			var result = await _controller.DeletePilot(id);
 
+			// Assert
 			Assert.IsType<NoContentResult>(result);
 		}
 
 		[Fact]
 		[Trait("Category", "DeletePilot")]
-		public async Task DeletePilot_PilotNotFound_ReturnsNotFoundResult()
+		public async Task DeletePilot_ReturnsBadRequest_WhenIdIsInvalid()
 		{
-			var id = 1;
+			// Arrange
+			int invalidId = -1;
+			_inputValidationServiceMock.Setup(service => service.IsNonNegativeInt(invalidId)).Returns(false);
+
+			// Act
+			var result = await _controller.DeletePilot(invalidId);
+
+			// Assert
+			var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
+			Assert.Equal("Invalid input. The ID must be a non-negative integer.", badRequestResult.Value);
+		}
+
+		[Fact]
+		[Trait("Category", "DeletePilot")]
+		public async Task DeletePilot_ReturnsNotFound_WhenPilotDoesNotExist()
+		{
+			// Arrange
+			int id = 1;
+			_inputValidationServiceMock.Setup(service => service.IsNonNegativeInt(id)).Returns(true);
 			_pilotServiceMock.Setup(service => service.PilotExists(id)).ReturnsAsync(false);
 
+			// Act
 			var result = await _controller.DeletePilot(id);
 
+			// Assert
 			Assert.IsType<NotFoundResult>(result);
 		}
 
 		[Fact]
 		[Trait("Category", "DeletePilot")]
-		public async Task DeletePilot_PilotFoundButIsReferenced_ReturnsConflictObjectResult()
+		public async Task DeletePilot_ReturnsConflict_WhenPilotCannotBeDeleted()
 		{
-			var id = 1;
+			// Arrange
+			int id = 1;
+			_inputValidationServiceMock.Setup(service => service.IsNonNegativeInt(id)).Returns(true);
 			_pilotServiceMock.Setup(service => service.PilotExists(id)).ReturnsAsync(true);
 			_pilotServiceMock.Setup(service => service.DeletePilot(id)).ReturnsAsync(false);
 
+			// Act
 			var result = await _controller.DeletePilot(id);
 
-			Assert.IsType<ConflictObjectResult>(result);
+			// Assert
+			var conflictResult = Assert.IsType<ConflictObjectResult>(result);
+			Assert.Equal("Pilot cannot be deleted because it is being referenced by other entities.", conflictResult.Value);
 		}
 
-		[Fact]
-		[Trait("Category", "DeletePilot")]
-		public async Task DeletePilot_ReturnsNullReferenceException_WhenPilotDeleteFails()
-		{
-			var id = 1;
-			_pilotServiceMock.Setup(service => service.PilotExists(id)).ReturnsAsync(true);
-			_pilotServiceMock.Setup(service => service.DeletePilot(id))
-				.ThrowsAsync(new Exception("Simulated error"));
-
-			await Assert.ThrowsAsync<Exception>(async () =>
-			{
-				await _controller.DeletePilot(id);
-			});
-		}
 
 	}
 }

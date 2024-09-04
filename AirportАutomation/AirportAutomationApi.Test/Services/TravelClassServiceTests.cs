@@ -1,5 +1,5 @@
-﻿using AirportAutomationApi.IRepository;
-using AirportAutomationApi.Services;
+﻿using AirportAutomation.Application.Services;
+using AirportAutomation.Core.Interfaces.IRepositories;
 using Moq;
 
 namespace AirportAutomationApi.Test.Services
@@ -41,12 +41,12 @@ namespace AirportAutomationApi.Test.Services
 		}
 
 		[Fact]
-		public void TravelClassesCount_ShouldReturnCorrectCount()
+		public async Task TravelClassesCount_ShouldReturnCorrectCount()
 		{
 			var expectedCount = 5;
-			_repositoryMock.Setup(repo => repo.TravelClassesCount()).Returns(expectedCount);
+			_repositoryMock.Setup(repo => repo.TravelClassesCount()).ReturnsAsync(expectedCount);
 
-			int count = _service.TravelClassesCount();
+			int count = await _service.TravelClassesCount();
 
 			Assert.Equal(expectedCount, count);
 		}

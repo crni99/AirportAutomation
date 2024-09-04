@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace AirportAutomation.Core.Dtos.Passenger
+namespace AirportAutomation.Application.Dtos.Passenger
 {
 	public class PassengerCreateDto
 	{
@@ -30,15 +30,5 @@ namespace AirportAutomation.Core.Dtos.Passenger
 		[MaxLength(30, ErrorMessage = "Phone number cannot be longer than 30 characters.")]
 		public string Phone { get; set; }
 
-		public PassengerCreateDto(string firstName, string lastName, string uPRN,
-			string passport, string address, string phone)
-		{
-			FirstName = firstName;
-			LastName = lastName;
-			UPRN = uPRN;
-			Passport = passport;
-			Address = address;
-			Phone = phone;
-		}
 	}
 }

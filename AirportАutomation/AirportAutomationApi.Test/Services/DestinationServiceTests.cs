@@ -1,6 +1,6 @@
-﻿using AirportAutomationApi.Entities;
-using AirportAutomationApi.IRepository;
-using AirportAutomationApi.Services;
+﻿using AirportAutomation.Application.Services;
+using AirportAutomation.Core.Entities;
+using AirportAutomation.Core.Interfaces.IRepositories;
 using Microsoft.AspNetCore.JsonPatch;
 using Moq;
 
@@ -15,6 +15,14 @@ namespace AirportAutomationApi.Test.Services
 		{
 			_repositoryMock = new Mock<IDestinationRepository>();
 			_service = new DestinationService(_repositoryMock.Object);
+		}
+
+		[Fact]
+		public async Task GetAllDestinations_Should_Call_Repository_GetAllDestinations()
+		{
+			await _service.GetAllDestinations();
+
+			_repositoryMock.Verify(repo => repo.GetAllDestinations(), Times.Once);
 		}
 
 		[Fact]
@@ -34,9 +42,20 @@ namespace AirportAutomationApi.Test.Services
 		}
 
 		[Fact]
+		public async Task GetDestinationsByCityOrAirport_Should_Call_Repository_GetDestinationsByCityOrAirport()
+		{
+			var city = "Belgrade";
+			var airport = "Nikola Tesla";
+
+			await _service.GetDestinationsByCityOrAirport(1, 10, city, airport);
+
+			_repositoryMock.Verify(repo => repo.GetDestinationsByCityOrAirport(1, 10, city, airport), Times.Once);
+		}
+
+		[Fact]
 		public async Task PostDestination_Should_Call_Repository_PostDestination()
 		{
-			var destination = new Destination();
+			var destination = new DestinationEntity();
 
 			await _service.PostDestination(destination);
 
@@ -46,7 +65,7 @@ namespace AirportAutomationApi.Test.Services
 		[Fact]
 		public async Task PutDestination_Should_Call_Repository_PutDestination()
 		{
-			var destination = new Destination();
+			var destination = new DestinationEntity();
 
 			await _service.PutDestination(destination);
 
@@ -80,15 +99,17 @@ namespace AirportAutomationApi.Test.Services
 			Assert.False(result);
 		}
 
+
 		[Fact]
-		public void DestinationsCount_ShouldReturnCorrectCount()
+		public async Task DestinationsCount_ShouldReturnCorrectCount()
 		{
 			var expectedCount = 5;
-			_repositoryMock.Setup(repo => repo.DestinationsCount()).Returns(expectedCount);
+			_repositoryMock.Setup(repo => repo.DestinationsCount(null, null)).ReturnsAsync(expectedCount);
 
-			int count = _service.DestinationsCount();
+			int count = await _service.DestinationsCount();
 
 			Assert.Equal(expectedCount, count);
 		}
+
 	}
 }

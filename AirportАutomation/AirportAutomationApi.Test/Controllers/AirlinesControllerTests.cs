@@ -1,9 +1,10 @@
-﻿using AirportAutomationApi.Dtos.Airline;
-using AirportAutomationApi.Entities;
-using AirportAutomationApi.IService;
+﻿using AirportAutomation.Api.Interfaces;
+using AirportAutomation.Application.Dtos.Airline;
+using AirportAutomation.Application.Dtos.Response;
+using AirportAutomation.Core.Entities;
+using AirportAutomation.Core.Interfaces.IServices;
+using AirportАutomation.Api.Interfaces;
 using AirportАutomationApi.Controllers;
-using AirportАutomationApi.Dtos.Response;
-using AirportАutomationApi.IServices;
 using AutoMapper;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
@@ -18,27 +19,16 @@ namespace AirportAutomationApi.Test.Controllers
 		private readonly AirlinesController _controller;
 		private readonly Mock<IAirlineService> _airlineServiceMock;
 		private readonly Mock<IPaginationValidationService> _paginationValidationServiceMock;
+		private readonly Mock<IInputValidationService> _inputValidationServiceMock;
+		private readonly Mock<IUtilityService> _utilityServiceMock;
+		private readonly Mock<IExportService> _exportServiceMock;
 		private readonly Mock<IMapper> _mapperMock;
 		private readonly Mock<ILogger<AirlinesController>> _loggerMock;
 		private readonly Mock<IConfiguration> _configurationMock;
 
-		private readonly int page = 1;
-		private readonly int pageSize = 10;
-
-		private readonly Airline airline = new()
+		private readonly AirlineEntity airlineEntity = new()
 		{
 			Id = 1,
-			Name = "Air Serbia"
-		};
-
-		private readonly Airline airline2 = new()
-		{
-			Id = 1,
-			Name = "Wizz Air"
-		};
-
-		private readonly AirlineCreateDto airlineCreateDto = new()
-		{
 			Name = "Air Serbia"
 		};
 
@@ -52,6 +42,9 @@ namespace AirportAutomationApi.Test.Controllers
 		{
 			_airlineServiceMock = new Mock<IAirlineService>();
 			_paginationValidationServiceMock = new Mock<IPaginationValidationService>();
+			_inputValidationServiceMock = new Mock<IInputValidationService>();
+			_utilityServiceMock = new Mock<IUtilityService>();
+			_exportServiceMock = new Mock<IExportService>();
 			_mapperMock = new Mock<IMapper>();
 			_loggerMock = new Mock<ILogger<AirlinesController>>();
 			_configurationMock = new Mock<IConfiguration>();
@@ -66,6 +59,9 @@ namespace AirportAutomationApi.Test.Controllers
 			_controller = new AirlinesController(
 				_airlineServiceMock.Object,
 				_paginationValidationServiceMock.Object,
+				_inputValidationServiceMock.Object,
+				_utilityServiceMock.Object,
+				_exportServiceMock.Object,
 				_mapperMock.Object,
 				_loggerMock.Object,
 				_configurationMock.Object
@@ -76,6 +72,7 @@ namespace AirportAutomationApi.Test.Controllers
 		[Trait("Category", "GetAirlines")]
 		public async Task GetAirlines_InvalidPaginationParameters_ReturnsBadRequest()
 		{
+			// Arrange
 			int invalidPage = -1;
 			int invalidPageSize = 0;
 			var expectedBadRequestResult = new BadRequestObjectResult("Invalid pagination parameters.");
@@ -84,8 +81,10 @@ namespace AirportAutomationApi.Test.Controllers
 				.Setup(x => x.ValidatePaginationParameters(invalidPage, invalidPageSize, It.IsAny<int>()))
 				.Returns((false, 0, expectedBadRequestResult));
 
+			// Act
 			var result = await _controller.GetAirlines(invalidPage, invalidPageSize);
 
+			// Assert
 			Assert.IsType<BadRequestObjectResult>(result.Result);
 		}
 
@@ -93,14 +92,20 @@ namespace AirportAutomationApi.Test.Controllers
 		[Trait("Category", "GetAirlines")]
 		public async Task GetAirlines_ReturnsNoContent_WhenNoAirlinesFound()
 		{
+			// Arrange
+			int page = 1;
+			int pageSize = 10;
+
 			_paginationValidationServiceMock
 				.Setup(x => x.ValidatePaginationParameters(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<int>()))
-				.Returns((true, 0, null));
+				.Returns((true, pageSize, null));
 			_airlineServiceMock.Setup(service => service.GetAirlines(It.IsAny<int>(), It.IsAny<int>()))
-				.ReturnsAsync(new List<Airline>());
+				.ReturnsAsync(new List<AirlineEntity>());
 
-			var result = await _controller.GetAirlines();
+			// Act
+			var result = await _controller.GetAirlines(page, pageSize);
 
+			// Assert
 			Assert.IsType<NoContentResult>(result.Result);
 		}
 
@@ -108,315 +113,550 @@ namespace AirportAutomationApi.Test.Controllers
 		[Trait("Category", "GetAirlines")]
 		public async Task GetAirlines_ReturnsInternalServerError_WhenExceptionThrown()
 		{
+			// Arrange
+			int page = 1;
+			int pageSize = 10;
+
 			_paginationValidationServiceMock
 				.Setup(x => x.ValidatePaginationParameters(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<int>()))
-				.Returns((true, 0, null));
+				.Returns((true, pageSize, null));
 			_airlineServiceMock.Setup(service => service.GetAirlines(It.IsAny<int>(), It.IsAny<int>()))
 				.ThrowsAsync(new Exception("Simulated exception"));
 
-			await Assert.ThrowsAsync<Exception>(async () => await _controller.GetAirlines());
+			// Act & Assert
+			await Assert.ThrowsAsync<Exception>(async () => await _controller.GetAirlines(page, pageSize));
 		}
 
 		[Fact]
 		[Trait("Category", "GetAirlines")]
-		public async Task GetAirlines_ReturnsNoContent_WhenNoData()
+		public async Task GetAirlines_ReturnsOk_WithPaginatedAirlines()
 		{
-			List<Airline> airlines = null;
+			// Arrange
+			int page = 1;
+			int pageSize = 10;
+			var airlines = new List<AirlineEntity>
+			{
+				new AirlineEntity { /* Initialize properties */ },
+				new AirlineEntity { /* Initialize properties */ }
+			};
+			var totalItems = 2;
+
 			_paginationValidationServiceMock
 				.Setup(x => x.ValidatePaginationParameters(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<int>()))
-				.Returns((true, 0, null));
-			_airlineServiceMock.Setup(service => service.GetAirlines(page, pageSize))
+				.Returns((true, pageSize, null));
+			_airlineServiceMock
+				.Setup(service => service.GetAirlines(page, pageSize))
 				.ReturnsAsync(airlines);
+			_airlineServiceMock
+				.Setup(service => service.AirlinesCount(null))
+				.ReturnsAsync(totalItems);
 
+			var expectedData = new List<AirlineDto>
+			{
+				new AirlineDto { /* Initialize properties */ },
+				new AirlineDto { /* Initialize properties */ }
+			};
+			_mapperMock
+				.Setup(m => m.Map<IEnumerable<AirlineDto>>(It.IsAny<IEnumerable<AirlineEntity>>()))
+				.Returns(expectedData);
+
+			// Act
 			var result = await _controller.GetAirlines(page, pageSize);
 
+			// Assert
 			var actionResult = Assert.IsType<ActionResult<PagedResponse<AirlineDto>>>(result);
-			Assert.IsType<NoContentResult>(actionResult.Result);
-		}
-
-		[Fact]
-		[Trait("Category", "GetAirlineById")]
-		public async Task GetAirlineById_ReturnsOkResult_WhenAirlineExists()
-		{
-			var airlineId = 1;
-			_airlineServiceMock.Setup(service => service.AirlineExists(airlineId))
-				.ReturnsAsync(true);
-			_airlineServiceMock.Setup(service => service.GetAirline(airlineId))
-				.ReturnsAsync(airline);
-			_mapperMock.Setup(mapper => mapper.Map<AirlineDto>(It.IsAny<Airline>()))
-				.Returns(new AirlineDto());
-
-			var result = await _controller.GetAirline(airlineId);
-
-			var actionResult = Assert.IsType<ActionResult<AirlineDto>>(result);
 			var okResult = Assert.IsType<OkObjectResult>(actionResult.Result);
-			Assert.IsType<AirlineDto>(okResult.Value);
+			var pagedResponse = Assert.IsType<PagedResponse<AirlineDto>>(okResult.Value);
+			Assert.Equal(page, pagedResponse.PageNumber);
+			Assert.Equal(pageSize, pagedResponse.PageSize);
+			Assert.Equal(totalItems, pagedResponse.TotalCount);
+			Assert.Equal(expectedData, pagedResponse.Data);
 		}
 
 		[Fact]
-		[Trait("Category", "GetAirlineById")]
-		public async Task GetAirlineById_ReturnsNotFound_WhenAirlineDoesNotExist()
+		[Trait("Category", "GetAirlines")]
+		public async Task GetAirlines_ReturnsCorrectPageData()
 		{
-			var airlineId = 2;
-			_airlineServiceMock.Setup(service => service.AirlineExists(airlineId))
+			// Arrange
+			int page = 2;
+			int pageSize = 5;
+			var allAirlines = new List<AirlineEntity>
+			{
+				new AirlineEntity { /* Initialize properties */ },
+				new AirlineEntity { /* Initialize properties */ },
+				new AirlineEntity { /* Initialize properties */ },
+				new AirlineEntity { /* Initialize properties */ },
+				new AirlineEntity { /* Initialize properties */ },
+				new AirlineEntity { /* Initialize properties */ },
+				new AirlineEntity { /* Initialize properties */ },
+				new AirlineEntity { /* Initialize properties */ },
+				new AirlineEntity { /* Initialize properties */ },
+				new AirlineEntity { /* Initialize properties */ }
+			};
+			var pagedAirlines = allAirlines.Skip((page - 1) * pageSize).Take(pageSize).ToList();
+
+			_paginationValidationServiceMock
+				.Setup(x => x.ValidatePaginationParameters(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<int>()))
+				.Returns((true, pageSize, null));
+			_airlineServiceMock
+				.Setup(service => service.GetAirlines(page, pageSize))
+				.ReturnsAsync(pagedAirlines);
+			_airlineServiceMock
+				.Setup(service => service.AirlinesCount(null))
+				.ReturnsAsync(allAirlines.Count);
+
+			var expectedData = new List<AirlineDto>
+			{
+				new AirlineDto { /* Initialize properties */ },
+				new AirlineDto { /* Initialize properties */ },
+				new AirlineDto { /* Initialize properties */ },
+				new AirlineDto { /* Initialize properties */ },
+				new AirlineDto { /* Initialize properties */ }
+			};
+			_mapperMock
+				.Setup(m => m.Map<IEnumerable<AirlineDto>>(It.IsAny<IEnumerable<AirlineEntity>>()))
+				.Returns(expectedData);
+
+			// Act
+			var result = await _controller.GetAirlines(page, pageSize);
+
+			// Assert
+			var actionResult = Assert.IsType<ActionResult<PagedResponse<AirlineDto>>>(result);
+			var okResult = Assert.IsType<OkObjectResult>(actionResult.Result);
+			var pagedResponse = Assert.IsType<PagedResponse<AirlineDto>>(okResult.Value);
+			Assert.Equal(page, pagedResponse.PageNumber);
+			Assert.Equal(pageSize, pagedResponse.PageSize);
+			Assert.Equal(allAirlines.Count, pagedResponse.TotalCount);
+			Assert.Equal(expectedData, pagedResponse.Data);
+		}
+
+		[Fact]
+		[Trait("Category", "GetAirline")]
+		public async Task GetAirline_InvalidId_ReturnsBadRequest()
+		{
+			// Arrange
+			int invalidId = -1;
+			var expectedBadRequestResult = new BadRequestObjectResult("Invalid input. The ID must be a non-negative integer.");
+
+			_inputValidationServiceMock
+				.Setup(x => x.IsNonNegativeInt(invalidId))
+				.Returns(false);
+
+			// Act
+			var result = await _controller.GetAirline(invalidId);
+
+			// Assert
+			Assert.IsType<BadRequestObjectResult>(result.Result);
+			var badRequestResult = result.Result as BadRequestObjectResult;
+			Assert.Equal(expectedBadRequestResult.Value, badRequestResult.Value);
+		}
+
+		[Fact]
+		[Trait("Category", "GetAirline")]
+		public async Task GetAirline_AirlineNotFound_ReturnsNotFound()
+		{
+			// Arrange
+			int validId = 1;
+
+			_inputValidationServiceMock
+				.Setup(x => x.IsNonNegativeInt(validId))
+				.Returns(true);
+			_airlineServiceMock
+				.Setup(service => service.AirlineExists(validId))
 				.ReturnsAsync(false);
 
-			var result = await _controller.GetAirline(airlineId);
+			// Act
+			var result = await _controller.GetAirline(validId);
 
+			// Assert
+			Assert.IsType<NotFoundResult>(result.Result);
+		}
+
+		[Fact]
+		[Trait("Category", "GetAirline")]
+		public async Task GetAirline_ReturnsAirlineDto_WhenAirlineExists()
+		{
+			// Arrange
+			int validId = 1;
+
+			_inputValidationServiceMock
+				.Setup(x => x.IsNonNegativeInt(validId))
+				.Returns(true);
+			_airlineServiceMock
+				.Setup(service => service.AirlineExists(validId))
+				.ReturnsAsync(true);
+			_airlineServiceMock
+				.Setup(service => service.GetAirline(validId))
+				.ReturnsAsync(airlineEntity);
+			_mapperMock
+				.Setup(m => m.Map<AirlineDto>(airlineEntity))
+				.Returns(airlineDto);
+
+			// Act
+			var result = await _controller.GetAirline(validId);
+
+			// Assert
 			var actionResult = Assert.IsType<ActionResult<AirlineDto>>(result);
-			Assert.IsType<NotFoundResult>(actionResult.Result);
+			var okResult = Assert.IsType<OkObjectResult>(actionResult.Result);
+			var returnedAirlineDto = Assert.IsType<AirlineDto>(okResult.Value);
+			Assert.Equal(airlineDto, returnedAirlineDto);
 		}
 
 		[Fact]
-		[Trait("Category", "GetAirlineById")]
-		public async Task GetAirlineById_ThrowsException_WhenServiceThrowsException()
+		[Trait("Category", "GetAirlinesByName")]
+		public async Task GetAirlinesByName_InvalidName_ReturnsBadRequest()
 		{
-			var airlineId = 1;
-			_airlineServiceMock.Setup(service => service.AirlineExists(airlineId))
-				.Throws(new Exception("Simulated exception"));
+			// Arrange
+			string invalidName = string.Empty;
+			var expectedBadRequestResult = new BadRequestObjectResult("Invalid input. The name must be a valid non-empty string.");
 
-			await Assert.ThrowsAsync<Exception>(async () => await _controller.GetAirline(airlineId));
+			_inputValidationServiceMock
+				.Setup(x => x.IsValidString(invalidName))
+				.Returns(false);
+
+			// Act
+			var result = await _controller.GetAirlinesByName(invalidName);
+
+			// Assert
+			Assert.IsType<BadRequestObjectResult>(result.Result);
+			var badRequestResult = result.Result as BadRequestObjectResult;
+			Assert.Equal(expectedBadRequestResult.Value, badRequestResult.Value);
 		}
 
 		[Fact]
-		[Trait("Category", "GetAirlineByName")]
-		public async Task GetAirlinesByName_ReturnsOkResult_WithValidInput()
+		[Trait("Category", "GetAirlinesByName")]
+		public async Task GetAirlinesByName_InvalidPaginationParameters_ReturnsBadRequest()
 		{
-			var name = "Ognjen";
-			var expectedAirlines = new List<Airline>
-			{
-				airline
-			};
-			var expectedAirlinesDto = expectedAirlines.Select(a => new AirlineDto
-			{
-				Id = a.Id,
-			});
-			_airlineServiceMock.Setup(service => service.GetAirlinesByName(name))
-					.ReturnsAsync(expectedAirlines);
+			// Arrange
+			string validName = "ValidName";
+			int invalidPage = -1;
+			int invalidPageSize = 0;
+			var expectedBadRequestResult = new BadRequestObjectResult("Invalid pagination parameters.");
 
-			var result = await _controller.GetAirlinesByName(name);
+			_inputValidationServiceMock
+				.Setup(x => x.IsValidString(validName))
+				.Returns(true);
+			_paginationValidationServiceMock
+				.Setup(x => x.ValidatePaginationParameters(invalidPage, invalidPageSize, It.IsAny<int>()))
+				.Returns((false, 0, expectedBadRequestResult));
 
-			Assert.IsType<ActionResult<IEnumerable<AirlineDto>>>(result);
+			// Act
+			var result = await _controller.GetAirlinesByName(validName, invalidPage, invalidPageSize);
+
+			// Assert
+			Assert.IsType<BadRequestObjectResult>(result.Result);
 		}
 
 		[Fact]
-		[Trait("Category", "GetAirlineByName")]
-		public async Task GetAirlinesByName_ReturnsBadRequest_WhenBothNamesAreMissing()
+		[Trait("Category", "GetAirlinesByName")]
+		public async Task GetAirlinesByName_AirlinesNotFound_ReturnsNotFound()
 		{
-			string name = string.Empty;
-			List<Airline> airlines = null;
-			_airlineServiceMock.Setup(service => service.GetAirlinesByName(name))
-				.ReturnsAsync(airlines);
+			// Arrange
+			string validName = "NonExistentName";
+			int validPage = 1;
+			int validPageSize = 10;
 
-			var result = await _controller.GetAirlinesByName(name);
+			_inputValidationServiceMock
+				.Setup(x => x.IsValidString(validName))
+				.Returns(true);
+			_paginationValidationServiceMock
+				.Setup(x => x.ValidatePaginationParameters(validPage, validPageSize, It.IsAny<int>()))
+				.Returns((true, validPageSize, null));
+			_airlineServiceMock
+				.Setup(service => service.GetAirlinesByName(validPage, validPageSize, validName))
+				.ReturnsAsync(new List<AirlineEntity>());
 
-			var notFoundResult = Assert.IsType<ActionResult<IEnumerable<AirlineDto>>>(result);
-			Assert.IsType<NotFoundResult>(notFoundResult.Result);
-			Assert.True(string.IsNullOrEmpty(notFoundResult.Value?.ToString()));
+			// Act
+			var result = await _controller.GetAirlinesByName(validName, validPage, validPageSize);
+
+			// Assert
+			Assert.IsType<NotFoundResult>(result.Result);
 		}
 
 		[Fact]
-		[Trait("Category", "GetAirlineByName")]
-		public async Task GetAirlineByName_ReturnsNotFound_WhenNoData()
+		[Trait("Category", "GetAirlinesByName")]
+		public async Task GetAirlinesByName_ReturnsPagedListOfAirlines_WhenAirlinesFound()
 		{
-			List<Airline> airlines = null;
-			_airlineServiceMock.Setup(service => service.GetAirlinesByName(airline.Name))
-				.ReturnsAsync(airlines);
+			// Arrange
+			string validName = "ValidName";
+			int validPage = 1;
+			int validPageSize = 10;
+			var airlineEntities = new List<AirlineEntity> { airlineEntity };
+			var airlineDtos = new List<AirlineDto> { airlineDto };
+			var totalItems = 1;
 
-			var result = await _controller.GetAirlinesByName(airline.Name);
+			_inputValidationServiceMock
+				.Setup(x => x.IsValidString(validName))
+				.Returns(true);
+			_paginationValidationServiceMock
+				.Setup(x => x.ValidatePaginationParameters(validPage, validPageSize, It.IsAny<int>()))
+				.Returns((true, validPageSize, null));
+			_airlineServiceMock
+				.Setup(service => service.GetAirlinesByName(validPage, validPageSize, validName))
+				.ReturnsAsync(airlineEntities);
+			_airlineServiceMock
+				.Setup(service => service.AirlinesCount(validName))
+				.ReturnsAsync(totalItems);
+			_mapperMock
+				.Setup(m => m.Map<IEnumerable<AirlineDto>>(airlineEntities))
+				.Returns(airlineDtos);
 
-			var actionResult = Assert.IsType<ActionResult<IEnumerable<AirlineDto>>>(result);
-			Assert.IsType<NotFoundResult>(actionResult.Result);
-		}
+			// Act
+			var result = await _controller.GetAirlinesByName(validName, validPage, validPageSize);
 
-		[Fact]
-		[Trait("Category", "GetAirlineByName")]
-		public async Task GetAirlineByName_ThrowsException_WhenServiceThrowsException()
-		{
-			var name = "Og";
-
-			_airlineServiceMock.Setup(service => service.GetAirlinesByName(name))
-				.ThrowsAsync(new Exception("Simulated exception"));
-
-			await Assert.ThrowsAsync<Exception>(async () => await _controller.GetAirlinesByName(name));
+			// Assert
+			var actionResult = Assert.IsType<ActionResult<PagedResponse<AirlineDto>>>(result);
+			var okResult = Assert.IsType<OkObjectResult>(actionResult.Result);
+			var response = Assert.IsType<PagedResponse<AirlineDto>>(okResult.Value);
+			Assert.Equal(validPage, response.PageNumber);
+			Assert.Equal(validPageSize, response.PageSize);
+			Assert.Equal(totalItems, response.TotalCount);
+			Assert.Equal(airlineDtos, response.Data);
 		}
 
 		[Fact]
 		[Trait("Category", "PostAirline")]
-		public async Task PostAirline_ReturnsCreatedAtAction_WhenAirlineCreatedSuccessfully()
+		public async Task PostAirline_ReturnsCreatedAtActionResult_WhenAirlineIsCreatedSuccessfully()
 		{
-			_mapperMock.Setup(mapper => mapper.Map<Airline>(airlineCreateDto))
-			.Returns(airline);
-			_airlineServiceMock.Setup(service => service.PostAirline(It.IsAny<Airline>()))
-			.ReturnsAsync(airline);
+			// Arrange
+			var airlineCreateDto = new AirlineCreateDto();
+			var airlineEntity = new AirlineEntity { Id = 1 };
+			var airlineDto = new AirlineDto { Id = 1 };
 
+			// Set up the mapper to return the expected values
+			_mapperMock.Setup(m => m.Map<AirlineEntity>(airlineCreateDto)).Returns(airlineEntity);
+			_mapperMock.Setup(m => m.Map<AirlineDto>(airlineEntity)).Returns(airlineDto);
+
+			// Adjust service setup to return the airlineEntity wrapped in a Task
+			_airlineServiceMock.Setup(service => service.PostAirline(airlineEntity))
+							   .ReturnsAsync(airlineEntity);
+
+			// Act
 			var result = await _controller.PostAirline(airlineCreateDto);
 
-			var actionResult = Assert.IsType<ActionResult<Airline>>(result);
-			var createdAtActionResult = Assert.IsType<CreatedAtActionResult>(actionResult.Result);
-			Assert.Equal("GetAirline", createdAtActionResult.ActionName);
-			Assert.Equal(airline.Id, createdAtActionResult.RouteValues["id"]);
-			Assert.Equal(airline, createdAtActionResult.Value);
+			// Assert
+			var actionResult = Assert.IsType<CreatedAtActionResult>(result.Result);
+			var returnedValue = Assert.IsType<AirlineDto>(actionResult.Value);
+			Assert.Equal(airlineDto.Id, returnedValue.Id);
+			Assert.Equal("GetAirline", actionResult.ActionName);
+			Assert.Equal(1, actionResult.RouteValues["id"]);
 		}
 
 		[Fact]
 		[Trait("Category", "PostAirline")]
-		public async Task PostAirline_ReturnsNullReferenceException_WhenAirlineCreationFails()
+		public async Task PostAirline_ThrowsException_WhenServiceFails()
 		{
-			_airlineServiceMock.Setup(service => service.PostAirline(airline))
-				.ThrowsAsync(new NullReferenceException("Simulated exception"));
+			// Arrange
+			var airlineCreateDto = new AirlineCreateDto();
+			var airlineEntity = new AirlineEntity();
+			_mapperMock.Setup(m => m.Map<AirlineEntity>(airlineCreateDto)).Returns(airlineEntity);
 
-			await Assert.ThrowsAsync<NullReferenceException>(async () => await _controller.PostAirline(airlineCreateDto));
+			// Set up the service to throw an exception
+			_airlineServiceMock.Setup(service => service.PostAirline(airlineEntity))
+							   .ThrowsAsync(new Exception("Simulated exception"));
+
+			// Act & Assert
+			await Assert.ThrowsAsync<Exception>(async () => await _controller.PostAirline(airlineCreateDto));
 		}
 
 		[Fact]
 		[Trait("Category", "PutAirline")]
-		public async Task PutAirline_ValidUpdate_ReturnsNoContentResult()
+		public async Task PutAirline_ReturnsNoContent_WhenUpdateIsSuccessful()
 		{
-			var id = 1;
-			_airlineServiceMock.Setup(service => service.AirlineExists(id)).ReturnsAsync(true);
-			_airlineServiceMock.Setup(service => service.PutAirline(It.IsAny<Airline>())).Returns(Task.CompletedTask);
+			// Arrange
+			int id = 1;
+			var airlineDto = new AirlineDto { Id = id };
+			var airlineEntity = new AirlineEntity { Id = id };
 
+			_inputValidationServiceMock.Setup(service => service.IsNonNegativeInt(id)).Returns(true);
+			_mapperMock.Setup(m => m.Map<AirlineEntity>(airlineDto)).Returns(airlineEntity);
+			_airlineServiceMock.Setup(service => service.AirlineExists(id)).ReturnsAsync(true);
+			_airlineServiceMock.Setup(service => service.PutAirline(airlineEntity)).Returns(Task.CompletedTask);
+
+			// Act
 			var result = await _controller.PutAirline(id, airlineDto);
 
+			// Assert
 			Assert.IsType<NoContentResult>(result);
 		}
 
 		[Fact]
 		[Trait("Category", "PutAirline")]
-		public async Task PutAirline_AirlineNotFound_ReturnsNotFoundResult()
+		public async Task PutAirline_ReturnsBadRequest_WhenIdIsInvalid()
 		{
-			var id = 1;
-			_airlineServiceMock.Setup(service => service.AirlineExists(id)).ReturnsAsync(false);
+			// Arrange
+			int invalidId = -1;
+			var airlineDto = new AirlineDto { Id = invalidId };
 
-			var result = await _controller.PutAirline(id, airlineDto);
+			_inputValidationServiceMock.Setup(service => service.IsNonNegativeInt(invalidId)).Returns(false);
 
-			Assert.IsType<NotFoundResult>(result);
+			// Act
+			var result = await _controller.PutAirline(invalidId, airlineDto);
+
+			// Assert
+			var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
+			Assert.Equal("Invalid input. The ID must be a non-negative integer.", badRequestResult.Value);
 		}
 
 		[Fact]
 		[Trait("Category", "PutAirline")]
-		public async Task PutAirline_IdsMismatch_ReturnsBadRequestResult()
+		public async Task PutAirline_ReturnsBadRequest_WhenIdInDtoDoesNotMatchIdInUrl()
 		{
-			var id = 2;
+			// Arrange
+			int id = 1;
+			var airlineDto = new AirlineDto { Id = 2 };
 
+			_inputValidationServiceMock.Setup(service => service.IsNonNegativeInt(id)).Returns(true);
+
+			// Act
 			var result = await _controller.PutAirline(id, airlineDto);
 
+			// Assert
 			Assert.IsType<BadRequestResult>(result);
 		}
 
 		[Fact]
 		[Trait("Category", "PutAirline")]
-		public async Task PutAirline_ReturnsNullReferenceException_WhenAirlineUpdateFails()
+		public async Task PutAirline_ReturnsNotFound_WhenAirlineDoesNotExist()
 		{
-			var id = 1;
-			_airlineServiceMock.Setup(service => service.AirlineExists(id)).ReturnsAsync(true);
-			_airlineServiceMock.Setup(service => service.PutAirline(It.IsAny<Airline>()))
-				.ThrowsAsync(new Exception("Simulated error"));
+			// Arrange
+			int id = 1;
+			var airlineDto = new AirlineDto { Id = id };
 
-			await Assert.ThrowsAsync<Exception>(async () =>
-			{
-				await _controller.PutAirline(id, airlineDto);
-			});
-		}
-
-		[Fact]
-		[Trait("Category", "PatchAirline")]
-		public async Task PatchAirline_ValidUpdate_ReturnsOkResult()
-		{
-			var id = 1;
-			var airlineDocument = new JsonPatchDocument();
-			var updatedAirline = new Airline { Id = id, Name = "OG" };
-			_airlineServiceMock.Setup(service => service.AirlineExists(id)).ReturnsAsync(true);
-			_airlineServiceMock.Setup(service => service.PatchAirline(id, airlineDocument)).ReturnsAsync(updatedAirline);
-
-			var result = await _controller.PatchAirline(id, airlineDocument);
-
-			var okResult = Assert.IsType<OkObjectResult>(result);
-			var returnedAirline = Assert.IsType<Airline>(okResult.Value);
-			Assert.Equal(id, returnedAirline.Id);
-			Assert.Equal("OG", returnedAirline.Name);
-		}
-
-		[Fact]
-		[Trait("Category", "PatchAirline")]
-		public async Task PatchAirline_AirlineNotFound_ReturnsNotFoundResult()
-		{
-			var id = 1;
-			var airlineDocument = new JsonPatchDocument();
+			_inputValidationServiceMock.Setup(service => service.IsNonNegativeInt(id)).Returns(true);
 			_airlineServiceMock.Setup(service => service.AirlineExists(id)).ReturnsAsync(false);
 
-			var result = await _controller.PatchAirline(id, airlineDocument);
+			// Act
+			var result = await _controller.PutAirline(id, airlineDto);
 
+			// Assert
 			Assert.IsType<NotFoundResult>(result);
 		}
 
 		[Fact]
 		[Trait("Category", "PatchAirline")]
-		public async Task PatchAirline_ReturnsNullReferenceException_WhenAirlinePatchFails()
+		public async Task PatchAirline_ReturnsOk_WhenUpdateIsSuccessful()
 		{
-			var id = 1;
-			_airlineServiceMock.Setup(service => service.AirlineExists(id)).ReturnsAsync(true);
-			_airlineServiceMock.Setup(service => service.PatchAirline(id, It.IsAny<JsonPatchDocument>()))
-				.ThrowsAsync(new Exception("Simulated error"));
+			// Arrange
+			int id = 1;
+			var airlineDocument = new JsonPatchDocument();
+			var updatedAirline = new AirlineEntity { Id = id };
+			var airlineDto = new AirlineDto { Id = id };
 
-			await Assert.ThrowsAsync<Exception>(async () =>
-			{
-				await _controller.PatchAirline(id, It.IsAny<JsonPatchDocument>());
-			});
+			_inputValidationServiceMock.Setup(service => service.IsNonNegativeInt(id)).Returns(true);
+			_airlineServiceMock.Setup(service => service.AirlineExists(id)).ReturnsAsync(true);
+			_airlineServiceMock.Setup(service => service.PatchAirline(id, airlineDocument)).ReturnsAsync(updatedAirline);
+			_mapperMock.Setup(m => m.Map<AirlineDto>(updatedAirline)).Returns(airlineDto);
+
+			// Act
+			var result = await _controller.PatchAirline(id, airlineDocument);
+
+			// Assert
+			var okResult = Assert.IsType<OkObjectResult>(result);
+			Assert.Equal(airlineDto, okResult.Value);
+		}
+
+		[Fact]
+		[Trait("Category", "PatchAirline")]
+		public async Task PatchAirline_ReturnsBadRequest_WhenIdIsInvalid()
+		{
+			// Arrange
+			int invalidId = -1;
+			var airlineDocument = new JsonPatchDocument();
+
+			_inputValidationServiceMock.Setup(service => service.IsNonNegativeInt(invalidId)).Returns(false);
+
+			// Act
+			var result = await _controller.PatchAirline(invalidId, airlineDocument);
+
+			// Assert
+			var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
+			Assert.Equal("Invalid input. The ID must be a non-negative integer.", badRequestResult.Value);
+		}
+
+		[Fact]
+		[Trait("Category", "PatchAirline")]
+		public async Task PatchAirline_ReturnsNotFound_WhenAirlineDoesNotExist()
+		{
+			// Arrange
+			int id = 1;
+			var airlineDocument = new JsonPatchDocument();
+
+			_inputValidationServiceMock.Setup(service => service.IsNonNegativeInt(id)).Returns(true);
+			_airlineServiceMock.Setup(service => service.AirlineExists(id)).ReturnsAsync(false);
+
+			// Act
+			var result = await _controller.PatchAirline(id, airlineDocument);
+
+			// Assert
+			Assert.IsType<NotFoundResult>(result);
 		}
 
 		[Fact]
 		[Trait("Category", "DeleteAirline")]
-		public async Task DeleteAirline_ValidDelete_ReturnsNoContentResult()
+		public async Task DeleteAirline_ReturnsNoContent_WhenDeletionIsSuccessful()
 		{
-			var id = 1;
+			// Arrange
+			int id = 1;
+			_inputValidationServiceMock.Setup(service => service.IsNonNegativeInt(id)).Returns(true);
 			_airlineServiceMock.Setup(service => service.AirlineExists(id)).ReturnsAsync(true);
 			_airlineServiceMock.Setup(service => service.DeleteAirline(id)).ReturnsAsync(true);
 
+			// Act
 			var result = await _controller.DeleteAirline(id);
 
+			// Assert
 			Assert.IsType<NoContentResult>(result);
 		}
 
 		[Fact]
 		[Trait("Category", "DeleteAirline")]
-		public async Task DeleteAirline_AirlineNotFound_ReturnsNotFoundResult()
+		public async Task DeleteAirline_ReturnsBadRequest_WhenIdIsInvalid()
 		{
-			var id = 1;
+			// Arrange
+			int invalidId = -1;
+			_inputValidationServiceMock.Setup(service => service.IsNonNegativeInt(invalidId)).Returns(false);
+
+			// Act
+			var result = await _controller.DeleteAirline(invalidId);
+
+			// Assert
+			var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
+			Assert.Equal("Invalid input. The ID must be a non-negative integer.", badRequestResult.Value);
+		}
+
+		[Fact]
+		[Trait("Category", "DeleteAirline")]
+		public async Task DeleteAirline_ReturnsNotFound_WhenAirlineDoesNotExist()
+		{
+			// Arrange
+			int id = 1;
+			_inputValidationServiceMock.Setup(service => service.IsNonNegativeInt(id)).Returns(true);
 			_airlineServiceMock.Setup(service => service.AirlineExists(id)).ReturnsAsync(false);
 
+			// Act
 			var result = await _controller.DeleteAirline(id);
 
+			// Assert
 			Assert.IsType<NotFoundResult>(result);
 		}
 
 		[Fact]
 		[Trait("Category", "DeleteAirline")]
-		public async Task DeleteAirline_AirlineFoundButIsReferenced_ReturnsConflictObjectResult()
+		public async Task DeleteAirline_ReturnsConflict_WhenAirlineCannotBeDeleted()
 		{
-			var id = 1;
+			// Arrange
+			int id = 1;
+			_inputValidationServiceMock.Setup(service => service.IsNonNegativeInt(id)).Returns(true);
 			_airlineServiceMock.Setup(service => service.AirlineExists(id)).ReturnsAsync(true);
 			_airlineServiceMock.Setup(service => service.DeleteAirline(id)).ReturnsAsync(false);
 
+			// Act
 			var result = await _controller.DeleteAirline(id);
 
-			Assert.IsType<ConflictObjectResult>(result);
-		}
-
-		[Fact]
-		[Trait("Category", "DeleteAirline")]
-		public async Task DeleteAirline_ReturnsNullReferenceException_WhenAirlineDeleteFails()
-		{
-			var id = 1;
-			_airlineServiceMock.Setup(service => service.AirlineExists(id)).ReturnsAsync(true);
-			_airlineServiceMock.Setup(service => service.DeleteAirline(id))
-				.ThrowsAsync(new Exception("Simulated error"));
-
-			await Assert.ThrowsAsync<Exception>(async () =>
-			{
-				await _controller.DeleteAirline(id);
-			});
+			// Assert
+			var conflictResult = Assert.IsType<ConflictObjectResult>(result);
+			Assert.Equal("Airline cannot be deleted because it is being referenced by other entities.", conflictResult.Value);
 		}
 
 	}
