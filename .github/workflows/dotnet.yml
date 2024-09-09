@@ -26,15 +26,15 @@ jobs:
 
     - name: Restore dependencies
       working-directory: ./AirportAutomation
-      run: dotnet restore AirportАutomation.sln
+      run: dotnet restore AirportAutomation.sln
 
     - name: Build
       working-directory: ./AirportAutomation
-      run: dotnet build AirportАutomation.sln --no-restore
+      run: dotnet build AirportAutomation.sln --no-restore
 
     - name: Test
       working-directory: ./AirportAutomation
-      run: dotnet test AirportАutomation.sln --no-build --verbosity normal
+      run: dotnet test AirportAutomation.sln --no-build --verbosity normal
 
 
 
