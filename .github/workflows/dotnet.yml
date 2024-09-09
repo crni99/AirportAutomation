@@ -22,19 +22,20 @@ jobs:
         dotnet-version: 8.0.x
 
     - name: List directory contents
-      run: ls -R
+      run: ls -R AirportAutomation
 
     - name: Restore dependencies
       working-directory: ./AirportAutomation
-      run: dotnet restore
+      run: dotnet restore AirportАutomation.sln
 
     - name: Build
       working-directory: ./AirportAutomation
-      run: dotnet build --no-restore
+      run: dotnet build AirportАutomation.sln --no-restore
 
     - name: Test
       working-directory: ./AirportAutomation
-      run: dotnet test --no-build --verbosity normal
+      run: dotnet test AirportАutomation.sln --no-build --verbosity normal
+
 
 
 
