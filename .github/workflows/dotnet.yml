@@ -22,15 +22,15 @@ jobs:
         dotnet-version: 8.0.x
 
     - name: Restore dependencies
-      working-directory: ./AirportAutomation
+      working-directory: AirportAutomation
       run: dotnet restore
 
     - name: Build
-      working-directory: ./AirportAutomation
+      working-directory: AirportAutomation
       run: dotnet build --no-restore
 
     - name: Test
-      working-directory: ./AirportAutomation
+      working-directory: AirportAutomation
       run: dotnet test --no-build --verbosity normal
 
 
