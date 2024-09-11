@@ -13,25 +13,14 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using QuestPDF.Infrastructure;
 using Serilog;
-using Serilog.Events;
 using System.Text;
-
-Log.Logger = new LoggerConfiguration()
-	.MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
-	.MinimumLevel.Is(LogEventLevel.Information)
-	.WriteTo.Logger(lc => lc
-		.Filter.ByIncludingOnly(le => le.Level >= LogEventLevel.Information)
-		.WriteTo.Console()
-	)
-	.WriteTo.Logger(lc => lc
-		.Filter.ByIncludingOnly(le => le.Level >= LogEventLevel.Warning)
-		.WriteTo.File("Logs/AirportAutomationAPI.txt", rollingInterval: RollingInterval.Day)
-	)
-	.CreateLogger();
 
 QuestPDF.Settings.License = LicenseType.Community;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Host.UseSerilog((context, loggerConfig) =>
+	loggerConfig.ReadFrom.Configuration(context.Configuration));
 
 builder.Services.AddCors(options =>
 {
@@ -47,7 +36,6 @@ builder.Services.AddControllers(
 		options => options.UseDateOnlyTimeOnlyStringConverters())
 	.AddJsonOptions(options => options.UseDateOnlyTimeOnlyStringConverters())
 	.AddNewtonsoftJson();
-builder.Host.UseSerilog();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(setupAction =>
 {
@@ -198,6 +186,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.UseMiddleware<RequestLogContextMiddleware>();
+app.UseSerilogRequestLogging();
 app.MapHealthChecks("/api/v{version:apiVersion}/HealthCheck", new()
 {
 	ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse,
