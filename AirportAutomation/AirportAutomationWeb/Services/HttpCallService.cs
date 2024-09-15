@@ -67,7 +67,7 @@ namespace AirportAutomation.Web.Services
 			}
 			else if (((int)response.StatusCode) == 400 || ((int)response.StatusCode) == 401)
 			{
-				_logger.LogError("Unauthorized");
+				_logger.LogInformation("Unauthorized. Status code: {StatusCode}", response.StatusCode);
 			}
 			else
 			{
