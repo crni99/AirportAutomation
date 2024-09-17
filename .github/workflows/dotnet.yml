@@ -14,6 +14,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
+        dotnet-version: [8.0.x, 6.0.x]
     runs-on: ${{ matrix.os }}
 
     steps:
@@ -22,9 +23,15 @@ jobs:
     - name: Setup .NET
       uses: actions/setup-dotnet@v4
       with:
-        dotnet-version: |
-          8.0.x
-          6.0.x
+        dotnet-version: ${{ matrix.dotnet-version }}
+
+    - name: Cache NuGet packages
+      uses: actions/cache@v3
+      with:
+        path: ~/.nuget/packages
+        key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}
+        restore-keys: |
+          ${{ runner.os }}-nuget-
 
     - name: Restore dependencies
       working-directory: ./AirportAutomation
@@ -37,5 +44,3 @@ jobs:
     - name: Test
       working-directory: ./AirportAutomation
       run: dotnet test AirportAutomation.sln --no-build --verbosity normal
-
-
