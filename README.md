@@ -1,6 +1,7 @@
+
 # AirportAutomation [![.NET](https://github.com/crni99/AirportAutomation/actions/workflows/dotnet.yml/badge.svg)](https://github.com/crni99/AirportAutomation/actions/workflows/dotnet.yml)
 
-## AirportAutomationAPI
+## [AirportAutomationAPI](https://github.com/crni99/AirportAutomation/tree/main/AirportAutomation/Airport%D0%90utomationApi)
 In this project, I have undertaken the challenge of developing a full-fledged Web API. It involves several key components and practices that I believe are fundamental in building a successful API. Here's a brief overview of what you can expect to find in this project:
 
 ### Creating the API and Returning Resources:
@@ -49,7 +50,7 @@ In this project, I have undertaken the challenge of developing a full-fledged We
 
 ___
 
-## AirportAutomationWEB
+## [AirportAutomationWEB](https://github.com/crni99/AirportAutomation/tree/main/AirportAutomation/AirportAutomationWeb)
 
 
 ### Consuming APIs with HttpClientFactory:
