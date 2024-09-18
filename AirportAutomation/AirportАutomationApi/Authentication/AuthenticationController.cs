@@ -2,6 +2,7 @@
 using AirportAutomation.Core.Entities;
 using AirportАutomation.Api.Controllers;
 using AutoMapper;
+using BCrypt.Net;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
@@ -43,11 +44,11 @@ namespace AirportАutomation.Api.Authentication
 		public ActionResult<string> Authenticate(ApiUserDto apiUserDto)
 		{
 			var apiUser = _mapper.Map<ApiUserEntity>(apiUserDto);
-			var user = _authenticationRepository.ValidateUser(apiUser.UserName, apiUser.Password);
+			var user = _authenticationRepository.GetUserByUsername(apiUser.UserName);
 
-			if (user is null)
+			if (user is null || !BCrypt.Net.BCrypt.Verify(apiUser.Password, user.Password))
 			{
-				_logger.LogInformation("User with username: {UserName} and password: {Password} don’t have permission to access this resource",
+				_logger.LogError("User with username: {UserName} and password: {Password} don’t have permission to access this resource",
 					apiUser.UserName, apiUser.Password);
 				return Unauthorized("Provided username or password is incorrect.");
 			}

@@ -87,7 +87,7 @@ FOREIGN KEY (FlightId) REFERENCES Flight (Id)
 CREATE TABLE ApiUser (
 ApiUserId int NOT NULL  IDENTITY(1,1),
 UserName nvarchar(50) NOT NULL,
-Password nvarchar(50) NOT NULL,
+Password nvarchar(100) NOT NULL,
 Roles nvarchar(50) NOT NULL,
 PRIMARY KEY (ApiUserId )
 );
@@ -210,10 +210,11 @@ VALUES
     (1000.00, '2023-06-15', 11, 9, 3, 9),
     (1100.00, '2023-06-16', 2, 10, 1, 10);
 
+-- Usernmae and Password are the same!
 INSERT INTO ApiUser (UserName, Password, Roles)
 VALUES 
-    ('og', 'og', 'Admin'),
-    ('aa', 'aa', 'User');    
+    ('og', '$2a$12$G5TIfsl2VIYnN00LwaCOSOcm5MIQIP36ukJ23KxNgqZt4u7Gpm6n2', 'Admin'),
+    ('aa', '$2a$12$wrWz/NXOYXmr6MNEciCQW.4Z4.HujMtFPm0p0X44NbC4CG0XkGr9q', 'User');    
 
 COMMIT TRANSACTION;
 
