@@ -210,11 +210,12 @@ VALUES
     (1000.00, '2023-06-15', 11, 9, 3, 9),
     (1100.00, '2023-06-16', 2, 10, 1, 10);
 
--- Usernmae and Password are the same!
+-- Username and Password are the same!
 INSERT INTO ApiUser (UserName, Password, Roles)
-VALUES 
-    ('og', '$2a$12$G5TIfsl2VIYnN00LwaCOSOcm5MIQIP36ukJ23KxNgqZt4u7Gpm6n2', 'Admin'),
-    ('aa', '$2a$12$wrWz/NXOYXmr6MNEciCQW.4Z4.HujMtFPm0p0X44NbC4CG0XkGr9q', 'User');    
+VALUES
+    ('og', '$2a$12$LCGwPPXCmcID1OU/ZkQtoOfEC5UMWxmvMPX4ja27X8eZ/tdTZ1v1y', 'SuperAdmin'),
+    ('aa', '$2a$12$f4CJk4AtefsjoVLDmeGSxeM.K9exNoxMheSHIWyORCmIujPTMJuTG', 'Admin'),
+    ('uu', '$2a$12$CcRyVR.Kzb10vj8hNOU9QOH7MtZ7d2BaxkCwSLVqADf/fRCHIf2ty', 'User');
 
 COMMIT TRANSACTION;
 

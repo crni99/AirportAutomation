@@ -13,6 +13,7 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using QuestPDF.Infrastructure;
 using Serilog;
+using System.Security.Claims;
 using System.Text;
 
 QuestPDF.Settings.License = LicenseType.Community;
@@ -111,22 +112,23 @@ builder.Services.AddAuthentication(options =>
 		o.IncludeErrorDetails = true;
 		o.TokenValidationParameters = new()
 		{
-			RoleClaimType = "role",
+			RoleClaimType = ClaimTypes.Role,
 			ValidTypes = new[] { "JWT" },
 			ValidIssuer = builder.Configuration["Authentication:Issuer"],
 			ValidAudience = builder.Configuration["Authentication:Audience"],
 			IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Authentication:SecretForKey"])),
 			ValidateIssuer = true,
 			ValidateAudience = false,
-			ValidateLifetime = false,
+			ValidateLifetime = true,
 			ValidateIssuerSigningKey = true
 		};
 	}
 	);
 builder.Services.AddAuthorization(options =>
 {
-	options.AddPolicy("RequireAdminRole", policy => policy.RequireRole("Admin"));
-	options.AddPolicy("UserAdminRole", policy => policy.RequireRole("User"));
+	options.AddPolicy("RequireSuperAdminRole", policy => policy.RequireRole("SuperAdmin"));
+	options.AddPolicy("RequireAdminRole", policy => policy.RequireRole("Admin", "SuperAdmin"));
+	options.AddPolicy("RequireUserRole", policy => policy.RequireRole("User", "Admin", "SuperAdmin"));
 });
 
 builder.Services.AddMemoryCache();

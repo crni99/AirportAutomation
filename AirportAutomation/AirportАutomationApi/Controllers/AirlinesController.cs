@@ -161,7 +161,7 @@ namespace AirportАutomationApi.Controllers
 		/// <response code="401">If user do not have permission to access the requested resource.</response>
 		/// <response code="403">If the user does not have permission to access the requested resource.</response>
 		[HttpPost]
-		[Authorize(Roles = "Admin")]
+		[Authorize(Policy = "RequireAdminRole")]
 		[ProducesResponseType(201, Type = typeof(AirlineDto))]
 		[ProducesResponseType(400)]
 		[ProducesResponseType(401)]
@@ -186,7 +186,7 @@ namespace AirportАutomationApi.Controllers
 		/// <response code="401">If user do not have permission to access the requested resource.</response>
 		/// <response code="403">If the user does not have permission to access the requested resource.</response>
 		[HttpPut("{id}")]
-		[Authorize(Roles = "Admin")]
+		[Authorize(Policy = "RequireAdminRole")]
 		[ProducesResponseType(204)]
 		[ProducesResponseType(400)]
 		[ProducesResponseType(404)]
@@ -236,7 +236,7 @@ namespace AirportАutomationApi.Controllers
 		/// <response code="401">If user do not have permission to access the requested resource.</response>
 		/// <response code="403">If the user does not have permission to access the requested resource.</response>
 		[HttpPatch("{id}")]
-		[Authorize(Roles = "Admin")]
+		[Authorize(Policy = "RequireAdminRole")]
 		[ProducesResponseType(200, Type = typeof(AirlineDto))]
 		[ProducesResponseType(400)]
 		[ProducesResponseType(404)]
@@ -271,7 +271,7 @@ namespace AirportАutomationApi.Controllers
 		/// <response code="403">If the user does not have permission to access the requested resource.</response>
 		/// <response code="409">Conflict. If the passenger cannot be deleted because it is being referenced by other entities.</response>
 		[HttpDelete("{id}")]
-		[Authorize(Roles = "Admin")]
+		[Authorize(Policy = "RequireAdminRole")]
 		[ProducesResponseType(204)]
 		[ProducesResponseType(400)]
 		[ProducesResponseType(404)]
