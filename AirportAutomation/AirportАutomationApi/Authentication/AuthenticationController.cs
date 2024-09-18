@@ -58,7 +58,8 @@ namespace AirportАutomation.Api.Authentication
 			var claimsForToken = new List<Claim>
 			{
 				new Claim(ClaimTypes.Name, user.UserName),
-				new Claim(ClaimTypes.Role, user.Roles)
+				new Claim(ClaimTypes.Role, "Admin"),
+				new Claim(ClaimTypes.Role, "User")
 			};
 			var jwtSecurityToken = new JwtSecurityToken(
 				_configuration["Authentication:Issuer"],

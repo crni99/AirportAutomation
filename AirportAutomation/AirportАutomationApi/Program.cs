@@ -111,7 +111,7 @@ builder.Services.AddAuthentication(options =>
 		o.IncludeErrorDetails = true;
 		o.TokenValidationParameters = new()
 		{
-			RoleClaimType = "Admin",
+			RoleClaimType = "role",
 			ValidTypes = new[] { "JWT" },
 			ValidIssuer = builder.Configuration["Authentication:Issuer"],
 			ValidAudience = builder.Configuration["Authentication:Audience"],
@@ -123,7 +123,11 @@ builder.Services.AddAuthentication(options =>
 		};
 	}
 	);
-builder.Services.AddAuthorization();
+builder.Services.AddAuthorization(options =>
+{
+	options.AddPolicy("RequireAdminRole", policy => policy.RequireRole("Admin"));
+	options.AddPolicy("UserAdminRole", policy => policy.RequireRole("User"));
+});
 
 builder.Services.AddMemoryCache();
 builder.Services.Configure<IpRateLimitOptions>(builder.Configuration.GetSection("IpRateLimiting"));

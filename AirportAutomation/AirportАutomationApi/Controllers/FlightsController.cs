@@ -168,10 +168,13 @@ namespace AirportАutomationApi.Controllers
 		/// <response code="201">Returns the created flight if successful.</response>
 		/// <response code="400">If the request is invalid or if there's a validation error.</response>
 		/// <response code="401">If user do not have permission to access the requested resource.</response>
+		/// <response code="403">If the user does not have permission to access the requested resource.</response>
 		[HttpPost]
+		[Authorize(Roles = "Admin")]
 		[ProducesResponseType(201, Type = typeof(FlightDto))]
 		[ProducesResponseType(400)]
 		[ProducesResponseType(401)]
+		[ProducesResponseType(403)]
 		public async Task<ActionResult<FlightEntity>> PostFlight(FlightCreateDto flightCreateDto)
 		{
 			var flight = _mapper.Map<FlightEntity>(flightCreateDto);
@@ -190,11 +193,14 @@ namespace AirportАutomationApi.Controllers
 		/// <response code="400">If the request is invalid or if there's a validation error.</response>
 		/// <response code="404">If no flight is found.</response>
 		/// <response code="401">If user do not have permission to access the requested resource.</response>
+		/// <response code="403">If the user does not have permission to access the requested resource.</response>
 		[HttpPut("{id}")]
+		[Authorize(Roles = "Admin")]
 		[ProducesResponseType(204)]
 		[ProducesResponseType(400)]
 		[ProducesResponseType(404)]
 		[ProducesResponseType(401)]
+		[ProducesResponseType(403)]
 		public async Task<IActionResult> PutFlight(int id, FlightUpdateDto flightUpdateDto)
 		{
 			if (!_inputValidationService.IsNonNegativeInt(id))
@@ -236,11 +242,14 @@ namespace AirportАutomationApi.Controllers
 		/// <response code="400">If the request is invalid or if there's a validation error.</response>
 		/// <response code="404">If the flight with the specified ID is not found.</response>
 		/// <response code="401">If user do not have permission to access the requested resource.</response>
+		/// <response code="403">If the user does not have permission to access the requested resource.</response>
 		[HttpPatch("{id}")]
+		[Authorize(Roles = "Admin")]
 		[ProducesResponseType(200, Type = typeof(FlightDto))]
 		[ProducesResponseType(400)]
 		[ProducesResponseType(404)]
 		[ProducesResponseType(401)]
+		[ProducesResponseType(403)]
 		public async Task<IActionResult> PatchFlight(int id, [FromBody] JsonPatchDocument flightDocument)
 		{
 			if (!_inputValidationService.IsNonNegativeInt(id))
@@ -267,12 +276,15 @@ namespace AirportАutomationApi.Controllers
 		/// <response code="400">If the request is invalid or if there's a validation error.</response>
 		/// <response code="404">If no flight is found.</response>
 		/// <response code="401">If user do not have permission to access the requested resource.</response>
+		/// <response code="403">If the user does not have permission to access the requested resource.</response>
 		/// <response code="409">Conflict. If the passenger cannot be deleted because it is being referenced by other entities.</response>
 		[HttpDelete("{id}")]
+		[Authorize(Roles = "Admin")]
 		[ProducesResponseType(204)]
 		[ProducesResponseType(400)]
 		[ProducesResponseType(404)]
 		[ProducesResponseType(401)]
+		[ProducesResponseType(403)]
 		[ProducesResponseType(409)]
 		public async Task<IActionResult> DeleteFlight(int id)
 		{
