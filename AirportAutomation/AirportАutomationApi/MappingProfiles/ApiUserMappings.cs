@@ -10,6 +10,10 @@ namespace AirportAutomation.Api.MappingProfiles
 		public ApiUserMappings()
 		{
 			CreateMap<ApiUserDto, ApiUserEntity>();
+			CreateMap<ApiUserEntity, ApiUserDto>();
+
+			CreateMap<ApiUserRoleDto, ApiUserEntity>();
+			CreateMap<ApiUserEntity, ApiUserRoleDto>();
 		}
 	}
 }

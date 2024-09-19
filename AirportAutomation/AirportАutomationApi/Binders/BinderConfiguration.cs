@@ -52,6 +52,9 @@ namespace AirportАutomation.Api.Binders
 
 			services.AddScoped<IAuthenticationRepository, AuthenticationRepository>();
 
+			services.AddScoped<IApiUserManagementRepository, ApiUserManagementRepository>();
+			services.AddScoped<IApiUserManagementService, ApiUserManagementService>();
+
 			services.AddScoped<IPaginationValidationService, PaginationValidationService>();
 			services.AddScoped<IInputValidationService, InputValidationService>();
 			services.AddScoped<IUtilityService, UtilityService>();
