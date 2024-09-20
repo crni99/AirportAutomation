@@ -1,0 +1,97 @@
+﻿@model PagedResponse<AirportAutomation.Web.Models.ApiUser.ApiUserViewModel>
+
+@{
+	ViewBag.Title = "Api Users";
+}
+
+@if (ViewBag.ApiUserRole == "SuperAdmin")
+{
+	<div class="container mt-5">
+		<div class="row">
+			<div class="col-md-6 d-flex justify-content-between">
+				@if (Model != null)
+				{
+					<div class="input-group mb-3" style="width: 70%;">
+						<label for="searchInput" class="input-group-text">Search by Role:</label>
+						<input type="text" id="searchInput" class="form-control" required />
+						<button id="searchButton" class="btn btn-primary">Search</button>
+					</div>
+				}
+			</div>
+		</div>
+	</div>
+	<br />
+	<div id="alert">
+		@if (TempData["AlertMessage"] != null)
+		{
+			@await Html.PartialAsync("_AlertPartial", TempData)
+		}
+	</div>
+
+	<div class="form-horizontal">
+		<div class="form-group">
+			@if (Model != null)
+			{
+				<hr />
+				<table class="table table-responsive table-striped table-hover">
+					<thead>
+						<tr>
+							<th>
+								@Html.DisplayNameFor(model => model.Data.First().Id)
+							</th>
+							<th>
+								@Html.DisplayNameFor(model => model.Data.First().UserName)
+							</th>
+							<th>
+								@Html.DisplayNameFor(model => model.Data.First().Password)
+							</th>
+							<th>
+								@Html.DisplayNameFor(model => model.Data.First().Roles)
+							</th>
+						</tr>
+					</thead>
+					<tbody id="tableBody">
+						@foreach (var item in Model.Data)
+						{
+							<tr class="clickable-row" onclick="window.open('@Url.Action("Details", new { id = item.Id })', '_blank');">
+								<td>
+									@Html.DisplayFor(modelItem => item.Id)
+								</td>
+								<td>
+									@Html.DisplayFor(modelItem => item.UserName)
+								</td>
+								<td>
+									@Html.DisplayFor(modelItem => item.Password)
+								</td>
+								<td>
+									@Html.DisplayFor(modelItem => item.Roles)
+								</td>
+							</tr>
+						}
+					</tbody>
+				</table>
+				@await Html.PartialAsync("_Pagination", Model)
+			}
+			else
+			{
+				@await Html.PartialAsync("_DataNotFound")
+			}
+		</div>
+	</div>
+}
+else
+{
+	@await Html.PartialAsync("_ForbiddenAccess")
+}
+
+@section Scripts {
+	<script>
+		$(document).ready(function () {
+			var searchUrl = '@Url.Action("GetApiUsersByRole", "ApiUser", new { area = "", name = "" })';
+			var tableBody = $('#tableBody');
+			searchByName(searchUrl, tableBody, 'ApiUser');
+		});
+	</script>
+	<script src="~/js/AlertHelper.js"></script>
+	<script src="~/js/SearchHelper.js"></script>
+}

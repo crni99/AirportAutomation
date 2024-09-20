@@ -4,7 +4,7 @@ namespace AirportAutomation.Application.Dtos.ApiUser;
 
 public class ApiUserRoleDto
 {
-	public int Id { get; set; }
+	public int ApiUserId { get; set; }
 
 	[Required(ErrorMessage = "User Name is required.")]
 	[MaxLength(50, ErrorMessage = "User Name cannot be longer than 50 characters.")]

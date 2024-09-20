@@ -7,11 +7,14 @@
 <div class="container mt-5">
 	<div class="row">
 		<div class="col-md-6 d-flex justify-content-between">
-			<div class="custom-navbar">
-				<div>
-					<a class="btn btn-success" asp-area="" asp-controller="Airline" asp-action="Create">Create Airline</a>
+			@if (ViewBag.ApiUserRole != "User")
+			{
+				<div class="custom-navbar">
+					<div>
+						<a class="btn btn-success" asp-area="" asp-controller="Airline" asp-action="Create">Create Airline</a>
+					</div>
 				</div>
-			</div>
+			}
 			@if (Model != null)
 			{
 				<div class="input-group mb-3" style="width: 70%;">

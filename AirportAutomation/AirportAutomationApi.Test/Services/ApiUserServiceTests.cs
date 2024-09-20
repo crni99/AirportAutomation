@@ -6,15 +6,15 @@ using Moq;
 
 namespace AirportAutomationApi.Test.Services
 {
-	public class ApiUserManagementServiceTests
+	public class ApiUserServiceTests
 	{
-		private readonly Mock<IApiUserManagementRepository> _repositoryMock;
-		private readonly ApiUserManagementService _service;
+		private readonly Mock<IApiUserRepository> _repositoryMock;
+		private readonly ApiUserService _service;
 
-		public ApiUserManagementServiceTests()
+		public ApiUserServiceTests()
 		{
-			_repositoryMock = new Mock<IApiUserManagementRepository>();
-			_service = new ApiUserManagementService(_repositoryMock.Object);
+			_repositoryMock = new Mock<IApiUserRepository>();
+			_service = new ApiUserService(_repositoryMock.Object);
 		}
 
 		[Fact]

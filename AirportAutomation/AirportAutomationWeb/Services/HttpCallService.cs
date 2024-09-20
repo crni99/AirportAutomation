@@ -1,6 +1,8 @@
-﻿using AirportAutomation.Web.Authentication;
-using AirportAutomation.Web.Interfaces;
+﻿using AirportAutomation.Web.Interfaces;
+using AirportAutomation.Web.Models.ApiUser;
 using AirportAutomation.Web.Models.Response;
+using Microsoft.IdentityModel.JsonWebTokens;
+using System.Data;
 using System.Net;
 using System.Net.Http.Headers;
 using System.Web;
@@ -29,7 +31,7 @@ namespace AirportAutomation.Web.Services
 			IConfiguration configuration, ILogger<HttpCallService> logger)
 		{
 			_httpClientFactory = httpClientFactory ?? throw new ArgumentNullException(nameof(httpClientFactory));
-			_httpContextAccessor = httpContextAccessor;
+			_httpContextAccessor = httpContextAccessor ?? throw new ArgumentNullException(nameof(httpContextAccessor));
 			_configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
 			_logger = logger ?? throw new ArgumentNullException(nameof(logger));
 			apiURL = _configuration.GetValue<string>("ApiSettings:apiUrl");
@@ -62,6 +64,10 @@ namespace AirportAutomation.Web.Services
 			if (response.IsSuccessStatusCode)
 			{
 				bearerToken += await response.Content.ReadFromJsonAsync<string>().ConfigureAwait(false);
+				if (!SetApiUserRole(bearerToken))
+				{
+					return false;
+				}
 				_httpContextAccessor.HttpContext.Session.SetString("AccessToken", bearerToken);
 				return true;
 			}
@@ -71,7 +77,7 @@ namespace AirportAutomation.Web.Services
 			}
 			else
 			{
-				_logger.LogError("Failed to authenticate. Status code: {StatusCode}", response.StatusCode);
+				_logger.LogInformation("Failed to authenticate. Status code: {StatusCode}", response.StatusCode);
 			}
 			return false;
 		}
@@ -130,8 +136,39 @@ namespace AirportAutomation.Web.Services
 			if (!string.IsNullOrEmpty(token))
 			{
 				_httpContextAccessor.HttpContext.Session.Remove("AccessToken");
+				_httpContextAccessor.HttpContext.Session.Remove("AccessRole");
 				_httpContextAccessor.HttpContext.Session.CommitAsync().Wait();
 				return true;
+			}
+			return false;
+		}
+
+		private bool SetApiUserRole(string token)
+		{
+			var handler = new JsonWebTokenHandler();
+			if (handler.CanReadToken(token))
+			{
+				try
+				{
+					var jwtToken = handler.ReadJsonWebToken(token);
+					var roleClaim = jwtToken.Claims.FirstOrDefault(c => c.Type.Equals("http://schemas.microsoft.com/ws/2008/06/identity/claims/role", StringComparison.OrdinalIgnoreCase));
+
+					if (roleClaim != null)
+					{
+						_httpContextAccessor.HttpContext.Session.SetString("AccessRole", roleClaim.Value);
+						return true;
+					}
+					else
+					{
+						_logger.LogInformation("Role claim not found in the token.");
+						return false;
+					}
+				}
+				catch (Exception ex)
+				{
+					_logger.LogInformation("Error decoding token: {Message}", ex.Message);
+					return false;
+				}
 			}
 			return false;
 		}
@@ -172,12 +209,12 @@ namespace AirportAutomation.Web.Services
 			}
 			else if (response.StatusCode == HttpStatusCode.NoContent)
 			{
-				_logger.LogError("Data not found. Status code: {StatusCode}", response.StatusCode);
+				_logger.LogInformation("Data not found. Status code: {StatusCode}", response.StatusCode);
 				return new PagedResponse<T>(Enumerable.Empty<T>(), page, pageSize, 0);
 			}
 			else
 			{
-				_logger.LogError("Failed to retrieve data. Status code: {StatusCode}", response.StatusCode);
+				_logger.LogInformation("Failed to retrieve data. Status code: {StatusCode}", response.StatusCode);
 				return null;
 			}
 		}
@@ -219,7 +256,7 @@ namespace AirportAutomation.Web.Services
 			}
 			else
 			{
-				_logger.LogError("Failed to retrieve data. Status code: {StatusCode}", response.StatusCode);
+				_logger.LogInformation("Failed to retrieve data. Status code: {StatusCode}", response.StatusCode);
 			}
 			return data;
 		}
@@ -257,7 +294,7 @@ namespace AirportAutomation.Web.Services
 			}
 			else
 			{
-				_logger.LogError("Failed to retrieve data. Status code: {StatusCode}", response.StatusCode);
+				_logger.LogInformation("Failed to retrieve data. Status code: {StatusCode}", response.StatusCode);
 			}
 			return null;
 		}
@@ -298,7 +335,7 @@ namespace AirportAutomation.Web.Services
 			}
 			else
 			{
-				_logger.LogError("Failed to retrieve data. Status code: {StatusCode}", response.StatusCode);
+				_logger.LogInformation("Failed to retrieve data. Status code: {StatusCode}", response.StatusCode);
 			}
 			return null;
 		}
@@ -353,7 +390,7 @@ namespace AirportAutomation.Web.Services
 			}
 			else
 			{
-				_logger.LogError("Failed to retrieve data. Status code: {StatusCode}", response.StatusCode);
+				_logger.LogInformation("Failed to retrieve data. Status code: {StatusCode}", response.StatusCode);
 			}
 			return null;
 		}
@@ -408,7 +445,7 @@ namespace AirportAutomation.Web.Services
 			}
 			else
 			{
-				_logger.LogError("Failed to retrieve data. Status code: {StatusCode}", response.StatusCode);
+				_logger.LogInformation("Failed to retrieve data. Status code: {StatusCode}", response.StatusCode);
 			}
 			return null;
 		}
@@ -463,7 +500,7 @@ namespace AirportAutomation.Web.Services
 			}
 			else
 			{
-				_logger.LogError("Failed to retrieve data. Status code: {StatusCode}", response.StatusCode);
+				_logger.LogInformation("Failed to retrieve data. Status code: {StatusCode}", response.StatusCode);
 			}
 			return null;
 		}
@@ -518,7 +555,7 @@ namespace AirportAutomation.Web.Services
 			}
 			else
 			{
-				_logger.LogError("Failed to retrieve data. Status code: {StatusCode}", response.StatusCode);
+				_logger.LogInformation("Failed to retrieve data. Status code: {StatusCode}", response.StatusCode);
 			}
 			return null;
 		}
@@ -549,7 +586,7 @@ namespace AirportAutomation.Web.Services
 			}
 			else
 			{
-				_logger.LogError("Failed to create data. Status code: {StatusCode}", response.StatusCode);
+				_logger.LogInformation("Failed to create data. Status code: {StatusCode}", response.StatusCode);
 			}
 			return data;
 		}
@@ -580,7 +617,7 @@ namespace AirportAutomation.Web.Services
 			}
 			else
 			{
-				_logger.LogError("Failed to edit data. Status code: {StatusCode}", response.StatusCode);
+				_logger.LogInformation("Failed to edit data. Status code: {StatusCode}", response.StatusCode);
 			}
 			return false;
 		}
@@ -615,7 +652,7 @@ namespace AirportAutomation.Web.Services
 			}
 			else
 			{
-				_logger.LogError("Failed to delete data. Status code: {StatusCode}", response.StatusCode);
+				_logger.LogInformation("Failed to delete data. Status code: {StatusCode}", response.StatusCode);
 			}
 			return false;
 		}
@@ -660,7 +697,7 @@ namespace AirportAutomation.Web.Services
 			}
 			else
 			{
-				_logger.LogError("Failed to retrieve data. Status code: {StatusCode}", response.StatusCode);
+				_logger.LogInformation("Failed to retrieve data. Status code: {StatusCode}", response.StatusCode);
 			}
 			return data;
 		}

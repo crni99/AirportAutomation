@@ -1,4 +1,4 @@
-﻿using AirportAutomation.Web.Authentication;
+﻿using AirportAutomation.Web.Models.ApiUser;
 using AirportAutomation.Web.Models.Response;
 
 namespace AirportAutomation.Web.Interfaces

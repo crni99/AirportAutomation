@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace AirportAutomation.Web.Controllers
 {
 	[Route("[controller]")]
-	public class HealthCheckController : Controller
+	public class HealthCheckController : BaseController
 	{
 		private readonly IHttpCallService _httpCallService;
 		private readonly IMapper _mapper;

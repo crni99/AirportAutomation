@@ -1,7 +1,10 @@
 ﻿using AirportAutomation.Core.Converters;
 using AirportAutomation.Infrastructure.Middlewares;
 using AirportAutomation.Web.Binders;
+using Microsoft.IdentityModel.Logging;
 using Serilog;
+
+IdentityModelEventSource.ShowPII = true;
 
 var builder = WebApplication.CreateBuilder(args);
 

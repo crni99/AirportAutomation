@@ -134,6 +134,9 @@
 {
 	@await Html.PartialAsync("_AlertPartial", TempData)
 }
-<div>
-	@await Html.PartialAsync("_EditButtons", Model)
-</div>
+@if (ViewBag.ApiUserRole != "User")
+{
+	<div>
+		@await Html.PartialAsync("_EditButtons", Model)
+	</div>
+}

@@ -5,11 +5,11 @@ using Microsoft.EntityFrameworkCore;
 
 namespace AirportAutomation.Infrastructure.Repositories
 {
-	public class ApiUserManagementRepository : IApiUserManagementRepository
+	public class ApiUserRepository : IApiUserRepository
 	{
 		protected readonly DatabaseContext _context;
 
-		public ApiUserManagementRepository(DatabaseContext context)
+		public ApiUserRepository(DatabaseContext context)
 		{
 			_context = context ?? throw new ArgumentNullException(nameof(context));
 		}

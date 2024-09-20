@@ -5,14 +5,14 @@ using AirportAutomation.Application.Services;
 using AirportAutomation.Core.Interfaces.IRepositories;
 using AirportAutomation.Core.Interfaces.IServices;
 using AirportAutomation.Infrastructure.Repositories;
-using AirportАutomation.Api.Authentication;
 using AirportАutomation.Api.Interfaces;
+using AirportАutomation.Api.Repositories;
 using AirportАutomation.Api.Services;
 using AspNetCoreRateLimit;
 
 namespace AirportАutomation.Api.Binders
 {
-	public static class BinderConfiguration
+    public static class BinderConfiguration
 	{
 		public static void Binders(IServiceCollection services)
 		{
@@ -52,8 +52,8 @@ namespace AirportАutomation.Api.Binders
 
 			services.AddScoped<IAuthenticationRepository, AuthenticationRepository>();
 
-			services.AddScoped<IApiUserManagementRepository, ApiUserManagementRepository>();
-			services.AddScoped<IApiUserManagementService, ApiUserManagementService>();
+			services.AddScoped<IApiUserRepository, ApiUserRepository>();
+			services.AddScoped<IApiUserService, ApiUserService>();
 
 			services.AddScoped<IPaginationValidationService, PaginationValidationService>();
 			services.AddScoped<IInputValidationService, InputValidationService>();

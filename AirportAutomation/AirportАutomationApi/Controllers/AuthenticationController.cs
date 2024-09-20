@@ -1,6 +1,6 @@
 ﻿using AirportAutomation.Application.Dtos.ApiUser;
 using AirportAutomation.Core.Entities;
-using AirportАutomation.Api.Controllers;
+using AirportАutomation.Api.Interfaces;
 using AutoMapper;
 using BCrypt.Net;
 using Microsoft.AspNetCore.Mvc;
@@ -10,7 +10,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 
-namespace AirportАutomation.Api.Authentication
+namespace AirportАutomation.Api.Controllers
 {
 	[ApiVersion("1.0")]
 	public class AuthenticationController : BaseController
@@ -48,7 +48,7 @@ namespace AirportАutomation.Api.Authentication
 
 			if (user is null || !BCrypt.Net.BCrypt.Verify(apiUser.Password, user.Password))
 			{
-				_logger.LogError("User with username: {UserName} and password: {Password} don’t have permission to access this resource",
+				_logger.LogInformation("User with username: {UserName} and password: {Password} don’t have permission to access this resource",
 					apiUser.UserName, apiUser.Password);
 				return Unauthorized("Provided username or password is incorrect.");
 			}

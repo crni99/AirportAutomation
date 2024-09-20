@@ -1,11 +1,11 @@
-﻿using AirportAutomation.Web.Authentication;
-using AirportAutomation.Web.Interfaces;
+﻿using AirportAutomation.Web.Interfaces;
+using AirportAutomation.Web.Models.ApiUser;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AirportAutomation.Web.Controllers
 {
 	[Route("")]
-	public class HomeController : Controller
+	public class HomeController : BaseController
 	{
 		private readonly IHttpCallService _httpCallService;
 		private readonly IAlertService _alertService;
@@ -26,7 +26,7 @@ namespace AirportAutomation.Web.Controllers
 			string token = _httpCallService.GetToken();
 			if (!string.IsNullOrEmpty(token))
 			{
-				return Redirect("HealthCheck");
+				return Redirect("/");
 			}
 			return View("Index");
 		}

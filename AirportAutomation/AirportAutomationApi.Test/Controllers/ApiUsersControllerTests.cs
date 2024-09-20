@@ -14,15 +14,15 @@ using Moq;
 
 namespace AirportAutomationApi.Test.Controllers
 {
-	public class ApiUserManagementControllerTests
+	public class ApiUsersControllerTests
 	{
-		private readonly ApiUserManagementController _controller;
-		private readonly Mock<IApiUserManagementService> _apiUserServiceMock;
+		private readonly ApiUsersController _controller;
+		private readonly Mock<IApiUserService> _apiUserServiceMock;
 		private readonly Mock<IPaginationValidationService> _paginationValidationServiceMock;
 		private readonly Mock<IInputValidationService> _inputValidationServiceMock;
 		private readonly Mock<IUtilityService> _utilityServiceMock;
 		private readonly Mock<IMapper> _mapperMock;
-		private readonly Mock<ILogger<ApiUserManagementController>> _loggerMock;
+		private readonly Mock<ILogger<ApiUsersController>> _loggerMock;
 		private readonly Mock<IConfiguration> _configurationMock;
 
 		private readonly ApiUserEntity apiUserEntity = new()
@@ -40,14 +40,14 @@ namespace AirportAutomationApi.Test.Controllers
 			Roles = "SuperAdmin"
 		};
 
-		public ApiUserManagementControllerTests()
+		public ApiUsersControllerTests()
 		{
-			_apiUserServiceMock = new Mock<IApiUserManagementService>();
+			_apiUserServiceMock = new Mock<IApiUserService>();
 			_paginationValidationServiceMock = new Mock<IPaginationValidationService>();
 			_inputValidationServiceMock = new Mock<IInputValidationService>();
 			_utilityServiceMock = new Mock<IUtilityService>();
 			_mapperMock = new Mock<IMapper>();
-			_loggerMock = new Mock<ILogger<ApiUserManagementController>>();
+			_loggerMock = new Mock<ILogger<ApiUsersController>>();
 			_configurationMock = new Mock<IConfiguration>();
 			var configBuilder = new ConfigurationBuilder();
 			configBuilder.AddInMemoryCollection(new Dictionary<string, string>
@@ -57,7 +57,7 @@ namespace AirportAutomationApi.Test.Controllers
 			_configurationMock.Setup(x => x.GetSection(It.IsAny<string>()))
 				.Returns(configBuilder.Build().GetSection(""));
 
-			_controller = new ApiUserManagementController(
+			_controller = new ApiUsersController(
 				_apiUserServiceMock.Object,
 				_paginationValidationServiceMock.Object,
 				_inputValidationServiceMock.Object,
@@ -420,7 +420,7 @@ namespace AirportAutomationApi.Test.Controllers
 		{
 			// Arrange
 			int id = 1;
-			var apiUserRoleDto = new ApiUserRoleDto { Id = id };
+			var apiUserRoleDto = new ApiUserRoleDto { ApiUserId = id };
 			var apiUserEntity = new ApiUserEntity { ApiUserId = id };
 
 			_inputValidationServiceMock.Setup(service => service.IsNonNegativeInt(id)).Returns(true);
@@ -441,7 +441,7 @@ namespace AirportAutomationApi.Test.Controllers
 		{
 			// Arrange
 			int invalidId = -1;
-			var apiUserRoleDto = new ApiUserRoleDto { Id = invalidId };
+			var apiUserRoleDto = new ApiUserRoleDto { ApiUserId = invalidId };
 
 			_inputValidationServiceMock.Setup(service => service.IsNonNegativeInt(invalidId)).Returns(false);
 
@@ -459,7 +459,7 @@ namespace AirportAutomationApi.Test.Controllers
 		{
 			// Arrange
 			int id = 1;
-			var apiUserRoleDto = new ApiUserRoleDto { Id = 2 };
+			var apiUserRoleDto = new ApiUserRoleDto { ApiUserId = 2 };
 
 			_inputValidationServiceMock.Setup(service => service.IsNonNegativeInt(id)).Returns(true);
 
@@ -476,7 +476,7 @@ namespace AirportAutomationApi.Test.Controllers
 		{
 			// Arrange
 			int id = 1;
-			var apiUserRoleDto = new ApiUserRoleDto { Id = id };
+			var apiUserRoleDto = new ApiUserRoleDto { ApiUserId = id };
 
 			_inputValidationServiceMock.Setup(service => service.IsNonNegativeInt(id)).Returns(true);
 			_apiUserServiceMock.Setup(service => service.ApiUserExists(id)).ReturnsAsync(false);

@@ -4,12 +4,12 @@ using AirportAutomation.Core.Interfaces.IServices;
 
 namespace AirportAutomation.Application.Services
 {
-	public class ApiUserManagementService : IApiUserManagementService
+	public class ApiUserService : IApiUserService
 	{
 
-		private readonly IApiUserManagementRepository _apiUserManagementRepository;
+		private readonly IApiUserRepository _apiUserManagementRepository;
 
-		public ApiUserManagementService(IApiUserManagementRepository apiUserManagementRepository)
+		public ApiUserService(IApiUserRepository apiUserManagementRepository)
 		{
 			_apiUserManagementRepository = apiUserManagementRepository;
 		}

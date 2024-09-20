@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace AirportAutomation.Web.Controllers
 {
 	[Route("[controller]")]
-	public class PilotController : Controller
+	public class PilotController : BaseController
 	{
 		private readonly IHttpCallService _httpCallService;
 		private readonly IAlertService _alertService;

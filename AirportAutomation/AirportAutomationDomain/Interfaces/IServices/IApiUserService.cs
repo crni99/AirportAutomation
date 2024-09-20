@@ -1,8 +1,8 @@
 ﻿using AirportAutomation.Core.Entities;
 
-namespace AirportAutomation.Core.Interfaces.IRepositories
+namespace AirportAutomation.Core.Interfaces.IServices
 {
-	public interface IApiUserManagementRepository
+	public interface IApiUserService
 	{
 		Task<IList<ApiUserEntity>> GetApiUsers(int page, int pageSize);
 		Task<ApiUserEntity?> GetApiUser(int id);

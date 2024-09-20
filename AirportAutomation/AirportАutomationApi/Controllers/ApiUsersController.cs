@@ -14,23 +14,23 @@ namespace AirportАutomationApi.Controllers
 {
 	[Authorize(Policy = "RequireSuperAdminRole")]
 	[ApiVersion("1.0")]
-	public class ApiUserManagementController : BaseController
+	public class ApiUsersController : BaseController
 	{
-		private readonly IApiUserManagementService _apiUserService;
+		private readonly IApiUserService _apiUserService;
 		private readonly IPaginationValidationService _paginationValidationService;
 		private readonly IInputValidationService _inputValidationService;
 		private readonly IUtilityService _utilityService;
 		private readonly IMapper _mapper;
-		private readonly ILogger<ApiUserManagementController> _logger;
+		private readonly ILogger<ApiUsersController> _logger;
 		private readonly int maxPageSize;
 
-		public ApiUserManagementController(
-			IApiUserManagementService apiUserService,
+		public ApiUsersController(
+			IApiUserService apiUserService,
 			IPaginationValidationService paginationValidationService,
 			IInputValidationService inputValidationService,
 			IUtilityService utilityService,
 			IMapper mapper,
-			ILogger<ApiUserManagementController> logger,
+			ILogger<ApiUsersController> logger,
 			IConfiguration configuration
 		)
 		{
@@ -171,7 +171,7 @@ namespace AirportАutomationApi.Controllers
 				_logger.LogInformation("Invalid input. The ID {id} must be a non-negative integer.", id);
 				return BadRequest("Invalid input. The ID must be a non-negative integer.");
 			}
-			if (id != apiUserRoleDto.Id)
+			if (id != apiUserRoleDto.ApiUserId)
 			{
 				_logger.LogInformation("Api User with id {id} is different from provided Api User and its id.", id);
 				return BadRequest();
