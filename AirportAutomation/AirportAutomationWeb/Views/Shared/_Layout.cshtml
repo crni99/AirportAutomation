@@ -19,56 +19,68 @@
 	<link rel="stylesheet" href="~/css/style.css" asp-append-version="true" />
 </head>
 <body>
-	<header>
-		<nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
-			<div class="container-fluid">
-				<a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">AirportAutomationWeb</a>
-				<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-						aria-expanded="false" aria-label="Toggle navigation">
-					<span class="navbar-toggler-icon"></span>
-				</button>
-				<div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-					<ul class="navbar-nav flex-grow-1">
-						<li class="nav-item">
-							<a class="nav-link text-dark" asp-area="" asp-controller="Passenger" asp-action="Index">Passenger</a>
-						</li>
-						<li class="nav-item">
-							<a class="nav-link text-dark" asp-area="" asp-controller="TravelClass" asp-action="Index">Travel Class</a>
-						</li>
-						<li class="nav-item">
-							<a class="nav-link text-dark" asp-area="" asp-controller="Destination" asp-action="Index">Destination</a>
-						</li>
-						<li class="nav-item">
-							<a class="nav-link text-dark" asp-area="" asp-controller="Pilot" asp-action="Index">Pilot</a>
-						</li>
-						<li class="nav-item">
-							<a class="nav-link text-dark" asp-area="" asp-controller="Airline" asp-action="Index">Airline</a>
-						</li>
-						<li class="nav-item">
-							<a class="nav-link text-dark" asp-area="" asp-controller="Flight" asp-action="Index">Flight</a>
-						</li>
-						<li class="nav-item">
-							<a class="nav-link text-dark" asp-area="" asp-controller="PlaneTicket" asp-action="Index">Plane Ticket</a>
-						</li>
-						<li class="nav-item">
-							<a class="nav-link text-dark" asp-area="" asp-controller="ApiUser" asp-action="Index">Api User</a>
-						</li>
-					</ul>
-					<ul class="navbar-nav">
-						@if (!string.IsNullOrEmpty(token))
-						{
+	@if (!string.IsNullOrEmpty(ViewBag.ApiUserRole))
+	{
+		<header>
+			<nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
+				<div class="container-fluid">
+					<a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">AirportAutomationWeb</a>
+					<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
+							aria-expanded="false" aria-label="Toggle navigation">
+						<span class="navbar-toggler-icon"></span>
+					</button>
+					<div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
+						<ul class="navbar-nav flex-grow-1">
 							<li class="nav-item">
-								<a id="signOut" class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="SignOut">Sign Out</a>
+								<a class="nav-link text-dark" asp-area="" asp-controller="Passenger" asp-action="Index">Passenger</a>
 							</li>
-						}
-						<li class="nav-item">
-							<a class="nav-link text-dark" asp-area="" asp-controller="HealthCheck" asp-action="Index">Status Check</a>
-						</li>
-					</ul>
+							<li class="nav-item">
+								<a class="nav-link text-dark" asp-area="" asp-controller="TravelClass" asp-action="Index">Travel Class</a>
+							</li>
+							<li class="nav-item">
+								<a class="nav-link text-dark" asp-area="" asp-controller="Destination" asp-action="Index">Destination</a>
+							</li>
+							<li class="nav-item">
+								<a class="nav-link text-dark" asp-area="" asp-controller="Pilot" asp-action="Index">Pilot</a>
+							</li>
+							<li class="nav-item">
+								<a class="nav-link text-dark" asp-area="" asp-controller="Airline" asp-action="Index">Airline</a>
+							</li>
+							<li class="nav-item">
+								<a class="nav-link text-dark" asp-area="" asp-controller="Flight" asp-action="Index">Flight</a>
+							</li>
+							<li class="nav-item">
+								<a class="nav-link text-dark" asp-area="" asp-controller="PlaneTicket" asp-action="Index">Plane Ticket</a>
+							</li>
+							@if (ViewBag.ApiUserRole == "SuperAdmin")
+							{
+								<li class="nav-item">
+									<a class="nav-link text-dark" asp-area="" asp-controller="ApiUser" asp-action="Index">Api User</a>
+								</li>
+							}
+						</ul>
+						<ul class="navbar-nav">
+							@if (!string.IsNullOrEmpty(token))
+							{
+								<li class="nav-item">
+									<a id="signOut" class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="SignOut">Sign Out</a>
+								</li>
+							}
+							<li class="nav-item">
+								<a class="nav-link text-dark" asp-area="" asp-controller="HealthCheck" asp-action="Index">Status Check</a>
+							</li>
+						</ul>
+					</div>
 				</div>
-			</div>
-		</nav>
-	</header>
+			</nav>
+		</header>
+	}
+	else
+	{
+		<br />
+		<br />
+		<br />
+	}
 	<div class="container">
 		<main role="main" class="pb-3">
 			@RenderBody()
