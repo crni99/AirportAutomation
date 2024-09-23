@@ -26,7 +26,7 @@ namespace AirportAutomation.Web.Controllers
 			string token = _httpCallService.GetToken();
 			if (!string.IsNullOrEmpty(token))
 			{
-				return Redirect("/");
+				return Redirect("HealthCheck");
 			}
 			return View("Index");
 		}
@@ -44,7 +44,7 @@ namespace AirportAutomation.Web.Controllers
 					_alertService.SetAlertMessage(TempData, "login_failed", false);
 					return Redirect("/");
 				}
-				return Redirect("TravelClass");
+				return Redirect("HealthCheck");
 			}
 			else { return RedirectToAction("Index"); }
 		}
