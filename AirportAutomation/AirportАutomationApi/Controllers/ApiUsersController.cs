@@ -1,17 +1,21 @@
 ﻿using AirportAutomation.Api.Interfaces;
-using AirportAutomation.Application.Dtos.Airline;
 using AirportAutomation.Application.Dtos.ApiUser;
 using AirportAutomation.Application.Dtos.Response;
 using AirportAutomation.Core.Entities;
 using AirportAutomation.Core.Interfaces.IServices;
-using AirportАutomation.Api.Controllers;
 using AirportАutomation.Api.Interfaces;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace AirportАutomationApi.Controllers
+namespace AirportАutomation.Api.Controllers
 {
+	/// <summary>
+	/// Represents the controller for managing API users.
+	/// </summary>
+	/// <remarks>
+	/// Requires the user to have the SuperAdmin role.
+	/// </remarks>
 	[Authorize(Policy = "RequireSuperAdminRole")]
 	[ApiVersion("1.0")]
 	public class ApiUsersController : BaseController
@@ -19,16 +23,23 @@ namespace AirportАutomationApi.Controllers
 		private readonly IApiUserService _apiUserService;
 		private readonly IPaginationValidationService _paginationValidationService;
 		private readonly IInputValidationService _inputValidationService;
-		private readonly IUtilityService _utilityService;
 		private readonly IMapper _mapper;
 		private readonly ILogger<ApiUsersController> _logger;
 		private readonly int maxPageSize;
 
+		/// <summary>
+		/// Initializes a new instance of the <see cref="ApiUsersController"/> class.
+		/// </summary>
+		/// <param name="apiUserService">The service for managing API users.</param>
+		/// <param name="paginationValidationService">The service for validating pagination parameters.</param>
+		/// <param name="inputValidationService">The service for validating input data.</param>
+		/// <param name="mapper">The mapper for object-to-object mapping.</param>
+		/// <param name="logger">The logger for logging actions and errors.</param>
+		/// <param name="configuration">The application configuration.</param>
 		public ApiUsersController(
 			IApiUserService apiUserService,
 			IPaginationValidationService paginationValidationService,
 			IInputValidationService inputValidationService,
-			IUtilityService utilityService,
 			IMapper mapper,
 			ILogger<ApiUsersController> logger,
 			IConfiguration configuration
@@ -37,7 +48,6 @@ namespace AirportАutomationApi.Controllers
 			_apiUserService = apiUserService ?? throw new ArgumentNullException(nameof(apiUserService));
 			_paginationValidationService = paginationValidationService ?? throw new ArgumentNullException(nameof(paginationValidationService));
 			_inputValidationService = inputValidationService ?? throw new ArgumentNullException(nameof(inputValidationService));
-			_utilityService = utilityService ?? throw new ArgumentNullException(nameof(utilityService));
 			_mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
 			_logger = logger ?? throw new ArgumentNullException(nameof(logger));
 			maxPageSize = configuration.GetValue<int>("pageSettings:maxPageSize");
@@ -53,11 +63,13 @@ namespace AirportАutomationApi.Controllers
 		/// <response code="204">If no apiUsers are found.</response>
 		/// <response code="400">If the request is invalid or if there's a validation error.</response>
 		/// <response code="401">If user do not have permission to access the requested resource.</response>
+		/// <response code="403">If the user does not have permission to access the requested resource.</response>
 		[HttpGet]
 		[ProducesResponseType(200, Type = typeof(PagedResponse<ApiUserRoleDto>))]
 		[ProducesResponseType(204)]
 		[ProducesResponseType(400)]
 		[ProducesResponseType(401)]
+		[ProducesResponseType(403)]
 		public async Task<ActionResult<PagedResponse<ApiUserRoleDto>>> GetApiUsers([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
 		{
 			var (isValid, correctedPageSize, result) = _paginationValidationService.ValidatePaginationParameters(page, pageSize, maxPageSize);
@@ -86,21 +98,23 @@ namespace AirportАutomationApi.Controllers
 		/// <response code="400">If the request is invalid or if there's a validation error.</response>
 		/// <response code="404">If no api user is found.</response>
 		/// <response code="401">If user do not have permission to access the requested resource.</response>
+		/// <response code="403">If the user does not have permission to access the requested resource.</response>
 		[HttpGet("{id}")]
 		[ProducesResponseType(200, Type = typeof(ApiUserRoleDto))]
 		[ProducesResponseType(400)]
 		[ProducesResponseType(404)]
 		[ProducesResponseType(401)]
+		[ProducesResponseType(403)]
 		public async Task<ActionResult<ApiUserRoleDto>> GetApiUser(int id)
 		{
 			if (!_inputValidationService.IsNonNegativeInt(id))
 			{
-				_logger.LogInformation("Invalid input. The ID {id} must be a non-negative integer.", id);
+				_logger.LogInformation("Invalid input. The ID {Id} must be a non-negative integer.", id);
 				return BadRequest("Invalid input. The ID must be a non-negative integer.");
 			}
 			if (!await _apiUserService.ApiUserExists(id))
 			{
-				_logger.LogInformation("Api User with id {id} not found.", id);
+				_logger.LogInformation("Api User with id {Id} not found.", id);
 				return NotFound();
 			}
 			var apiUser = await _apiUserService.GetApiUser(id);
@@ -119,11 +133,13 @@ namespace AirportАutomationApi.Controllers
 		/// <response code="400">If the request is invalid or if there's a validation error.</response>
 		/// <response code="404">If no apiUsers are found.</response>
 		/// <response code="401">If user do not have permission to access the requested resource.</response>
+		/// <response code="403">If the user does not have permission to access the requested resource.</response>
 		[HttpGet("byRole/{role}")]
 		[ProducesResponseType(200, Type = typeof(PagedResponse<ApiUserRoleDto>))]
 		[ProducesResponseType(400)]
 		[ProducesResponseType(404)]
 		[ProducesResponseType(401)]
+		[ProducesResponseType(403)]
 		public async Task<ActionResult<PagedResponse<ApiUserRoleDto>>> GetApiUsersByRole(string role, [FromQuery] int page = 1, [FromQuery] int pageSize = 10)
 		{
 			if (!_inputValidationService.IsValidString(role))
@@ -139,7 +155,7 @@ namespace AirportАutomationApi.Controllers
 			var apiUsers = await _apiUserService.GetApiUsersByRole(page, correctedPageSize, role);
 			if (apiUsers is null || apiUsers.Count == 0)
 			{
-				_logger.LogInformation("ApiUser with role {role} not found.", role);
+				_logger.LogInformation("Api User with role {Role} not found.", role);
 				return NotFound();
 			}
 			var totalItems = await _apiUserService.ApiUsersCount(role);
@@ -168,17 +184,17 @@ namespace AirportАutomationApi.Controllers
 		{
 			if (!_inputValidationService.IsNonNegativeInt(id))
 			{
-				_logger.LogInformation("Invalid input. The ID {id} must be a non-negative integer.", id);
+				_logger.LogInformation("Invalid input. The ID {Id} must be a non-negative integer.", id);
 				return BadRequest("Invalid input. The ID must be a non-negative integer.");
 			}
 			if (id != apiUserRoleDto.ApiUserId)
 			{
-				_logger.LogInformation("Api User with id {id} is different from provided Api User and its id.", id);
+				_logger.LogInformation("Api User with id {Id} is different from provided Api User and its id.", id);
 				return BadRequest();
 			}
 			if (!await _apiUserService.ApiUserExists(id))
 			{
-				_logger.LogInformation("Api User with id {id} not found.", id);
+				_logger.LogInformation("Api User with id {Id} not found.", id);
 				return NotFound();
 			}
 			var apiUser = _mapper.Map<ApiUserEntity>(apiUserRoleDto);
@@ -206,12 +222,12 @@ namespace AirportАutomationApi.Controllers
 		{
 			if (!_inputValidationService.IsNonNegativeInt(id))
 			{
-				_logger.LogInformation("Invalid input. The ID {id} must be a non-negative integer.", id);
+				_logger.LogInformation("Invalid input. The ID {Id} must be a non-negative integer.", id);
 				return BadRequest("Invalid input. The ID must be a non-negative integer.");
 			}
 			if (!await _apiUserService.ApiUserExists(id))
 			{
-				_logger.LogInformation("Api User with id {id} not found.", id);
+				_logger.LogInformation("Api User with id {Id} not found.", id);
 				return NotFound();
 			}
 			await _apiUserService.DeleteApiUser(id);

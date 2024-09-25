@@ -1,16 +1,17 @@
 ﻿using AirportAutomation.Api.Interfaces;
 using AirportAutomation.Application.Dtos.Response;
 using AirportAutomation.Application.Dtos.TravelClass;
-using AirportAutomation.Core.Entities;
 using AirportAutomation.Core.Interfaces.IServices;
-using AirportАutomation.Api.Controllers;
 using AirportАutomation.Api.Interfaces;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace AirportАutomationApi.Controllers
+namespace AirportАutomation.Api.Controllers
 {
+	/// <summary>
+	/// Represents the controller for managing Travel Classes.
+	/// </summary>
 	[Authorize]
 	[ApiVersion("1.0")]
 	public class TravelClassesController : BaseController
@@ -24,6 +25,17 @@ namespace AirportАutomationApi.Controllers
 		private readonly ILogger<TravelClassesController> _logger;
 		private readonly int maxPageSize;
 
+		/// <summary>
+		/// Initializes a new instance of the <see cref="TravelClassesController"/> class.
+		/// </summary>
+		/// <param name="travelClassService">The service for managing travel classes.</param>
+		/// <param name="paginationValidationService">The service for validating pagination parameters.</param>
+		/// <param name="inputValidationService">The service for validating input data.</param>
+		/// <param name="utilityService">The utility service for various helper functions.</param>
+		/// <param name="exportService">The service for exporting data.</param>
+		/// <param name="mapper">The mapper for object-to-object mapping.</param>
+		/// <param name="logger">The logger for logging actions and errors.</param>
+		/// <param name="configuration">The application configuration.</param>
 		public TravelClassesController(
 			ITravelClassService travelClassService,
 			IPaginationValidationService paginationValidationService,
@@ -97,12 +109,12 @@ namespace AirportАutomationApi.Controllers
 		{
 			if (!_inputValidationService.IsNonNegativeInt(id))
 			{
-				_logger.LogInformation("Invalid input. The ID {id} must be a non-negative integer.", id);
+				_logger.LogInformation("Invalid input. The ID {Id} must be a non-negative integer.", id);
 				return BadRequest("Invalid input. The ID must be a non-negative integer.");
 			}
 			if (!await _travelClassService.TravelClassExists(id))
 			{
-				_logger.LogInformation("Travel class with id {id} not found.", id);
+				_logger.LogInformation("Travel class with id {Id} not found.", id);
 				return NotFound();
 			}
 			var travelClass = await _travelClassService.GetTravelClass(id);
@@ -119,10 +131,13 @@ namespace AirportАutomationApi.Controllers
 		/// <response code="200">Returns the generated PDF document.</response>
 		/// <response code="400">If the request is invalid or if there's a validation error.</response>
 		/// <response code="401">If user do not have permission to access the requested resource.</response>
+		/// <response code="403">If the user does not have permission to access the requested resource.</response>
 		[HttpGet("export/pdf")]
+		[Authorize(Policy = "RequireAdminRole")]
 		[ProducesResponseType(200)]
 		[ProducesResponseType(400)]
 		[ProducesResponseType(401)]
+		[ProducesResponseType(403)]
 		public async Task<ActionResult> ExportToPdf([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
 		{
 			var (isValid, correctedPageSize, result) = _paginationValidationService.ValidatePaginationParameters(page, pageSize, maxPageSize);
@@ -136,7 +151,7 @@ namespace AirportАutomationApi.Controllers
 				_logger.LogInformation("Travel Classes not found.");
 				return NoContent();
 			}
-			var pdf = _exportService.ExportToPDF<TravelClassEntity>("Travel Classes", travelClasses);
+			var pdf = _exportService.ExportToPDF("Travel Classes", travelClasses);
 			string fileName = _utilityService.GenerateUniqueFileName("TravelClasses");
 			return File(pdf, "application/pdf", fileName);
 		}

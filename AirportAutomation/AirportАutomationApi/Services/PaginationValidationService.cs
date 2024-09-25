@@ -1,7 +1,7 @@
 ﻿using AirportAutomation.Api.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
-namespace AirportAutomation.Api.Services
+namespace AirportАutomation.Api.Services
 {
 	public class PaginationValidationService : IPaginationValidationService
 	{
@@ -22,7 +22,7 @@ namespace AirportAutomation.Api.Services
 
 			if (pageSize < 1)
 			{
-				_logger.LogInformation("Invalid page size: Page size should be a positive integer between 1 and {maxPageSize}.", maxPageSize);
+				_logger.LogInformation("Invalid page size: Page size should be a positive integer between 1 and {MaxPageSize}.", maxPageSize);
 				return (false, 0, new BadRequestObjectResult($"Invalid page size. It should be between 1 and {maxPageSize}."));
 			}
 

@@ -5,15 +5,21 @@ using Swashbuckle.AspNetCore.SwaggerGen;
 
 namespace AirportАutomation.Api.Helpers
 {
+	/// <summary>
+	/// A filter that applies custom health check endpoints to the Swagger document.
+	/// </summary>
+	/// <remarks>
+	/// This filter modifies the Swagger document to include health check endpoints.
+	/// </remarks>
 	[SwaggerTag("ApiHealth")]
 	public class HealthChecksFilter : IDocumentFilter
 	{
-		public const string HealthCheckEndpoint = @"/api/v1/HealthCheck";
+		private const string HealthCheckEndpoint = @"/api/v1/HealthCheck";
 
 		/// <summary>
 		/// Applies the custom health check endpoint to the Swagger document.
 		/// </summary>
-		/// <param name="openApiDocument">The Swagger document to modify.</param>
+		/// <param name="swaggerDoc">The Swagger document to modify.</param>
 		/// <param name="context">The context for the Swagger document generation.</param>
 		/// <remarks>
 		/// Endpoint for retrieving health check status.
@@ -22,7 +28,7 @@ namespace AirportАutomation.Api.Helpers
 		/// <response code="401">If user do not have permission to access the requested resource.</response>
 		[SwaggerOperation(Summary = "Endpoint for retrieving health check status.",
 			OperationId = "GetHealthCheckStatus", Tags = new[] { "ApiHealth" })]
-		public void Apply(OpenApiDocument openApiDocument, DocumentFilterContext context)
+		public void Apply(OpenApiDocument swaggerDoc, DocumentFilterContext context)
 		{
 			var pathItem = new OpenApiPathItem();
 			var operation = new OpenApiOperation();
@@ -70,7 +76,7 @@ namespace AirportАutomation.Api.Helpers
 			operation.Responses.Add("200", response200);
 			operation.Responses.Add("401", response401);
 			pathItem.AddOperation(OperationType.Get, operation);
-			openApiDocument?.Paths.Add(HealthCheckEndpoint, pathItem);
+			swaggerDoc?.Paths.Add(HealthCheckEndpoint, pathItem);
 		}
 	}
 }

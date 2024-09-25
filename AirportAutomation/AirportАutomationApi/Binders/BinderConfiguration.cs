@@ -1,6 +1,5 @@
 ﻿using AirportAutomation.Api.Interfaces;
 using AirportAutomation.Api.MappingProfiles;
-using AirportAutomation.Api.Services;
 using AirportAutomation.Application.Services;
 using AirportAutomation.Core.Interfaces.IRepositories;
 using AirportAutomation.Core.Interfaces.IServices;
@@ -12,7 +11,7 @@ using AspNetCoreRateLimit;
 
 namespace AirportАutomation.Api.Binders
 {
-    public static class BinderConfiguration
+	public static class BinderConfiguration
 	{
 		public static void Binders(IServiceCollection services)
 		{

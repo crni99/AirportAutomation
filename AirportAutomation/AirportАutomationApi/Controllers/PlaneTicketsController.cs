@@ -3,15 +3,17 @@ using AirportAutomation.Application.Dtos.PlaneTicket;
 using AirportAutomation.Application.Dtos.Response;
 using AirportAutomation.Core.Entities;
 using AirportAutomation.Core.Interfaces.IServices;
-using AirportАutomation.Api.Controllers;
 using AirportАutomation.Api.Interfaces;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 
-namespace AirportАutomationApi.Controllers
+namespace AirportАutomation.Api.Controllers
 {
+	/// <summary>
+	/// Represents the controller for managing Plane Tickets.
+	/// </summary>
 	[Authorize]
 	[ApiVersion("1.0")]
 	public class PlaneTicketsController : BaseController
@@ -25,6 +27,17 @@ namespace AirportАutomationApi.Controllers
 		private readonly ILogger<PlaneTicketsController> _logger;
 		private readonly int maxPageSize;
 
+		/// <summary>
+		/// Initializes a new instance of the <see cref="PlaneTicketsController"/> class.
+		/// </summary>
+		/// <param name="planeTicketService">The service for managing plane tickets.</param>
+		/// <param name="paginationValidationService">The service for validating pagination parameters.</param>
+		/// <param name="inputValidationService">The service for validating input data.</param>
+		/// <param name="utilityService">The utility service for various helper functions.</param>
+		/// <param name="exportService">The service for exporting data.</param>
+		/// <param name="mapper">The mapper for object-to-object mapping.</param>
+		/// <param name="logger">The logger for logging actions and errors.</param>
+		/// <param name="configuration">The application configuration.</param>
 		public PlaneTicketsController(
 			IPlaneTicketService planeTicketService,
 			IPaginationValidationService paginationValidationService,
@@ -97,12 +110,12 @@ namespace AirportАutomationApi.Controllers
 		{
 			if (!_inputValidationService.IsNonNegativeInt(id))
 			{
-				_logger.LogInformation("Invalid input. The ID {id} must be a non-negative integer.", id);
+				_logger.LogInformation("Invalid input. The ID {Id} must be a non-negative integer.", id);
 				return BadRequest("Invalid input. The ID must be a non-negative integer.");
 			}
 			if (!await _planeTicketService.PlaneTicketExists(id))
 			{
-				_logger.LogInformation("Plane ticket with id {id} not found.", id);
+				_logger.LogInformation("Plane ticket with id {Id} not found.", id);
 				return NotFound();
 			}
 			var planeTicket = await _planeTicketService.GetPlaneTicket(id);
@@ -172,18 +185,10 @@ namespace AirportАutomationApi.Controllers
 		[ProducesResponseType(403)]
 		public async Task<ActionResult<PlaneTicketEntity>> PostPlaneTicket(PlaneTicketCreateDto planeTicketCreateDto)
 		{
-			try
-			{
-				var planeTicket = _mapper.Map<PlaneTicketEntity>(planeTicketCreateDto);
-				await _planeTicketService.PostPlaneTicket(planeTicket);
-				var planeTicketDto = _mapper.Map<PlaneTicketDto>(planeTicket);
-				return CreatedAtAction("GetPlaneTicket", new { id = planeTicketDto.Id }, planeTicketDto);
-			}
-			catch (Exception ex)
-			{
-				_logger.LogError(ex, "Error creating plane ticket.");
-				throw;
-			}
+			var planeTicket = _mapper.Map<PlaneTicketEntity>(planeTicketCreateDto);
+			await _planeTicketService.PostPlaneTicket(planeTicket);
+			var planeTicketDto = _mapper.Map<PlaneTicketDto>(planeTicket);
+			return CreatedAtAction("GetPlaneTicket", new { id = planeTicketDto.Id }, planeTicketDto);
 		}
 
 		/// <summary>
@@ -208,17 +213,17 @@ namespace AirportАutomationApi.Controllers
 		{
 			if (!_inputValidationService.IsNonNegativeInt(id))
 			{
-				_logger.LogInformation("Invalid input. The ID {id} must be a non-negative integer.", id);
+				_logger.LogInformation("Invalid input. The ID {Id} must be a non-negative integer.", id);
 				return BadRequest("Invalid input. The ID must be a non-negative integer.");
 			}
 			if (id != planeTicketUpdateDto.Id)
 			{
-				_logger.LogInformation("Plane Ticket with id {id} is different from provided Plane Ticket and his id.", id);
+				_logger.LogInformation("Plane Ticket with id {Id} is different from provided Plane Ticket and his id.", id);
 				return BadRequest();
 			}
 			if (!await _planeTicketService.PlaneTicketExists(id))
 			{
-				_logger.LogInformation("Plane ticket with id {id} not found.", id);
+				_logger.LogInformation("Plane ticket with id {Id} not found.", id);
 				return NotFound();
 			}
 			var planeTicket = _mapper.Map<PlaneTicketEntity>(planeTicketUpdateDto);
@@ -257,12 +262,12 @@ namespace AirportАutomationApi.Controllers
 		{
 			if (!_inputValidationService.IsNonNegativeInt(id))
 			{
-				_logger.LogInformation("Invalid input. The ID {id} must be a non-negative integer.", id);
+				_logger.LogInformation("Invalid input. The ID {Id} must be a non-negative integer.", id);
 				return BadRequest("Invalid input. The ID must be a non-negative integer.");
 			}
 			if (!await _planeTicketService.PlaneTicketExists(id))
 			{
-				_logger.LogInformation("Plane Ticket with id {id} not found.", id);
+				_logger.LogInformation("Plane Ticket with id {Id} not found.", id);
 				return NotFound();
 			}
 			var updatedPlaneTicket = await _planeTicketService.PatchPlaneTicket(id, planeTicketDocument);
@@ -293,12 +298,12 @@ namespace AirportАutomationApi.Controllers
 		{
 			if (!_inputValidationService.IsNonNegativeInt(id))
 			{
-				_logger.LogInformation("Invalid input. The ID {id} must be a non-negative integer.", id);
+				_logger.LogInformation("Invalid input. The ID {Id} must be a non-negative integer.", id);
 				return BadRequest("Invalid input. The ID must be a non-negative integer.");
 			}
 			if (!await _planeTicketService.PlaneTicketExists(id))
 			{
-				_logger.LogInformation("Plane ticket with id {id} not found.", id);
+				_logger.LogInformation("Plane ticket with id {Id} not found.", id);
 				return NotFound();
 			}
 			bool deleted = await _planeTicketService.DeletePlaneTicket(id);
@@ -324,10 +329,13 @@ namespace AirportАutomationApi.Controllers
 		/// <response code="200">Returns the generated PDF document.</response>
 		/// <response code="400">If the request is invalid or if there's a validation error.</response>
 		/// <response code="401">If user do not have permission to access the requested resource.</response>
+		/// <response code="403">If the user does not have permission to access the requested resource.</response>
 		[HttpGet("export/pdf")]
+		[Authorize(Policy = "RequireAdminRole")]
 		[ProducesResponseType(200)]
 		[ProducesResponseType(400)]
 		[ProducesResponseType(401)]
+		[ProducesResponseType(403)]
 		public async Task<ActionResult> ExportToPdf(
 			[FromQuery] int page = 1,
 			[FromQuery] int pageSize = 10,
@@ -361,7 +369,7 @@ namespace AirportАutomationApi.Controllers
 				_logger.LogInformation("Plane Tickets not found.");
 				return NoContent();
 			}
-			var pdf = _exportService.ExportToPDF<PlaneTicketEntity>("Plane Tickets", planeTickets);
+			var pdf = _exportService.ExportToPDF("Plane Tickets", planeTickets);
 			string fileName = _utilityService.GenerateUniqueFileName("PlaneTickets");
 			return File(pdf, "application/pdf", fileName);
 		}

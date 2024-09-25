@@ -2,7 +2,6 @@
 using AirportAutomation.Core.Entities;
 using AirportАutomation.Api.Interfaces;
 using AutoMapper;
-using BCrypt.Net;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
@@ -12,6 +11,9 @@ using System.Text;
 
 namespace AirportАutomation.Api.Controllers
 {
+	/// <summary>
+	/// Represents the controller for user authentication.
+	/// </summary>
 	[ApiVersion("1.0")]
 	public class AuthenticationController : BaseController
 	{
@@ -20,6 +22,13 @@ namespace AirportАutomation.Api.Controllers
 		private readonly IMapper _mapper;
 		private readonly ILogger<AuthenticationController> _logger;
 
+		/// <summary>
+		/// Initializes a new instance of the <see cref="AuthenticationController"/> class.
+		/// </summary>
+		/// <param name="authenticationRepository">The repository for user authentication.</param>
+		/// <param name="mapper">The mapper for object-to-object mapping.</param>
+		/// <param name="logger">The logger for logging actions and errors.</param>
+		/// <param name="configuration">The application configuration.</param>
 		public AuthenticationController(IAuthenticationRepository authenticationRepository, IConfiguration configuration, IMapper mapper, ILogger<AuthenticationController> logger)
 		{
 			_authenticationRepository = authenticationRepository ?? throw new ArgumentNullException(nameof(authenticationRepository));

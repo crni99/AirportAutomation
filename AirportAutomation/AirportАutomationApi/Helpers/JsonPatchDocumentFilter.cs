@@ -3,8 +3,24 @@ using Swashbuckle.AspNetCore.SwaggerGen;
 
 namespace AirportАutomation.Api.Helpers
 {
+	/// <summary>
+	/// A filter that modifies the Swagger document to handle JSON Patch operations.
+	/// </summary>
+	/// <remarks>
+	/// This filter removes default schemas related to JSON Patch and defines custom schemas for 
+	/// operations and JSON Patch documents.
+	/// </remarks>
 	public class JsonPatchDocumentFilter : IDocumentFilter
 	{
+		/// <summary>
+		/// Applies the modifications to the Swagger document.
+		/// </summary>
+		/// <param name="swaggerDoc">The Swagger document to modify.</param>
+		/// <param name="context">The context for the Swagger document generation.</param>
+		/// <remarks>
+		/// This method removes existing "Operation" and "JsonPatchDocument" schemas and adds
+		/// new definitions to represent JSON Patch operations.
+		/// </remarks>
 		public void Apply(OpenApiDocument swaggerDoc, DocumentFilterContext context)
 		{
 			var schemas = swaggerDoc.Components.Schemas.ToList();
@@ -35,7 +51,6 @@ namespace AirportАutomation.Api.Helpers
 				Description = "Array of operations to perform"
 			});
 
-			// Loop through each path and operation for each API version
 			foreach (var apiDescription in context.ApiDescriptions)
 			{
 				var relativePath = apiDescription.RelativePath;

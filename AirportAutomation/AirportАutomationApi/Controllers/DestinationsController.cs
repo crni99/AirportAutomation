@@ -3,15 +3,17 @@ using AirportAutomation.Application.Dtos.Destination;
 using AirportAutomation.Application.Dtos.Response;
 using AirportAutomation.Core.Entities;
 using AirportAutomation.Core.Interfaces.IServices;
-using AirportАutomation.Api.Controllers;
 using AirportАutomation.Api.Interfaces;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 
-namespace AirportАutomationApi.Controllers
+namespace AirportАutomation.Api.Controllers
 {
+	/// <summary>
+	/// Represents the controller for managing Destinations.
+	/// </summary>
 	[Authorize]
 	[ApiVersion("1.0")]
 	public class DestinationsController : BaseController
@@ -25,6 +27,17 @@ namespace AirportАutomationApi.Controllers
 		private readonly ILogger<DestinationsController> _logger;
 		private readonly int maxPageSize;
 
+		/// <summary>
+		/// Initializes a new instance of the <see cref="DestinationsController"/> class.
+		/// </summary>
+		/// <param name="destinationService">The service for managing destinations.</param>
+		/// <param name="paginationValidationService">The service for validating pagination parameters.</param>
+		/// <param name="inputValidationService">The service for validating input data.</param>
+		/// <param name="utilityService">The utility service for various helper functions.</param>
+		/// <param name="exportService">The service for exporting data.</param>
+		/// <param name="mapper">The mapper for object-to-object mapping.</param>
+		/// <param name="logger">The logger for logging actions and errors.</param>
+		/// <param name="configuration">The application configuration.</param>
 		public DestinationsController(
 			IDestinationService destinationService,
 			IPaginationValidationService paginationValidationService,
@@ -97,12 +110,12 @@ namespace AirportАutomationApi.Controllers
 		{
 			if (!_inputValidationService.IsNonNegativeInt(id))
 			{
-				_logger.LogInformation("Invalid input. The ID {id} must be a non-negative integer.", id);
+				_logger.LogInformation("Invalid input. The ID {Id} must be a non-negative integer.", id);
 				return BadRequest("Invalid input. The ID must be a non-negative integer.");
 			}
 			if (!await _destinationService.DestinationExists(id))
 			{
-				_logger.LogInformation("Destination with id {id} not found.", id);
+				_logger.LogInformation("Destination with id {Id} not found.", id);
 				return NotFound();
 			}
 			var destination = await _destinationService.GetDestination(id);
@@ -200,17 +213,17 @@ namespace AirportАutomationApi.Controllers
 		{
 			if (!_inputValidationService.IsNonNegativeInt(id))
 			{
-				_logger.LogInformation("Invalid input. The ID {id} must be a non-negative integer.", id);
+				_logger.LogInformation("Invalid input. The ID {Id} must be a non-negative integer.", id);
 				return BadRequest("Invalid input. The ID must be a non-negative integer.");
 			}
 			if (id != destinationDto.Id)
 			{
-				_logger.LogInformation("Destination with id {id} is different from provided Destination and his id.", id);
+				_logger.LogInformation("Destination with id {Id} is different from provided Destination and his id.", id);
 				return BadRequest();
 			}
 			if (!await _destinationService.DestinationExists(id))
 			{
-				_logger.LogInformation("Destination with id {id} not found.", id);
+				_logger.LogInformation("Destination with id {Id} not found.", id);
 				return NotFound();
 			}
 			var destination = _mapper.Map<DestinationEntity>(destinationDto);
@@ -249,12 +262,12 @@ namespace AirportАutomationApi.Controllers
 		{
 			if (!_inputValidationService.IsNonNegativeInt(id))
 			{
-				_logger.LogInformation("Invalid input. The ID {id} must be a non-negative integer.", id);
+				_logger.LogInformation("Invalid input. The ID {Id} must be a non-negative integer.", id);
 				return BadRequest("Invalid input. The ID must be a non-negative integer.");
 			}
 			if (!await _destinationService.DestinationExists(id))
 			{
-				_logger.LogInformation("Destination with id {id} not found.", id);
+				_logger.LogInformation("Destination with id {Id} not found.", id);
 				return NotFound();
 			}
 			var updatedDestination = await _destinationService.PatchDestination(id, destinationDocument);
@@ -285,12 +298,12 @@ namespace AirportАutomationApi.Controllers
 		{
 			if (!_inputValidationService.IsNonNegativeInt(id))
 			{
-				_logger.LogInformation("Invalid input. The ID {id} must be a non-negative integer.", id);
+				_logger.LogInformation("Invalid input. The ID {Id} must be a non-negative integer.", id);
 				return BadRequest("Invalid input. The ID must be a non-negative integer.");
 			}
 			if (!await _destinationService.DestinationExists(id))
 			{
-				_logger.LogInformation("Destination with id {id} not found.", id);
+				_logger.LogInformation("Destination with id {Id} not found.", id);
 				return NotFound();
 			}
 			bool deleted = await _destinationService.DeleteDestination(id);
@@ -300,7 +313,7 @@ namespace AirportАutomationApi.Controllers
 			}
 			else
 			{
-				_logger.LogInformation("Destination with id {id} is being referenced by other entities and cannot be deleted.", id);
+				_logger.LogInformation("Destination with id {Id} is being referenced by other entities and cannot be deleted.", id);
 				return Conflict("Destination cannot be deleted because it is being referenced by other entities.");
 			}
 		}
@@ -317,10 +330,13 @@ namespace AirportАutomationApi.Controllers
 		/// <response code="200">Returns the generated PDF document.</response>
 		/// <response code="400">If the request is invalid or if there's a validation error.</response>
 		/// <response code="401">If user do not have permission to access the requested resource.</response>
+		/// <response code="403">If the user does not have permission to access the requested resource.</response>
 		[HttpGet("export/pdf")]
+		[Authorize(Policy = "RequireAdminRole")]
 		[ProducesResponseType(200)]
 		[ProducesResponseType(400)]
 		[ProducesResponseType(401)]
+		[ProducesResponseType(403)]
 		public async Task<ActionResult> ExportToPdf(
 			[FromQuery] int page = 1,
 			[FromQuery] int pageSize = 10,
@@ -354,7 +370,7 @@ namespace AirportАutomationApi.Controllers
 				_logger.LogInformation("Destinations not found.");
 				return NoContent();
 			}
-			var pdf = _exportService.ExportToPDF<DestinationEntity>("Destinations", destinations);
+			var pdf = _exportService.ExportToPDF("Destinations", destinations);
 			string fileName = _utilityService.GenerateUniqueFileName("Destinations");
 			return File(pdf, "application/pdf", fileName);
 		}
