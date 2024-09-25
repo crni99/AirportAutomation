@@ -61,7 +61,6 @@ namespace AirportAutomationApi.Test.Controllers
 				_apiUserServiceMock.Object,
 				_paginationValidationServiceMock.Object,
 				_inputValidationServiceMock.Object,
-				_utilityServiceMock.Object,
 				_mapperMock.Object,
 				_loggerMock.Object,
 				_configurationMock.Object
