@@ -14,7 +14,7 @@ namespace AirportАutomation.Api.Controllers
 	/// <summary>
 	/// Represents the controller for managing Airlines.
 	/// </summary>
-	//[Authorize]
+	[Authorize]
 	[ApiVersion("1.0")]
 	public class AirlinesController : BaseController
 	{
