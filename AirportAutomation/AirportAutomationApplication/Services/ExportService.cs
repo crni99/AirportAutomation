@@ -1,10 +1,8 @@
 ﻿using AirportAutomation.Core.Entities;
 using AirportAutomation.Core.Interfaces.IServices;
-using QuestPDF.Elements;
 using QuestPDF.Fluent;
 using QuestPDF.Helpers;
 using QuestPDF.Infrastructure;
-using System.Data.Common;
 
 namespace AirportAutomation.Application.Services
 {

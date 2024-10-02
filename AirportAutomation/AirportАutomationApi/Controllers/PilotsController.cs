@@ -61,6 +61,7 @@ namespace AirportАutomation.Api.Controllers
 		/// <summary>
 		/// Endpoint for retrieving a paginated list of pilots.
 		/// </summary>
+		/// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
 		/// <param name="page">The page number for pagination (optional).</param>
 		/// <param name="pageSize">The number of items per page (optional).</param>
 		/// <returns>A paginated list of pilots.</returns>
@@ -73,20 +74,23 @@ namespace AirportАutomation.Api.Controllers
 		[ProducesResponseType(204)]
 		[ProducesResponseType(400)]
 		[ProducesResponseType(401)]
-		public async Task<ActionResult<PagedResponse<PilotDto>>> GetPilots([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
+		public async Task<ActionResult<PagedResponse<PilotDto>>> GetPilots(
+			CancellationToken cancellationToken,
+			[FromQuery] int page = 1,
+			[FromQuery] int pageSize = 10)
 		{
 			var (isValid, correctedPageSize, result) = _paginationValidationService.ValidatePaginationParameters(page, pageSize, maxPageSize);
 			if (!isValid)
 			{
 				return result;
 			}
-			var pilots = await _pilotService.GetPilots(page, correctedPageSize);
+			var pilots = await _pilotService.GetPilots(cancellationToken, page, correctedPageSize);
 			if (pilots is null || !pilots.Any())
 			{
 				_logger.LogInformation("Pilots not found.");
 				return NoContent();
 			}
-			var totalItems = await _pilotService.PilotsCount();
+			var totalItems = await _pilotService.PilotsCount(cancellationToken);
 			var data = _mapper.Map<IEnumerable<PilotDto>>(pilots);
 			var response = new PagedResponse<PilotDto>(data, page, correctedPageSize, totalItems);
 			return Ok(response);
@@ -126,6 +130,7 @@ namespace AirportАutomation.Api.Controllers
 		/// <summary>
 		/// Endpoint for retrieving a paginated list of pilots containing the specified name.
 		/// </summary>
+		/// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
 		/// <param name="firstName">The first name to search for.</param>
 		/// <param name="lastName">The last name to search for.</param>
 		/// <param name="page">The page number for pagination (optional).</param>
@@ -141,6 +146,7 @@ namespace AirportАutomation.Api.Controllers
 		[ProducesResponseType(404)]
 		[ProducesResponseType(401)]
 		public async Task<ActionResult<PagedResponse<PilotDto>>> GetPilotsByName(
+			CancellationToken cancellationToken,
 			[FromQuery] string? firstName = null,
 			[FromQuery] string? lastName = null,
 			[FromQuery] int page = 1,
@@ -156,13 +162,13 @@ namespace AirportАutomation.Api.Controllers
 			{
 				return result;
 			}
-			var pilots = await _pilotService.GetPilotsByName(page, correctedPageSize, firstName, lastName);
+			var pilots = await _pilotService.GetPilotsByName(cancellationToken, page, correctedPageSize, firstName, lastName);
 			if (pilots == null || pilots.Count == 0)
 			{
 				_logger.LogInformation("Pilots not found.");
 				return NotFound();
 			}
-			var totalItems = await _pilotService.PilotsCount(firstName, lastName);
+			var totalItems = await _pilotService.PilotsCount(cancellationToken, firstName, lastName);
 			var data = _mapper.Map<IEnumerable<PilotDto>>(pilots);
 			var response = new PagedResponse<PilotDto>(data, page, correctedPageSize, totalItems);
 			return Ok(response);
@@ -321,6 +327,7 @@ namespace AirportАutomation.Api.Controllers
 		/// <summary>
 		/// Endpoint for exporting pilot data to PDF.
 		/// </summary>
+		/// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
 		/// <param name="page">The page number for pagination (optional, default is 1).</param>
 		/// <param name="pageSize">The page size for pagination (optional, default is 10).</param>
 		/// <param name="getAll">Flag indicating whether to retrieve all data (optional, default is false).</param>
@@ -338,6 +345,7 @@ namespace AirportАutomation.Api.Controllers
 		[ProducesResponseType(401)]
 		[ProducesResponseType(403)]
 		public async Task<ActionResult> ExportToPdf(
+			CancellationToken cancellationToken,
 			[FromQuery] int page = 1,
 			[FromQuery] int pageSize = 10,
 			[FromQuery] bool getAll = false,
@@ -347,7 +355,7 @@ namespace AirportАutomation.Api.Controllers
 			IList<PilotEntity> pilots;
 			if (getAll)
 			{
-				pilots = await _pilotService.GetAllPilots();
+				pilots = await _pilotService.GetAllPilots(cancellationToken);
 			}
 			else
 			{
@@ -358,11 +366,11 @@ namespace AirportАutomation.Api.Controllers
 				}
 				if (string.IsNullOrEmpty(firstName) && string.IsNullOrEmpty(lastName))
 				{
-					pilots = await _pilotService.GetPilots(page, correctedPageSize);
+					pilots = await _pilotService.GetPilots(cancellationToken, page, correctedPageSize);
 				}
 				else
 				{
-					pilots = await _pilotService.GetPilotsByName(page, correctedPageSize, firstName, lastName);
+					pilots = await _pilotService.GetPilotsByName(cancellationToken, page, correctedPageSize, firstName, lastName);
 				}
 			}
 			if (pilots is null || !pilots.Any())

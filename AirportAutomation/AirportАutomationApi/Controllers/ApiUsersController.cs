@@ -56,6 +56,7 @@ namespace AirportАutomation.Api.Controllers
 		/// <summary>
 		/// Endpoint for retrieving a paginated list of api users.
 		/// </summary>
+		/// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
 		/// <param name="page">The page number for pagination (optional).</param>
 		/// <param name="pageSize">The number of items per page (optional).</param>
 		/// <returns>A paginated list of api users.</returns>
@@ -70,20 +71,23 @@ namespace AirportАutomation.Api.Controllers
 		[ProducesResponseType(400)]
 		[ProducesResponseType(401)]
 		[ProducesResponseType(403)]
-		public async Task<ActionResult<PagedResponse<ApiUserRoleDto>>> GetApiUsers([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
+		public async Task<ActionResult<PagedResponse<ApiUserRoleDto>>> GetApiUsers(
+			CancellationToken cancellationToken,
+			[FromQuery] int page = 1,
+			[FromQuery] int pageSize = 10)
 		{
 			var (isValid, correctedPageSize, result) = _paginationValidationService.ValidatePaginationParameters(page, pageSize, maxPageSize);
 			if (!isValid)
 			{
 				return result;
 			}
-			var apiUsers = await _apiUserService.GetApiUsers(page, correctedPageSize);
+			var apiUsers = await _apiUserService.GetApiUsers(cancellationToken, page, correctedPageSize);
 			if (apiUsers is null || !apiUsers.Any())
 			{
 				_logger.LogInformation("Api Users not found.");
 				return NoContent();
 			}
-			var totalItems = await _apiUserService.ApiUsersCount();
+			var totalItems = await _apiUserService.ApiUsersCount(cancellationToken);
 			var data = _mapper.Map<IEnumerable<ApiUserRoleDto>>(apiUsers);
 			var response = new PagedResponse<ApiUserRoleDto>(data, page, correctedPageSize, totalItems);
 			return Ok(response);
@@ -125,6 +129,7 @@ namespace AirportАutomation.Api.Controllers
 		/// <summary>
 		/// Endpoint for retrieving a paginated list of api users containing the specified role.
 		/// </summary>
+		/// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
 		/// <param name="role">The role to search for.</param>
 		/// <param name="page">The page number for pagination (optional).</param>
 		/// <param name="pageSize">The size of each page for pagination (optional).</param>
@@ -140,7 +145,11 @@ namespace AirportАutomation.Api.Controllers
 		[ProducesResponseType(404)]
 		[ProducesResponseType(401)]
 		[ProducesResponseType(403)]
-		public async Task<ActionResult<PagedResponse<ApiUserRoleDto>>> GetApiUsersByRole(string role, [FromQuery] int page = 1, [FromQuery] int pageSize = 10)
+		public async Task<ActionResult<PagedResponse<ApiUserRoleDto>>> GetApiUsersByRole(
+			CancellationToken cancellationToken,
+			string role,
+			[FromQuery] int page = 1,
+			[FromQuery] int pageSize = 10)
 		{
 			if (!_inputValidationService.IsValidString(role))
 			{
@@ -152,13 +161,13 @@ namespace AirportАutomation.Api.Controllers
 			{
 				return result;
 			}
-			var apiUsers = await _apiUserService.GetApiUsersByRole(page, correctedPageSize, role);
+			var apiUsers = await _apiUserService.GetApiUsersByRole(cancellationToken, page, correctedPageSize, role);
 			if (apiUsers is null || apiUsers.Count == 0)
 			{
 				_logger.LogInformation("Api User with role {Role} not found.", role);
 				return NotFound();
 			}
-			var totalItems = await _apiUserService.ApiUsersCount(role);
+			var totalItems = await _apiUserService.ApiUsersCount(cancellationToken, role);
 			var data = _mapper.Map<IEnumerable<ApiUserRoleDto>>(apiUsers);
 			var response = new PagedResponse<ApiUserRoleDto>(data, page, correctedPageSize, totalItems);
 			return Ok(response);

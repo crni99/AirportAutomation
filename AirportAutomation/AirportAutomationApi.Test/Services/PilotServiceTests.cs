@@ -20,17 +20,19 @@ namespace AirportAutomationApi.Test.Services
 		[Fact]
 		public async Task GetAllPilots_Should_Call_Repository_GetAllPilots()
 		{
-			await _service.GetAllPilots();
+			var cancellationToken = new CancellationToken();
+			await _service.GetAllPilots(cancellationToken);
 
-			_repositoryMock.Verify(repo => repo.GetAllPilots(), Times.Once);
+			_repositoryMock.Verify(repo => repo.GetAllPilots(cancellationToken), Times.Once);
 		}
 
 		[Fact]
 		public async Task GetPilots_Should_Call_Repository_GetPilots()
 		{
-			await _service.GetPilots(1, 10);
+			var cancellationToken = new CancellationToken();
+			await _service.GetPilots(cancellationToken, 1, 10);
 
-			_repositoryMock.Verify(repo => repo.GetPilots(1, 10), Times.Once);
+			_repositoryMock.Verify(repo => repo.GetPilots(cancellationToken, 1, 10), Times.Once);
 		}
 
 		[Fact]
@@ -44,9 +46,10 @@ namespace AirportAutomationApi.Test.Services
 		[Fact]
 		public async Task GetPilotsByName_Should_Call_Repository_GetPilotsByName()
 		{
-			await _service.GetPilotsByName(1, 10, "John", "Doe");
+			var cancellationToken = new CancellationToken();
+			await _service.GetPilotsByName(cancellationToken, 1, 10, "John", "Doe");
 
-			_repositoryMock.Verify(repo => repo.GetPilotsByName(1, 10, "John", "Doe"), Times.Once);
+			_repositoryMock.Verify(repo => repo.GetPilotsByName(cancellationToken, 1, 10, "John", "Doe"), Times.Once);
 		}
 
 		[Fact]
@@ -99,10 +102,11 @@ namespace AirportAutomationApi.Test.Services
 		[Fact]
 		public async Task PilotsCount_ShouldReturnCorrectCount()
 		{
+			var cancellationToken = new CancellationToken();
 			var expectedCount = 5;
-			_repositoryMock.Setup(repo => repo.PilotsCount(null, null)).ReturnsAsync(expectedCount);
+			_repositoryMock.Setup(repo => repo.PilotsCount(cancellationToken, null, null)).ReturnsAsync(expectedCount);
 
-			int count = await _service.PilotsCount();
+			int count = await _service.PilotsCount(cancellationToken);
 
 			Assert.Equal(expectedCount, count);
 		}

@@ -66,6 +66,13 @@ namespace AirportAutomation.Infrastructure.Middlewares
 					model.Title = "Unauthorized access";
 					break;
 
+				case TaskCanceledException:
+					statusCode = (int)HttpStatusCode.RequestTimeout;
+					model.Type = "Request Timeout";
+					model.Title = "Request Timeout";
+					model.Detail = "The request was canceled due to a timeout.";
+					break;
+
 				default:
 					statusCode = (int)HttpStatusCode.InternalServerError;
 					model.Type = "Server error";

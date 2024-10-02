@@ -73,6 +73,7 @@ namespace AirportAutomationApi.Test.Controllers
 		public async Task GetAirlines_InvalidPaginationParameters_ReturnsBadRequest()
 		{
 			// Arrange
+			var cancellationToken = new CancellationToken();
 			int invalidPage = -1;
 			int invalidPageSize = 0;
 			var expectedBadRequestResult = new BadRequestObjectResult("Invalid pagination parameters.");
@@ -82,7 +83,7 @@ namespace AirportAutomationApi.Test.Controllers
 				.Returns((false, 0, expectedBadRequestResult));
 
 			// Act
-			var result = await _controller.GetAirlines(invalidPage, invalidPageSize);
+			var result = await _controller.GetAirlines(cancellationToken, invalidPage, invalidPageSize);
 
 			// Assert
 			Assert.IsType<BadRequestObjectResult>(result.Result);
@@ -93,17 +94,18 @@ namespace AirportAutomationApi.Test.Controllers
 		public async Task GetAirlines_ReturnsNoContent_WhenNoAirlinesFound()
 		{
 			// Arrange
+			var cancellationToken = new CancellationToken();
 			int page = 1;
 			int pageSize = 10;
 
 			_paginationValidationServiceMock
 				.Setup(x => x.ValidatePaginationParameters(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<int>()))
 				.Returns((true, pageSize, null));
-			_airlineServiceMock.Setup(service => service.GetAirlines(It.IsAny<int>(), It.IsAny<int>()))
+			_airlineServiceMock.Setup(service => service.GetAirlines(cancellationToken, It.IsAny<int>(), It.IsAny<int>()))
 				.ReturnsAsync(new List<AirlineEntity>());
 
 			// Act
-			var result = await _controller.GetAirlines(page, pageSize);
+			var result = await _controller.GetAirlines(cancellationToken, page, pageSize);
 
 			// Assert
 			Assert.IsType<NoContentResult>(result.Result);
@@ -114,17 +116,18 @@ namespace AirportAutomationApi.Test.Controllers
 		public async Task GetAirlines_ReturnsInternalServerError_WhenExceptionThrown()
 		{
 			// Arrange
+			var cancellationToken = new CancellationToken();
 			int page = 1;
 			int pageSize = 10;
 
 			_paginationValidationServiceMock
 				.Setup(x => x.ValidatePaginationParameters(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<int>()))
 				.Returns((true, pageSize, null));
-			_airlineServiceMock.Setup(service => service.GetAirlines(It.IsAny<int>(), It.IsAny<int>()))
+			_airlineServiceMock.Setup(service => service.GetAirlines(cancellationToken, It.IsAny<int>(), It.IsAny<int>()))
 				.ThrowsAsync(new Exception("Simulated exception"));
 
 			// Act & Assert
-			await Assert.ThrowsAsync<Exception>(async () => await _controller.GetAirlines(page, pageSize));
+			await Assert.ThrowsAsync<Exception>(async () => await _controller.GetAirlines(cancellationToken, page, pageSize));
 		}
 
 		[Fact]
@@ -132,6 +135,7 @@ namespace AirportAutomationApi.Test.Controllers
 		public async Task GetAirlines_ReturnsOk_WithPaginatedAirlines()
 		{
 			// Arrange
+			var cancellationToken = new CancellationToken();
 			int page = 1;
 			int pageSize = 10;
 			var airlines = new List<AirlineEntity>
@@ -145,10 +149,10 @@ namespace AirportAutomationApi.Test.Controllers
 				.Setup(x => x.ValidatePaginationParameters(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<int>()))
 				.Returns((true, pageSize, null));
 			_airlineServiceMock
-				.Setup(service => service.GetAirlines(page, pageSize))
+				.Setup(service => service.GetAirlines(cancellationToken, page, pageSize))
 				.ReturnsAsync(airlines);
 			_airlineServiceMock
-				.Setup(service => service.AirlinesCount(null))
+				.Setup(service => service.AirlinesCount(cancellationToken, null))
 				.ReturnsAsync(totalItems);
 
 			var expectedData = new List<AirlineDto>
@@ -161,7 +165,7 @@ namespace AirportAutomationApi.Test.Controllers
 				.Returns(expectedData);
 
 			// Act
-			var result = await _controller.GetAirlines(page, pageSize);
+			var result = await _controller.GetAirlines(cancellationToken, page, pageSize);
 
 			// Assert
 			var actionResult = Assert.IsType<ActionResult<PagedResponse<AirlineDto>>>(result);
@@ -178,6 +182,7 @@ namespace AirportAutomationApi.Test.Controllers
 		public async Task GetAirlines_ReturnsCorrectPageData()
 		{
 			// Arrange
+			var cancellationToken = new CancellationToken();
 			int page = 2;
 			int pageSize = 5;
 			var allAirlines = new List<AirlineEntity>
@@ -199,10 +204,10 @@ namespace AirportAutomationApi.Test.Controllers
 				.Setup(x => x.ValidatePaginationParameters(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<int>()))
 				.Returns((true, pageSize, null));
 			_airlineServiceMock
-				.Setup(service => service.GetAirlines(page, pageSize))
+				.Setup(service => service.GetAirlines(cancellationToken, page, pageSize))
 				.ReturnsAsync(pagedAirlines);
 			_airlineServiceMock
-				.Setup(service => service.AirlinesCount(null))
+				.Setup(service => service.AirlinesCount(cancellationToken, null))
 				.ReturnsAsync(allAirlines.Count);
 
 			var expectedData = new List<AirlineDto>
@@ -218,7 +223,7 @@ namespace AirportAutomationApi.Test.Controllers
 				.Returns(expectedData);
 
 			// Act
-			var result = await _controller.GetAirlines(page, pageSize);
+			var result = await _controller.GetAirlines(cancellationToken, page, pageSize);
 
 			// Assert
 			var actionResult = Assert.IsType<ActionResult<PagedResponse<AirlineDto>>>(result);
@@ -307,6 +312,7 @@ namespace AirportAutomationApi.Test.Controllers
 		public async Task GetAirlinesByName_InvalidName_ReturnsBadRequest()
 		{
 			// Arrange
+			var cancellationToken = new CancellationToken();
 			string invalidName = string.Empty;
 			var expectedBadRequestResult = new BadRequestObjectResult("Invalid input. The name must be a valid non-empty string.");
 
@@ -315,7 +321,7 @@ namespace AirportAutomationApi.Test.Controllers
 				.Returns(false);
 
 			// Act
-			var result = await _controller.GetAirlinesByName(invalidName);
+			var result = await _controller.GetAirlinesByName(cancellationToken, invalidName);
 
 			// Assert
 			Assert.IsType<BadRequestObjectResult>(result.Result);
@@ -328,6 +334,7 @@ namespace AirportAutomationApi.Test.Controllers
 		public async Task GetAirlinesByName_InvalidPaginationParameters_ReturnsBadRequest()
 		{
 			// Arrange
+			var cancellationToken = new CancellationToken();
 			string validName = "ValidName";
 			int invalidPage = -1;
 			int invalidPageSize = 0;
@@ -341,7 +348,7 @@ namespace AirportAutomationApi.Test.Controllers
 				.Returns((false, 0, expectedBadRequestResult));
 
 			// Act
-			var result = await _controller.GetAirlinesByName(validName, invalidPage, invalidPageSize);
+			var result = await _controller.GetAirlinesByName(cancellationToken, validName, invalidPage, invalidPageSize);
 
 			// Assert
 			Assert.IsType<BadRequestObjectResult>(result.Result);
@@ -352,6 +359,7 @@ namespace AirportAutomationApi.Test.Controllers
 		public async Task GetAirlinesByName_AirlinesNotFound_ReturnsNotFound()
 		{
 			// Arrange
+			var cancellationToken = new CancellationToken();
 			string validName = "NonExistentName";
 			int validPage = 1;
 			int validPageSize = 10;
@@ -363,11 +371,11 @@ namespace AirportAutomationApi.Test.Controllers
 				.Setup(x => x.ValidatePaginationParameters(validPage, validPageSize, It.IsAny<int>()))
 				.Returns((true, validPageSize, null));
 			_airlineServiceMock
-				.Setup(service => service.GetAirlinesByName(validPage, validPageSize, validName))
+				.Setup(service => service.GetAirlinesByName(cancellationToken, validPage, validPageSize, validName))
 				.ReturnsAsync(new List<AirlineEntity>());
 
 			// Act
-			var result = await _controller.GetAirlinesByName(validName, validPage, validPageSize);
+			var result = await _controller.GetAirlinesByName(cancellationToken, validName, validPage, validPageSize);
 
 			// Assert
 			Assert.IsType<NotFoundResult>(result.Result);
@@ -378,6 +386,7 @@ namespace AirportAutomationApi.Test.Controllers
 		public async Task GetAirlinesByName_ReturnsPagedListOfAirlines_WhenAirlinesFound()
 		{
 			// Arrange
+			var cancellationToken = new CancellationToken();
 			string validName = "ValidName";
 			int validPage = 1;
 			int validPageSize = 10;
@@ -392,17 +401,17 @@ namespace AirportAutomationApi.Test.Controllers
 				.Setup(x => x.ValidatePaginationParameters(validPage, validPageSize, It.IsAny<int>()))
 				.Returns((true, validPageSize, null));
 			_airlineServiceMock
-				.Setup(service => service.GetAirlinesByName(validPage, validPageSize, validName))
+				.Setup(service => service.GetAirlinesByName(cancellationToken, validPage, validPageSize, validName))
 				.ReturnsAsync(airlineEntities);
 			_airlineServiceMock
-				.Setup(service => service.AirlinesCount(validName))
+				.Setup(service => service.AirlinesCount(cancellationToken, validName))
 				.ReturnsAsync(totalItems);
 			_mapperMock
 				.Setup(m => m.Map<IEnumerable<AirlineDto>>(airlineEntities))
 				.Returns(airlineDtos);
 
 			// Act
-			var result = await _controller.GetAirlinesByName(validName, validPage, validPageSize);
+			var result = await _controller.GetAirlinesByName(cancellationToken, validName, validPage, validPageSize);
 
 			// Assert
 			var actionResult = Assert.IsType<ActionResult<PagedResponse<AirlineDto>>>(result);

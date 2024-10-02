@@ -4,12 +4,12 @@ namespace AirportAutomation.Core.Interfaces.IServices
 {
 	public interface IApiUserService
 	{
-		Task<IList<ApiUserEntity>> GetApiUsers(int page, int pageSize);
+		Task<IList<ApiUserEntity>> GetApiUsers(CancellationToken cancellationToken, int page, int pageSize);
 		Task<ApiUserEntity?> GetApiUser(int id);
-		Task<IList<ApiUserEntity?>> GetApiUsersByRole(int page, int pageSize, string role);
+		Task<IList<ApiUserEntity?>> GetApiUsersByRole(CancellationToken cancellationToken, int page, int pageSize, string role);
 		Task PutApiUser(ApiUserEntity apiUser);
 		Task<bool> DeleteApiUser(int id);
 		Task<bool> ApiUserExists(int id);
-		Task<int> ApiUsersCount(string? role = null);
+		Task<int> ApiUsersCount(CancellationToken cancellationToken, string? role = null);
 	}
 }

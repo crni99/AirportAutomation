@@ -20,17 +20,19 @@ namespace AirportAutomationApi.Test.Services
 		[Fact]
 		public async Task GetAllFlights_Should_Call_Repository_GetAllFlights()
 		{
-			await _service.GetAllFlights();
+			var cancellationToken = new CancellationToken();
+			await _service.GetAllFlights(cancellationToken);
 
-			_repositoryMock.Verify(repo => repo.GetAllFlights(), Times.Once);
+			_repositoryMock.Verify(repo => repo.GetAllFlights(cancellationToken), Times.Once);
 		}
 
 		[Fact]
 		public async Task GetFlights_Should_Call_Repository_GetFlights()
 		{
-			await _service.GetFlights(1, 10);
+			var cancellationToken = new CancellationToken();
+			await _service.GetFlights(cancellationToken, 1, 10);
 
-			_repositoryMock.Verify(repo => repo.GetFlights(1, 10), Times.Once);
+			_repositoryMock.Verify(repo => repo.GetFlights(cancellationToken, 1, 10), Times.Once);
 		}
 
 		[Fact]
@@ -44,12 +46,13 @@ namespace AirportAutomationApi.Test.Services
 		[Fact]
 		public async Task GetFlightsByName_Should_Call_Repository_GetFlightsByName()
 		{
+			var cancellationToken = new CancellationToken();
 			var startDate = new DateOnly(1999, 12, 01);
 			var endDate = new DateOnly(2023, 9, 20);
 
-			await _service.GetFlightsBetweenDates(1, 10, startDate, endDate);
+			await _service.GetFlightsBetweenDates(cancellationToken, 1, 10, startDate, endDate);
 
-			_repositoryMock.Verify(repo => repo.GetFlightsBetweenDates(1, 10, startDate, endDate), Times.Once);
+			_repositoryMock.Verify(repo => repo.GetFlightsBetweenDates(cancellationToken, 1, 10, startDate, endDate), Times.Once);
 		}
 
 		[Fact]
@@ -102,10 +105,11 @@ namespace AirportAutomationApi.Test.Services
 		[Fact]
 		public async Task FlightsCount_ShouldReturnCorrectCount()
 		{
+			var cancellationToken = new CancellationToken();
 			var expectedCount = 5;
-			_repositoryMock.Setup(repo => repo.FlightsCount(null, null)).ReturnsAsync(expectedCount);
+			_repositoryMock.Setup(repo => repo.FlightsCount(cancellationToken, null, null)).ReturnsAsync(expectedCount);
 
-			int count = await _service.FlightsCount();
+			int count = await _service.FlightsCount(cancellationToken);
 
 			Assert.Equal(expectedCount, count);
 		}

@@ -14,14 +14,14 @@ namespace AirportAutomation.Application.Services
 			_planeTicketRepository = planeTicketRepository;
 		}
 
-		public async Task<IList<PlaneTicketEntity>> GetAllPlaneTickets()
+		public async Task<IList<PlaneTicketEntity>> GetAllPlaneTickets(CancellationToken cancellationToken)
 		{
-			return await _planeTicketRepository.GetAllPlaneTickets();
+			return await _planeTicketRepository.GetAllPlaneTickets(cancellationToken);
 		}
 
-		public async Task<IList<PlaneTicketEntity>> GetPlaneTickets(int page, int pageSize)
+		public async Task<IList<PlaneTicketEntity>> GetPlaneTickets(CancellationToken cancellationToken, int page, int pageSize)
 		{
-			return await _planeTicketRepository.GetPlaneTickets(page, pageSize);
+			return await _planeTicketRepository.GetPlaneTickets(cancellationToken, page, pageSize);
 		}
 
 		public async Task<PlaneTicketEntity?> GetPlaneTicket(int id)
@@ -29,9 +29,9 @@ namespace AirportAutomation.Application.Services
 			return await _planeTicketRepository.GetPlaneTicket(id);
 		}
 
-		public async Task<IList<PlaneTicketEntity?>> GetPlaneTicketsForPrice(int page, int pageSize, int? minPrice, int? maxPrice)
+		public async Task<IList<PlaneTicketEntity?>> GetPlaneTicketsForPrice(CancellationToken cancellationToken, int page, int pageSize, int? minPrice, int? maxPrice)
 		{
-			return await _planeTicketRepository.GetPlaneTicketsForPrice(page, pageSize, minPrice, maxPrice);
+			return await _planeTicketRepository.GetPlaneTicketsForPrice(cancellationToken, page, pageSize, minPrice, maxPrice);
 		}
 
 		public async Task<PlaneTicketEntity> PostPlaneTicket(PlaneTicketEntity planeTicket)
@@ -59,9 +59,9 @@ namespace AirportAutomation.Application.Services
 			return await _planeTicketRepository.PlaneTicketExists(id);
 		}
 
-		public async Task<int> PlaneTicketsCount(int? minPrice = null, int? maxPrice = null)
+		public async Task<int> PlaneTicketsCount(CancellationToken cancellationToken, int? minPrice = null, int? maxPrice = null)
 		{
-			return await _planeTicketRepository.PlaneTicketsCount(minPrice, maxPrice);
+			return await _planeTicketRepository.PlaneTicketsCount(cancellationToken, minPrice, maxPrice);
 		}
 
 	}

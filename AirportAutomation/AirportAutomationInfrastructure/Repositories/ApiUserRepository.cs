@@ -14,12 +14,12 @@ namespace AirportAutomation.Infrastructure.Repositories
 			_context = context ?? throw new ArgumentNullException(nameof(context));
 		}
 
-		public async Task<IList<ApiUserEntity>> GetApiUsers(int page, int pageSize)
+		public async Task<IList<ApiUserEntity>> GetApiUsers(CancellationToken cancellationToken, int page, int pageSize)
 		{
 			return await _context.ApiUser
 				.OrderBy(c => c.ApiUserId)
 				.AsNoTracking()
-				.ToListAsync();
+				.ToListAsync(cancellationToken);
 		}
 
 		public async Task<ApiUserEntity?> GetApiUser(int id)
@@ -27,7 +27,7 @@ namespace AirportAutomation.Infrastructure.Repositories
 			return await _context.ApiUser.FindAsync(id);
 		}
 
-		public async Task<IList<ApiUserEntity?>> GetApiUsersByRole(int page, int pageSize, string role)
+		public async Task<IList<ApiUserEntity?>> GetApiUsersByRole(CancellationToken cancellationToken, int page, int pageSize, string role)
 		{
 			return await _context.ApiUser
 				.Where(a => a.Roles == role)
@@ -35,7 +35,7 @@ namespace AirportAutomation.Infrastructure.Repositories
 				.Skip(pageSize * (page - 1))
 				.Take(pageSize)
 				.AsNoTracking()
-				.ToListAsync();
+				.ToListAsync(cancellationToken);
 		}
 
 		public async Task PutApiUser(ApiUserEntity apiUser)
@@ -57,14 +57,14 @@ namespace AirportAutomation.Infrastructure.Repositories
 			return await _context.ApiUser.AsNoTracking().AnyAsync(e => e.ApiUserId == id);
 		}
 
-		public async Task<int> ApiUsersCount(string? role = null)
+		public async Task<int> ApiUsersCount(CancellationToken cancellationToken, string? role = null)
 		{
 			IQueryable<ApiUserEntity> query = _context.ApiUser.AsNoTracking();
 			if (!string.IsNullOrEmpty(role))
 			{
 				query = query.Where(a => a.Roles.Contains(role));
 			}
-			return await query.CountAsync().ConfigureAwait(false);
+			return await query.CountAsync(cancellationToken).ConfigureAwait(false);
 		}
 	}
 }

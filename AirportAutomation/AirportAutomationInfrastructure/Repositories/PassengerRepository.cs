@@ -15,22 +15,22 @@ namespace AirportAutomation.Infrastructure.Repositories
 			_context = context ?? throw new ArgumentNullException(nameof(context));
 		}
 
-		public async Task<IList<PassengerEntity>> GetAllPassengers()
+		public async Task<IList<PassengerEntity>> GetAllPassengers(CancellationToken cancellationToken)
 		{
 			return await _context.Passenger
 				.OrderBy(c => c.Id)
 				.AsNoTracking()
-				.ToListAsync();
+				.ToListAsync(cancellationToken);
 		}
 
-		public async Task<IList<PassengerEntity>> GetPassengers(int page, int pageSize)
+		public async Task<IList<PassengerEntity>> GetPassengers(CancellationToken cancellationToken, int page, int pageSize)
 		{
 			return await _context.Passenger
 				.OrderBy(c => c.Id)
 				.Skip(pageSize * (page - 1))
 				.Take(pageSize)
 				.AsNoTracking()
-				.ToListAsync();
+				.ToListAsync(cancellationToken);
 		}
 
 		public async Task<PassengerEntity?> GetPassenger(int id)
@@ -38,7 +38,7 @@ namespace AirportAutomation.Infrastructure.Repositories
 			return await _context.Passenger.FindAsync(id);
 		}
 
-		public async Task<IList<PassengerEntity?>> GetPassengersByName(int page, int pageSize, string firstName = null, string lastName = null)
+		public async Task<IList<PassengerEntity?>> GetPassengersByName(CancellationToken cancellationToken, int page, int pageSize, string firstName = null, string lastName = null)
 		{
 			IQueryable<PassengerEntity> query = _context.Passenger.AsNoTracking();
 
@@ -54,7 +54,7 @@ namespace AirportAutomation.Infrastructure.Repositories
 			return await query.OrderBy(c => c.Id)
 								.Skip(pageSize * (page - 1))
 								.Take(pageSize)
-								.ToListAsync()
+								.ToListAsync(cancellationToken)
 								.ConfigureAwait(false);
 		}
 
@@ -97,7 +97,7 @@ namespace AirportAutomation.Infrastructure.Repositories
 			return (_context.Passenger?.Any(e => e.Id == id)).GetValueOrDefault();
 		}
 
-		public async Task<int> PassengersCount(string firstName = null, string lastName = null)
+		public async Task<int> PassengersCount(CancellationToken cancellationToken, string firstName = null, string lastName = null)
 		{
 			IQueryable<PassengerEntity> query = _context.Passenger;
 
@@ -109,7 +109,7 @@ namespace AirportAutomation.Infrastructure.Repositories
 			{
 				query = query.Where(p => p.LastName.Contains(lastName));
 			}
-			return await query.CountAsync().ConfigureAwait(false);
+			return await query.CountAsync(cancellationToken).ConfigureAwait(false);
 		}
 
 	}

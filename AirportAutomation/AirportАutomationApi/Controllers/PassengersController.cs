@@ -61,6 +61,7 @@ namespace AirportАutomation.Api.Controllers
 		/// <summary>
 		/// Endpoint for retrieving a paginated list of passengers.
 		/// </summary>
+		/// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
 		/// <param name="page">The page number for pagination (optional).</param>
 		/// <param name="pageSize">The number of items per page (optional).</param>
 		/// <returns>A paginated list of passengers.</returns>
@@ -73,20 +74,23 @@ namespace AirportАutomation.Api.Controllers
 		[ProducesResponseType(204)]
 		[ProducesResponseType(400)]
 		[ProducesResponseType(401)]
-		public async Task<ActionResult<PagedResponse<PassengerDto>>> GetPassengers([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
+		public async Task<ActionResult<PagedResponse<PassengerDto>>> GetPassengers(
+			CancellationToken cancellationToken,
+			[FromQuery] int page = 1,
+			[FromQuery] int pageSize = 10)
 		{
 			var (isValid, correctedPageSize, result) = _paginationValidationService.ValidatePaginationParameters(page, pageSize, maxPageSize);
 			if (!isValid)
 			{
 				return result;
 			}
-			var passengers = await _passengerService.GetPassengers(page, correctedPageSize);
+			var passengers = await _passengerService.GetPassengers(cancellationToken, page, correctedPageSize);
 			if (passengers is null || !passengers.Any())
 			{
 				_logger.LogInformation("Passengers not found.");
 				return NoContent();
 			}
-			var totalItems = await _passengerService.PassengersCount();
+			var totalItems = await _passengerService.PassengersCount(cancellationToken);
 			var data = _mapper.Map<IEnumerable<PassengerDto>>(passengers);
 			var response = new PagedResponse<PassengerDto>(data, page, correctedPageSize, totalItems);
 			return Ok(response);
@@ -126,6 +130,7 @@ namespace AirportАutomation.Api.Controllers
 		/// <summary>
 		/// Endpoint for retrieving a paginated list of passengers containing the specified name.
 		/// </summary>
+		/// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
 		/// <param name="firstName">The first name to search for.</param>
 		/// <param name="lastName">The last name to search for.</param>
 		/// <param name="page">The page number for pagination (optional).</param>
@@ -141,6 +146,7 @@ namespace AirportАutomation.Api.Controllers
 		[ProducesResponseType(404)]
 		[ProducesResponseType(401)]
 		public async Task<ActionResult<PagedResponse<PassengerDto>>> GetPassengersByName(
+			CancellationToken cancellationToken,
 			[FromQuery] string? firstName = null,
 			[FromQuery] string? lastName = null,
 			[FromQuery] int page = 1,
@@ -156,13 +162,13 @@ namespace AirportАutomation.Api.Controllers
 			{
 				return result;
 			}
-			var passengers = await _passengerService.GetPassengersByName(page, correctedPageSize, firstName, lastName);
+			var passengers = await _passengerService.GetPassengersByName(cancellationToken, page, correctedPageSize, firstName, lastName);
 			if (passengers == null || passengers.Count == 0)
 			{
 				_logger.LogInformation("Passengers not found.");
 				return NotFound();
 			}
-			var totalItems = await _passengerService.PassengersCount(firstName, lastName);
+			var totalItems = await _passengerService.PassengersCount(cancellationToken, firstName, lastName);
 			var data = _mapper.Map<IEnumerable<PassengerDto>>(passengers);
 			var response = new PagedResponse<PassengerDto>(data, page, correctedPageSize, totalItems);
 			return Ok(response);
@@ -321,6 +327,7 @@ namespace AirportАutomation.Api.Controllers
 		/// <summary>
 		/// Endpoint for exporting passenger data to PDF.
 		/// </summary>
+		/// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
 		/// <param name="page">The page number for pagination (optional, default is 1).</param>
 		/// <param name="pageSize">The page size for pagination (optional, default is 10).</param>
 		/// <param name="getAll">Flag indicating whether to retrieve all data (optional, default is false).</param>
@@ -338,6 +345,7 @@ namespace AirportАutomation.Api.Controllers
 		[ProducesResponseType(401)]
 		[ProducesResponseType(403)]
 		public async Task<ActionResult> ExportToPdf(
+			CancellationToken cancellationToken,
 			[FromQuery] int page = 1,
 			[FromQuery] int pageSize = 10,
 			[FromQuery] bool getAll = false,
@@ -347,7 +355,7 @@ namespace AirportАutomation.Api.Controllers
 			IList<PassengerEntity> passengers;
 			if (getAll)
 			{
-				passengers = await _passengerService.GetAllPassengers();
+				passengers = await _passengerService.GetAllPassengers(cancellationToken);
 			}
 			else
 			{
@@ -358,11 +366,11 @@ namespace AirportАutomation.Api.Controllers
 				}
 				if (string.IsNullOrEmpty(firstName) && string.IsNullOrEmpty(lastName))
 				{
-					passengers = await _passengerService.GetPassengers(page, correctedPageSize);
+					passengers = await _passengerService.GetPassengers(cancellationToken, page, correctedPageSize);
 				}
 				else
 				{
-					passengers = await _passengerService.GetPassengersByName(page, correctedPageSize, firstName, lastName);
+					passengers = await _passengerService.GetPassengersByName(cancellationToken, page, correctedPageSize, firstName, lastName);
 				}
 			}
 			if (passengers is null || !passengers.Any())

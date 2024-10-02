@@ -14,14 +14,14 @@ namespace AirportAutomation.Infrastructure.Repositories
 			_context = context ?? throw new ArgumentNullException(nameof(context));
 		}
 
-		public async Task<IList<TravelClassEntity>> GetTravelClasses(int page, int pageSize)
+		public async Task<IList<TravelClassEntity>> GetTravelClasses(CancellationToken cancellationToken, int page, int pageSize)
 		{
 			return await _context.TravelClass
 				.OrderBy(c => c.Id)
 				.Skip(pageSize * (page - 1))
 				.Take(pageSize)
 				.AsNoTracking()
-				.ToListAsync();
+				.ToListAsync(cancellationToken);
 		}
 
 		public async Task<TravelClassEntity?> GetTravelClass(int id)
@@ -34,9 +34,9 @@ namespace AirportAutomation.Infrastructure.Repositories
 			return (_context.TravelClass?.Any(e => e.Id == id)).GetValueOrDefault();
 		}
 
-		public async Task<int> TravelClassesCount()
+		public async Task<int> TravelClassesCount(CancellationToken cancellationToken)
 		{
-			return await _context.TravelClass.CountAsync();
+			return await _context.TravelClass.CountAsync(cancellationToken);
 		}
 
 	}

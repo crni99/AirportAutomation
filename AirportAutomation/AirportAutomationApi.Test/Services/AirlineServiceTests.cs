@@ -20,17 +20,19 @@ namespace AirportAutomationApi.Test.Services
 		[Fact]
 		public async Task GetAllAirlines_Should_Call_Repository_GetAllAirlines()
 		{
-			await _service.GetAllAirlines();
+			var cancellationToken = new CancellationToken();
+			await _service.GetAllAirlines(cancellationToken);
 
-			_repositoryMock.Verify(repo => repo.GetAllAirlines(), Times.Once);
+			_repositoryMock.Verify(repo => repo.GetAllAirlines(cancellationToken), Times.Once);
 		}
 
 		[Fact]
 		public async Task GetAirlines_Should_Call_Repository_GetAirlines()
 		{
-			await _service.GetAirlines(1, 10);
+			var cancellationToken = new CancellationToken();
+			await _service.GetAirlines(cancellationToken, 1, 10);
 
-			_repositoryMock.Verify(repo => repo.GetAirlines(1, 10), Times.Once);
+			_repositoryMock.Verify(repo => repo.GetAirlines(cancellationToken, 1, 10), Times.Once);
 		}
 
 		[Fact]
@@ -44,9 +46,10 @@ namespace AirportAutomationApi.Test.Services
 		[Fact]
 		public async Task GetAirlinesByName_Should_Call_Repository_GetAirlinesByName()
 		{
-			await _service.GetAirlinesByName(1, 10, "Sample Airline");
+			var cancellationToken = new CancellationToken();
+			await _service.GetAirlinesByName(cancellationToken, 1, 10, "Sample Airline");
 
-			_repositoryMock.Verify(repo => repo.GetAirlinesByName(1, 10, "Sample Airline"), Times.Once);
+			_repositoryMock.Verify(repo => repo.GetAirlinesByName(cancellationToken, 1, 10, "Sample Airline"), Times.Once);
 		}
 
 		[Fact]
@@ -99,10 +102,11 @@ namespace AirportAutomationApi.Test.Services
 		[Fact]
 		public async Task AirlinesCount_ShouldReturnCorrectCount()
 		{
+			var cancellationToken = new CancellationToken();
 			var expectedCount = 5;
-			_repositoryMock.Setup(repo => repo.AirlinesCount(null)).ReturnsAsync(expectedCount);
+			_repositoryMock.Setup(repo => repo.AirlinesCount(cancellationToken, null)).ReturnsAsync(expectedCount);
 
-			var count = await _service.AirlinesCount();
+			var count = await _service.AirlinesCount(cancellationToken);
 
 			Assert.Equal(expectedCount, count);
 		}

@@ -15,22 +15,22 @@ namespace AirportAutomation.Infrastructure.Repositories
 			_context = context ?? throw new ArgumentNullException(nameof(context));
 		}
 
-		public async Task<IList<PilotEntity>> GetAllPilots()
+		public async Task<IList<PilotEntity>> GetAllPilots(CancellationToken cancellationToken)
 		{
 			return await _context.Pilot
 				.OrderBy(c => c.Id)
 				.AsNoTracking()
-				.ToListAsync();
+				.ToListAsync(cancellationToken);
 		}
 
-		public async Task<IList<PilotEntity>> GetPilots(int page, int pageSize)
+		public async Task<IList<PilotEntity>> GetPilots(CancellationToken cancellationToken, int page, int pageSize)
 		{
 			return await _context.Pilot
 				.OrderBy(c => c.Id)
 				.Skip(pageSize * (page - 1))
 				.Take(pageSize)
 				.AsNoTracking()
-				.ToListAsync();
+				.ToListAsync(cancellationToken);
 		}
 
 		public async Task<PilotEntity?> GetPilot(int id)
@@ -38,7 +38,7 @@ namespace AirportAutomation.Infrastructure.Repositories
 			return await _context.Pilot.FindAsync(id);
 		}
 
-		public async Task<IList<PilotEntity?>> GetPilotsByName(int page, int pageSize, string firstName = null, string lastName = null)
+		public async Task<IList<PilotEntity?>> GetPilotsByName(CancellationToken cancellationToken, int page, int pageSize, string firstName = null, string lastName = null)
 		{
 			IQueryable<PilotEntity> query = _context.Pilot.AsNoTracking();
 
@@ -54,7 +54,7 @@ namespace AirportAutomation.Infrastructure.Repositories
 			return await query.OrderBy(c => c.Id)
 								.Skip(pageSize * (page - 1))
 								.Take(pageSize)
-								.ToListAsync()
+								.ToListAsync(cancellationToken)
 								.ConfigureAwait(false);
 		}
 
@@ -97,7 +97,7 @@ namespace AirportAutomation.Infrastructure.Repositories
 			return (_context.Pilot?.Any(e => e.Id == id)).GetValueOrDefault();
 		}
 
-		public async Task<int> PilotsCount(string firstName = null, string lastName = null)
+		public async Task<int> PilotsCount(CancellationToken cancellationToken, string firstName = null, string lastName = null)
 		{
 			IQueryable<PilotEntity> query = _context.Pilot;
 
@@ -109,7 +109,7 @@ namespace AirportAutomation.Infrastructure.Repositories
 			{
 				query = query.Where(p => p.LastName.Contains(lastName));
 			}
-			return await query.CountAsync().ConfigureAwait(false);
+			return await query.CountAsync(cancellationToken).ConfigureAwait(false);
 		}
 	}
 }

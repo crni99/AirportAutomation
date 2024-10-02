@@ -20,17 +20,19 @@ namespace AirportAutomationApi.Test.Services
 		[Fact]
 		public async Task GetAllDestinations_Should_Call_Repository_GetAllDestinations()
 		{
-			await _service.GetAllDestinations();
+			var cancellationToken = new CancellationToken();
+			await _service.GetAllDestinations(cancellationToken);
 
-			_repositoryMock.Verify(repo => repo.GetAllDestinations(), Times.Once);
+			_repositoryMock.Verify(repo => repo.GetAllDestinations(cancellationToken), Times.Once);
 		}
 
 		[Fact]
 		public async Task GetDestinations_Should_Call_Repository_GetDestinations()
 		{
-			await _service.GetDestinations(1, 10);
+			var cancellationToken = new CancellationToken();
+			await _service.GetDestinations(cancellationToken, 1, 10);
 
-			_repositoryMock.Verify(repo => repo.GetDestinations(1, 10), Times.Once);
+			_repositoryMock.Verify(repo => repo.GetDestinations(cancellationToken, 1, 10), Times.Once);
 		}
 
 		[Fact]
@@ -44,12 +46,13 @@ namespace AirportAutomationApi.Test.Services
 		[Fact]
 		public async Task GetDestinationsByCityOrAirport_Should_Call_Repository_GetDestinationsByCityOrAirport()
 		{
+			var cancellationToken = new CancellationToken();
 			var city = "Belgrade";
 			var airport = "Nikola Tesla";
 
-			await _service.GetDestinationsByCityOrAirport(1, 10, city, airport);
+			await _service.GetDestinationsByCityOrAirport(cancellationToken, 1, 10, city, airport);
 
-			_repositoryMock.Verify(repo => repo.GetDestinationsByCityOrAirport(1, 10, city, airport), Times.Once);
+			_repositoryMock.Verify(repo => repo.GetDestinationsByCityOrAirport(cancellationToken, 1, 10, city, airport), Times.Once);
 		}
 
 		[Fact]
@@ -103,10 +106,11 @@ namespace AirportAutomationApi.Test.Services
 		[Fact]
 		public async Task DestinationsCount_ShouldReturnCorrectCount()
 		{
+			var cancellationToken = new CancellationToken();
 			var expectedCount = 5;
-			_repositoryMock.Setup(repo => repo.DestinationsCount(null, null)).ReturnsAsync(expectedCount);
+			_repositoryMock.Setup(repo => repo.DestinationsCount(cancellationToken, null, null)).ReturnsAsync(expectedCount);
 
-			int count = await _service.DestinationsCount();
+			int count = await _service.DestinationsCount(cancellationToken);
 
 			Assert.Equal(expectedCount, count);
 		}

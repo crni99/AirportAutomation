@@ -14,14 +14,14 @@ namespace AirportAutomation.Application.Services
 			_destinationRepository = destinationRepository;
 		}
 
-		public async Task<IList<DestinationEntity>> GetAllDestinations()
+		public async Task<IList<DestinationEntity>> GetAllDestinations(CancellationToken cancellationToken)
 		{
-			return await _destinationRepository.GetAllDestinations();
+			return await _destinationRepository.GetAllDestinations(cancellationToken);
 		}
 
-		public async Task<IList<DestinationEntity>> GetDestinations(int page, int pageSize)
+		public async Task<IList<DestinationEntity>> GetDestinations(CancellationToken cancellationToken, int page, int pageSize)
 		{
-			return await _destinationRepository.GetDestinations(page, pageSize);
+			return await _destinationRepository.GetDestinations(cancellationToken, page, pageSize);
 		}
 
 		public async Task<DestinationEntity?> GetDestination(int id)
@@ -29,9 +29,9 @@ namespace AirportAutomation.Application.Services
 			return await _destinationRepository.GetDestination(id);
 		}
 
-		public async Task<IList<DestinationEntity?>> GetDestinationsByCityOrAirport(int page, int pageSize, string city, string airport)
+		public async Task<IList<DestinationEntity?>> GetDestinationsByCityOrAirport(CancellationToken cancellationToken, int page, int pageSize, string city, string airport)
 		{
-			return await _destinationRepository.GetDestinationsByCityOrAirport(page, pageSize, city, airport);
+			return await _destinationRepository.GetDestinationsByCityOrAirport(cancellationToken, page, pageSize, city, airport);
 		}
 
 		public async Task<DestinationEntity> PostDestination(DestinationEntity destination)
@@ -58,9 +58,9 @@ namespace AirportAutomation.Application.Services
 		{
 			return await _destinationRepository.DestinationExists(id);
 		}
-		public async Task<int> DestinationsCount(string city = null, string airport = null)
+		public async Task<int> DestinationsCount(CancellationToken cancellationToken, string city = null, string airport = null)
 		{
-			return await _destinationRepository.DestinationsCount(city, airport);
+			return await _destinationRepository.DestinationsCount(cancellationToken, city, airport);
 		}
 	}
 }

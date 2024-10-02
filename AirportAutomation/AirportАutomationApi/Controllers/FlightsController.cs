@@ -61,6 +61,7 @@ namespace AirportАutomation.Api.Controllers
 		/// <summary>
 		/// Endpoint for retrieving a paginated list of flights.
 		/// </summary>
+		/// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
 		/// <param name="page">The page number for pagination (optional).</param>
 		/// <param name="pageSize">The number of items per page (optional).</param>
 		/// <returns>A paginated list of flights.</returns>
@@ -73,20 +74,23 @@ namespace AirportАutomation.Api.Controllers
 		[ProducesResponseType(204)]
 		[ProducesResponseType(400)]
 		[ProducesResponseType(401)]
-		public async Task<ActionResult<PagedResponse<FlightDto>>> GetFlights([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
+		public async Task<ActionResult<PagedResponse<FlightDto>>> GetFlights(
+			CancellationToken cancellationToken,
+			[FromQuery] int page = 1,
+			[FromQuery] int pageSize = 10)
 		{
 			var (isValid, correctedPageSize, result) = _paginationValidationService.ValidatePaginationParameters(page, pageSize, maxPageSize);
 			if (!isValid)
 			{
 				return result;
 			}
-			var flights = await _flightService.GetFlights(page, correctedPageSize);
+			var flights = await _flightService.GetFlights(cancellationToken, page, correctedPageSize);
 			if (flights is null || !flights.Any())
 			{
 				_logger.LogInformation("Flights not found.");
 				return NoContent();
 			}
-			var totalItems = await _flightService.FlightsCount();
+			var totalItems = await _flightService.FlightsCount(cancellationToken);
 			var data = _mapper.Map<IEnumerable<FlightDto>>(flights);
 			var response = new PagedResponse<FlightDto>(data, page, correctedPageSize, totalItems);
 			return Ok(response);
@@ -126,6 +130,7 @@ namespace AirportАutomation.Api.Controllers
 		/// <summary>
 		/// Endpoint for retrieving a paginated list of flights containing the specified name.
 		/// </summary>
+		/// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
 		/// <param name="startDate">The start date for the search.</param>
 		/// <param name = "endDate" > The end date for the search.</param>
 		/// <param name="page">The page number for pagination (optional).</param>
@@ -141,6 +146,7 @@ namespace AirportАutomation.Api.Controllers
 		[ProducesResponseType(404)]
 		[ProducesResponseType(401)]
 		public async Task<ActionResult<PagedResponse<FlightDto>>> GetFlightsBetweenDates(
+			CancellationToken cancellationToken,
 			[FromQuery] DateOnly? startDate = null,
 			[FromQuery] DateOnly? endDate = null,
 			[FromQuery] int page = 1,
@@ -161,13 +167,13 @@ namespace AirportАutomation.Api.Controllers
 				_logger.LogInformation("Invalid input. The start and end dates must be valid dates.");
 				return BadRequest("Invalid input. The start and end dates must be valid dates.");
 			}
-			var flights = await _flightService.GetFlightsBetweenDates(page, correctedPageSize, startDate, endDate);
+			var flights = await _flightService.GetFlightsBetweenDates(cancellationToken, page, correctedPageSize, startDate, endDate);
 			if (flights == null || flights.Count == 0)
 			{
 				_logger.LogInformation("Flights not found.");
 				return NotFound();
 			}
-			var totalItems = await _flightService.FlightsCount(startDate, endDate);
+			var totalItems = await _flightService.FlightsCount(cancellationToken, startDate, endDate);
 			var data = _mapper.Map<IEnumerable<FlightDto>>(flights);
 			var response = new PagedResponse<FlightDto>(data, page, correctedPageSize, totalItems);
 			return Ok(response);
@@ -326,6 +332,7 @@ namespace AirportАutomation.Api.Controllers
 		/// <summary>
 		/// Endpoint for exporting flight data to PDF.
 		/// </summary>
+		/// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
 		/// <param name="page">The page number for pagination (optional, default is 1).</param>
 		/// <param name="pageSize">The page size for pagination (optional, default is 10).</param>
 		/// <param name="getAll">Flag indicating whether to retrieve all data (optional, default is false).</param>
@@ -343,6 +350,7 @@ namespace AirportАutomation.Api.Controllers
 		[ProducesResponseType(401)]
 		[ProducesResponseType(403)]
 		public async Task<ActionResult> ExportToPdf(
+			CancellationToken cancellationToken,
 			[FromQuery] int page = 1,
 			[FromQuery] int pageSize = 10,
 			[FromQuery] bool getAll = false,
@@ -352,7 +360,7 @@ namespace AirportАutomation.Api.Controllers
 			IList<FlightEntity> flights = new List<FlightEntity>();
 			if (getAll)
 			{
-				flights = await _flightService.GetAllFlights();
+				flights = await _flightService.GetAllFlights(cancellationToken);
 			}
 			else
 			{
@@ -365,12 +373,12 @@ namespace AirportАutomation.Api.Controllers
 				{
 					if (_inputValidationService.IsValidDateOnly(startDate) && _inputValidationService.IsValidDateOnly(endDate))
 					{
-						flights = await _flightService.GetFlightsBetweenDates(page, correctedPageSize, startDate, endDate);
+						flights = await _flightService.GetFlightsBetweenDates(cancellationToken, page, correctedPageSize, startDate, endDate);
 					}
 				}
 				else
 				{
-					flights = await _flightService.GetFlights(page, correctedPageSize);
+					flights = await _flightService.GetFlights(cancellationToken, page, correctedPageSize);
 				}
 			}
 			if (flights is null || !flights.Any())

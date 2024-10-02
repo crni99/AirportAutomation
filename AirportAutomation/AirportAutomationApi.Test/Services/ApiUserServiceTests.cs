@@ -1,7 +1,6 @@
 ﻿using AirportAutomation.Application.Services;
 using AirportAutomation.Core.Entities;
 using AirportAutomation.Core.Interfaces.IRepositories;
-using Microsoft.AspNetCore.JsonPatch;
 using Moq;
 
 namespace AirportAutomationApi.Test.Services
@@ -20,9 +19,10 @@ namespace AirportAutomationApi.Test.Services
 		[Fact]
 		public async Task GetApiUsers_Should_Call_Repository_GetApiUsers()
 		{
-			await _service.GetApiUsers(1, 10);
+			var cancellationToken = new CancellationToken();
+			await _service.GetApiUsers(cancellationToken, 1, 10);
 
-			_repositoryMock.Verify(repo => repo.GetApiUsers(1, 10), Times.Once);
+			_repositoryMock.Verify(repo => repo.GetApiUsers(cancellationToken, 1, 10), Times.Once);
 		}
 
 		[Fact]
@@ -36,9 +36,10 @@ namespace AirportAutomationApi.Test.Services
 		[Fact]
 		public async Task GetApiUsersByRole_Should_Call_Repository_GetApiUsersByRole()
 		{
-			await _service.GetApiUsersByRole(1, 10, "user");
+			var cancellationToken = new CancellationToken();
+			await _service.GetApiUsersByRole(cancellationToken, 1, 10, "user");
 
-			_repositoryMock.Verify(repo => repo.GetApiUsersByRole(1, 10, "user"), Times.Once);
+			_repositoryMock.Verify(repo => repo.GetApiUsersByRole(cancellationToken, 1, 10, "user"), Times.Once);
 		}
 
 		[Fact]
@@ -71,10 +72,11 @@ namespace AirportAutomationApi.Test.Services
 		[Fact]
 		public async Task ApiUsersCount_ShouldReturnCorrectCount()
 		{
+			var cancellationToken = new CancellationToken();
 			var expectedCount = 5;
-			_repositoryMock.Setup(repo => repo.ApiUsersCount(null)).ReturnsAsync(expectedCount);
+			_repositoryMock.Setup(repo => repo.ApiUsersCount(cancellationToken, null)).ReturnsAsync(expectedCount);
 
-			var count = await _service.ApiUsersCount();
+			var count = await _service.ApiUsersCount(cancellationToken);
 
 			Assert.Equal(expectedCount, count);
 		}

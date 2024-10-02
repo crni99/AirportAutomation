@@ -61,6 +61,7 @@ namespace AirportАutomation.Api.Controllers
 		/// <summary>
 		/// Endpoint for retrieving a paginated list of destinations.
 		/// </summary>
+		/// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
 		/// <param name="page">The page number for pagination (optional).</param>
 		/// <param name="pageSize">The number of items per page (optional).</param>
 		/// <returns>A paginated list of destinations.</returns>
@@ -73,20 +74,23 @@ namespace AirportАutomation.Api.Controllers
 		[ProducesResponseType(204)]
 		[ProducesResponseType(400)]
 		[ProducesResponseType(401)]
-		public async Task<ActionResult<PagedResponse<DestinationDto>>> GetDestinations([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
+		public async Task<ActionResult<PagedResponse<DestinationDto>>> GetDestinations(
+			CancellationToken cancellationToken,
+			[FromQuery] int page = 1,
+			[FromQuery] int pageSize = 10)
 		{
 			var (isValid, correctedPageSize, result) = _paginationValidationService.ValidatePaginationParameters(page, pageSize, maxPageSize);
 			if (!isValid)
 			{
 				return result;
 			}
-			var destinations = await _destinationService.GetDestinations(page, correctedPageSize);
+			var destinations = await _destinationService.GetDestinations(cancellationToken, page, correctedPageSize);
 			if (destinations is null || !destinations.Any())
 			{
 				_logger.LogInformation("Destinations not found.");
 				return NoContent();
 			}
-			var totalItems = await _destinationService.DestinationsCount();
+			var totalItems = await _destinationService.DestinationsCount(cancellationToken);
 			var data = _mapper.Map<IEnumerable<DestinationDto>>(destinations);
 			var response = new PagedResponse<DestinationDto>(data, page, correctedPageSize, totalItems);
 			return Ok(response);
@@ -126,6 +130,7 @@ namespace AirportАutomation.Api.Controllers
 		/// <summary>
 		/// Endpoint for retrieving a paginated list of destinations containing the specified name.
 		/// </summary>
+		/// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
 		/// <param name="city">The city name to search for.</param>
 		/// <param name="airport">The airport name to search for.</param>
 		/// <param name="page">The page number for pagination (optional, defaults to 1).</param>
@@ -141,6 +146,7 @@ namespace AirportАutomation.Api.Controllers
 		[ProducesResponseType(404)]
 		[ProducesResponseType(401)]
 		public async Task<ActionResult<PagedResponse<DestinationDto>>> GetDestinationsByCityOrAirport(
+			CancellationToken cancellationToken,
 			[FromQuery] string? city = null,
 			[FromQuery] string? airport = null,
 			[FromQuery] int page = 1,
@@ -156,13 +162,13 @@ namespace AirportАutomation.Api.Controllers
 			{
 				return result;
 			}
-			var destinations = await _destinationService.GetDestinationsByCityOrAirport(page, correctedPageSize, city, airport);
+			var destinations = await _destinationService.GetDestinationsByCityOrAirport(cancellationToken, page, correctedPageSize, city, airport);
 			if (destinations == null || destinations.Count == 0)
 			{
 				_logger.LogInformation("Destinations not found.");
 				return NotFound();
 			}
-			var totalItems = await _destinationService.DestinationsCount(city, airport);
+			var totalItems = await _destinationService.DestinationsCount(cancellationToken, city, airport);
 			var data = _mapper.Map<IEnumerable<DestinationDto>>(destinations);
 			var response = new PagedResponse<DestinationDto>(data, page, correctedPageSize, totalItems);
 			return Ok(response);
@@ -321,6 +327,7 @@ namespace AirportАutomation.Api.Controllers
 		/// <summary>
 		/// Endpoint for exporting destination data to PDF.
 		/// </summary>
+		/// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
 		/// <param name="page">The page number for pagination (optional, default is 1).</param>
 		/// <param name="pageSize">The page size for pagination (optional, default is 10).</param>
 		/// <param name="getAll">Flag indicating whether to retrieve all data (optional, default is false).</param>
@@ -338,6 +345,7 @@ namespace AirportАutomation.Api.Controllers
 		[ProducesResponseType(401)]
 		[ProducesResponseType(403)]
 		public async Task<ActionResult> ExportToPdf(
+			CancellationToken cancellationToken,
 			[FromQuery] int page = 1,
 			[FromQuery] int pageSize = 10,
 			[FromQuery] bool getAll = false,
@@ -347,7 +355,7 @@ namespace AirportАutomation.Api.Controllers
 			IList<DestinationEntity> destinations;
 			if (getAll)
 			{
-				destinations = await _destinationService.GetAllDestinations();
+				destinations = await _destinationService.GetAllDestinations(cancellationToken);
 			}
 			else
 			{
@@ -358,11 +366,11 @@ namespace AirportАutomation.Api.Controllers
 				}
 				if (string.IsNullOrEmpty(city) && string.IsNullOrEmpty(airport))
 				{
-					destinations = await _destinationService.GetDestinations(page, correctedPageSize);
+					destinations = await _destinationService.GetDestinations(cancellationToken, page, correctedPageSize);
 				}
 				else
 				{
-					destinations = await _destinationService.GetDestinationsByCityOrAirport(page, correctedPageSize, city, airport);
+					destinations = await _destinationService.GetDestinationsByCityOrAirport(cancellationToken, page, correctedPageSize, city, airport);
 				}
 			}
 			if (destinations is null || !destinations.Any())

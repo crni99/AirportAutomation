@@ -15,22 +15,30 @@ namespace AirportAutomation.Infrastructure.Repositories
 			_context = context ?? throw new ArgumentNullException(nameof(context));
 		}
 
-		public async Task<IList<AirlineEntity>> GetAllAirlines()
+		public async Task<IList<AirlineEntity>> GetAllAirlines(CancellationToken cancellationToken)
 		{
 			return await _context.Airline
 				.OrderBy(c => c.Id)
 				.AsNoTracking()
-				.ToListAsync();
+				.ToListAsync(cancellationToken);
 		}
 
-		public async Task<IList<AirlineEntity>> GetAirlines(int page, int pageSize)
+		public async Task<IList<AirlineEntity>> GetAirlines(CancellationToken cancellationToken, int page, int pageSize)
 		{
-			return await _context.Airline
-				.OrderBy(c => c.Id)
-				.Skip(pageSize * (page - 1))
-				.Take(pageSize)
-				.AsNoTracking()
-				.ToListAsync();
+			try
+			{
+				return await _context.Airline
+					.OrderBy(c => c.Id)
+					.Skip(pageSize * (page - 1))
+					.Take(pageSize)
+					.AsNoTracking()
+					.ToListAsync(cancellationToken);
+			}
+			catch (Exception ex)
+			{
+				Console.WriteLine(ex);
+				return null;
+			}
 		}
 
 		public async Task<AirlineEntity?> GetAirline(int id)
@@ -38,7 +46,7 @@ namespace AirportAutomation.Infrastructure.Repositories
 			return await _context.Airline.FindAsync(id);
 		}
 
-		public async Task<IList<AirlineEntity?>> GetAirlinesByName(int page, int pageSize, string name)
+		public async Task<IList<AirlineEntity?>> GetAirlinesByName(CancellationToken cancellationToken, int page, int pageSize, string name)
 		{
 			return await _context.Airline
 				.Where(a => a.Name.Contains(name))
@@ -46,7 +54,7 @@ namespace AirportAutomation.Infrastructure.Repositories
 				.Skip(pageSize * (page - 1))
 				.Take(pageSize)
 				.AsNoTracking()
-				.ToListAsync();
+				.ToListAsync(cancellationToken);
 		}
 
 		public async Task<AirlineEntity> PostAirline(AirlineEntity airline)
@@ -88,14 +96,14 @@ namespace AirportAutomation.Infrastructure.Repositories
 			return await _context.Airline.AsNoTracking().AnyAsync(e => e.Id == id);
 		}
 
-		public async Task<int> AirlinesCount(string? name = null)
+		public async Task<int> AirlinesCount(CancellationToken cancellationToken, string? name = null)
 		{
 			IQueryable<AirlineEntity> query = _context.Airline.AsNoTracking();
 			if (!string.IsNullOrEmpty(name))
 			{
 				query = query.Where(a => a.Name.Contains(name));
 			}
-			return await query.CountAsync().ConfigureAwait(false);
+			return await query.CountAsync(cancellationToken).ConfigureAwait(false);
 		}
 
 	}

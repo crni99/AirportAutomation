@@ -14,14 +14,14 @@ namespace AirportAutomation.Application.Services
 			_passengerRepository = passengerRepository;
 		}
 
-		public async Task<IList<PassengerEntity>> GetAllPassengers()
+		public async Task<IList<PassengerEntity>> GetAllPassengers(CancellationToken cancellationToken)
 		{
-			return await _passengerRepository.GetAllPassengers();
+			return await _passengerRepository.GetAllPassengers(cancellationToken);
 		}
 
-		public async Task<IList<PassengerEntity>> GetPassengers(int page, int pageSize)
+		public async Task<IList<PassengerEntity>> GetPassengers(CancellationToken cancellationToken, int page, int pageSize)
 		{
-			return await _passengerRepository.GetPassengers(page, pageSize);
+			return await _passengerRepository.GetPassengers(cancellationToken, page, pageSize);
 		}
 
 		public async Task<PassengerEntity?> GetPassenger(int id)
@@ -29,9 +29,9 @@ namespace AirportAutomation.Application.Services
 			return await _passengerRepository.GetPassenger(id);
 		}
 
-		public async Task<IList<PassengerEntity?>> GetPassengersByName(int page, int pageSize, string firstName, string lastName)
+		public async Task<IList<PassengerEntity?>> GetPassengersByName(CancellationToken cancellationToken, int page, int pageSize, string firstName, string lastName)
 		{
-			return await _passengerRepository.GetPassengersByName(page, pageSize, firstName, lastName);
+			return await _passengerRepository.GetPassengersByName(cancellationToken, page, pageSize, firstName, lastName);
 		}
 
 		public async Task<PassengerEntity> PostPassenger(PassengerEntity passenger)
@@ -59,9 +59,9 @@ namespace AirportAutomation.Application.Services
 			return await _passengerRepository.PassengerExists(id);
 		}
 
-		public async Task<int> PassengersCount(string firstName = null, string lastName = null)
+		public async Task<int> PassengersCount(CancellationToken cancellationToken, string firstName = null, string lastName = null)
 		{
-			return await _passengerRepository.PassengersCount(firstName, lastName);
+			return await _passengerRepository.PassengersCount(cancellationToken, firstName, lastName);
 		}
 	}
 }

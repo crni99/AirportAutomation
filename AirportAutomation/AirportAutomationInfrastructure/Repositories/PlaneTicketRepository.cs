@@ -15,7 +15,7 @@ namespace AirportAutomation.Infrastructure.Repositories
 			_context = context ?? throw new ArgumentNullException(nameof(context));
 		}
 
-		public async Task<IList<PlaneTicketEntity>> GetAllPlaneTickets()
+		public async Task<IList<PlaneTicketEntity>> GetAllPlaneTickets(CancellationToken cancellationToken)
 		{
 			var collection = _context.PlaneTicket
 				.Include(k => k.Passenger)
@@ -25,10 +25,10 @@ namespace AirportAutomation.Infrastructure.Repositories
 
 			return await collection
 				.OrderBy(c => c.Id)
-				.ToListAsync();
+				.ToListAsync(cancellationToken);
 		}
 
-		public async Task<IList<PlaneTicketEntity>> GetPlaneTickets(int page, int pageSize)
+		public async Task<IList<PlaneTicketEntity>> GetPlaneTickets(CancellationToken cancellationToken, int page, int pageSize)
 		{
 			var collection = _context.PlaneTicket
 				.Include(k => k.Passenger)
@@ -40,7 +40,7 @@ namespace AirportAutomation.Infrastructure.Repositories
 				.OrderBy(c => c.Id)
 				.Skip(pageSize * (page - 1))
 				.Take(pageSize)
-				.ToListAsync();
+				.ToListAsync(cancellationToken);
 		}
 
 		public async Task<PlaneTicketEntity?> GetPlaneTicket(int id)
@@ -53,7 +53,7 @@ namespace AirportAutomation.Infrastructure.Repositories
 				.FirstOrDefaultAsync(k => k.Id == id);
 		}
 
-		public async Task<IList<PlaneTicketEntity?>> GetPlaneTicketsForPrice(int page, int pageSize, int? minPrice, int? maxPrice)
+		public async Task<IList<PlaneTicketEntity?>> GetPlaneTicketsForPrice(CancellationToken cancellationToken, int page, int pageSize, int? minPrice, int? maxPrice)
 		{
 			IQueryable<PlaneTicketEntity> query = _context.PlaneTicket
 				.Include(k => k.Passenger)
@@ -73,7 +73,7 @@ namespace AirportAutomation.Infrastructure.Repositories
 			return await query.OrderBy(c => c.Id)
 								.Skip(pageSize * (page - 1))
 								.Take(pageSize)
-								.ToListAsync()
+								.ToListAsync(cancellationToken)
 								.ConfigureAwait(false);
 		}
 
@@ -111,7 +111,7 @@ namespace AirportAutomation.Infrastructure.Repositories
 			return (_context.PlaneTicket?.Any(e => e.Id == id)).GetValueOrDefault();
 		}
 
-		public async Task<int> PlaneTicketsCount(int? minPrice, int? maxPrice)
+		public async Task<int> PlaneTicketsCount(CancellationToken cancellationToken, int? minPrice, int? maxPrice)
 		{
 			IQueryable<PlaneTicketEntity> query = _context.PlaneTicket;
 
@@ -123,7 +123,7 @@ namespace AirportAutomation.Infrastructure.Repositories
 			{
 				query = query.Where(p => p.Price <= maxPrice.Value);
 			}
-			return await query.CountAsync().ConfigureAwait(false);
+			return await query.CountAsync(cancellationToken).ConfigureAwait(false);
 		}
 	}
 }

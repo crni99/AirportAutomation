@@ -18,9 +18,10 @@ namespace AirportAutomationApi.Test.Services
 		[Fact]
 		public async Task GetTravelClasses_Should_Call_Repository_GetTravelClasses()
 		{
-			await _service.GetTravelClasses(1, 10);
+			var cancellationToken = new CancellationToken();
+			await _service.GetTravelClasses(cancellationToken, 1, 10);
 
-			_repositoryMock.Verify(repo => repo.GetTravelClasses(1, 10), Times.Once);
+			_repositoryMock.Verify(repo => repo.GetTravelClasses(cancellationToken, 1, 10), Times.Once);
 		}
 
 		[Fact]
@@ -43,10 +44,11 @@ namespace AirportAutomationApi.Test.Services
 		[Fact]
 		public async Task TravelClassesCount_ShouldReturnCorrectCount()
 		{
+			var cancellationToken = new CancellationToken();
 			var expectedCount = 5;
-			_repositoryMock.Setup(repo => repo.TravelClassesCount()).ReturnsAsync(expectedCount);
+			_repositoryMock.Setup(repo => repo.TravelClassesCount(cancellationToken)).ReturnsAsync(expectedCount);
 
-			int count = await _service.TravelClassesCount();
+			int count = await _service.TravelClassesCount(cancellationToken);
 
 			Assert.Equal(expectedCount, count);
 		}

@@ -15,7 +15,7 @@ namespace AirportAutomation.Infrastructure.Repositories
 			_context = context ?? throw new ArgumentNullException(nameof(context));
 		}
 
-		public async Task<IList<FlightEntity>> GetAllFlights()
+		public async Task<IList<FlightEntity>> GetAllFlights(CancellationToken cancellationToken)
 		{
 			var collection = _context.Flight
 				.Include(l => l.Airline)
@@ -25,10 +25,10 @@ namespace AirportAutomation.Infrastructure.Repositories
 
 			return await collection
 				.OrderBy(c => c.Id)
-				.ToListAsync();
+				.ToListAsync(cancellationToken);
 		}
 
-		public async Task<IList<FlightEntity>> GetFlights(int page, int pageSize)
+		public async Task<IList<FlightEntity>> GetFlights(CancellationToken cancellationToken, int page, int pageSize)
 		{
 			var collection = _context.Flight
 				.Include(l => l.Airline)
@@ -40,7 +40,7 @@ namespace AirportAutomation.Infrastructure.Repositories
 				.OrderBy(c => c.Id)
 				.Skip(pageSize * (page - 1))
 				.Take(pageSize)
-				.ToListAsync();
+				.ToListAsync(cancellationToken);
 		}
 
 		public async Task<FlightEntity?> GetFlight(int id)
@@ -53,7 +53,7 @@ namespace AirportAutomation.Infrastructure.Repositories
 				.FirstOrDefaultAsync(l => l.Id == id);
 		}
 
-		public async Task<IList<FlightEntity?>> GetFlightsBetweenDates(int page, int pageSize, DateOnly? startDate, DateOnly? endDate)
+		public async Task<IList<FlightEntity?>> GetFlightsBetweenDates(CancellationToken cancellationToken, int page, int pageSize, DateOnly? startDate, DateOnly? endDate)
 		{
 			IQueryable<FlightEntity> query = _context.Flight
 				.Include(f => f.Airline)
@@ -72,7 +72,7 @@ namespace AirportAutomation.Infrastructure.Repositories
 			return await query.OrderBy(c => c.Id)
 					 .Skip(pageSize * (page - 1))
 					 .Take(pageSize)
-					 .ToListAsync()
+					 .ToListAsync(cancellationToken)
 					 .ConfigureAwait(false);
 		}
 
@@ -115,7 +115,7 @@ namespace AirportAutomation.Infrastructure.Repositories
 			return await _context.Flight.AsNoTracking().AnyAsync(e => e.Id == id);
 		}
 
-		public async Task<int> FlightsCount(DateOnly? startDate = null, DateOnly? endDate = null)
+		public async Task<int> FlightsCount(CancellationToken cancellationToken, DateOnly? startDate = null, DateOnly? endDate = null)
 		{
 			IQueryable<FlightEntity> query = _context.Flight.AsNoTracking();
 
@@ -128,7 +128,7 @@ namespace AirportAutomation.Infrastructure.Repositories
 			{
 				query = query.Where(f => f.DepartureDate <= endDate);
 			}
-			return await query.CountAsync().ConfigureAwait(false);
+			return await query.CountAsync(cancellationToken).ConfigureAwait(false);
 		}
 
 	}

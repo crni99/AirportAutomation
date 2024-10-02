@@ -14,14 +14,14 @@ namespace AirportAutomation.Application.Services
 			_flightRepository = flightRepository;
 		}
 
-		public async Task<IList<FlightEntity>> GetAllFlights()
+		public async Task<IList<FlightEntity>> GetAllFlights(CancellationToken cancellationToken)
 		{
-			return await _flightRepository.GetAllFlights();
+			return await _flightRepository.GetAllFlights(cancellationToken);
 		}
 
-		public async Task<IList<FlightEntity>> GetFlights(int page, int pageSize)
+		public async Task<IList<FlightEntity>> GetFlights(CancellationToken cancellationToken, int page, int pageSize)
 		{
-			return await _flightRepository.GetFlights(page, pageSize);
+			return await _flightRepository.GetFlights(cancellationToken, page, pageSize);
 		}
 
 		public async Task<FlightEntity?> GetFlight(int id)
@@ -29,9 +29,9 @@ namespace AirportAutomation.Application.Services
 			return await _flightRepository.GetFlight(id);
 		}
 
-		public async Task<IList<FlightEntity?>> GetFlightsBetweenDates(int page, int pageSize, DateOnly? startDate, DateOnly? endDate)
+		public async Task<IList<FlightEntity?>> GetFlightsBetweenDates(CancellationToken cancellationToken, int page, int pageSize, DateOnly? startDate, DateOnly? endDate)
 		{
-			return await _flightRepository.GetFlightsBetweenDates(page, pageSize, startDate, endDate);
+			return await _flightRepository.GetFlightsBetweenDates(cancellationToken, page, pageSize, startDate, endDate);
 		}
 
 		public async Task<FlightEntity> PostFlight(FlightEntity flight)
@@ -59,9 +59,9 @@ namespace AirportAutomation.Application.Services
 			return await _flightRepository.FlightExists(id);
 		}
 
-		public async Task<int> FlightsCount(DateOnly? startDate = null, DateOnly? endDate = null)
+		public async Task<int> FlightsCount(CancellationToken cancellationToken, DateOnly? startDate = null, DateOnly? endDate = null)
 		{
-			return await _flightRepository.FlightsCount(startDate, endDate);
+			return await _flightRepository.FlightsCount(cancellationToken, startDate, endDate);
 		}
 	}
 }

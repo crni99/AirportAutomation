@@ -20,17 +20,19 @@ namespace AirportAutomationApi.Test.Services
 		[Fact]
 		public async Task GetAllPassengers_Should_Call_Repository_GetAllPassengers()
 		{
-			await _service.GetAllPassengers();
+			var cancellationToken = new CancellationToken();
+			await _service.GetAllPassengers(cancellationToken);
 
-			_repositoryMock.Verify(repo => repo.GetAllPassengers(), Times.Once);
+			_repositoryMock.Verify(repo => repo.GetAllPassengers(cancellationToken), Times.Once);
 		}
 
 		[Fact]
 		public async Task GetPassengers_Should_Call_Repository_GetPassengers()
 		{
-			await _service.GetPassengers(1, 10);
+			var cancellationToken = new CancellationToken();
+			await _service.GetPassengers(cancellationToken, 1, 10);
 
-			_repositoryMock.Verify(repo => repo.GetPassengers(1, 10), Times.Once);
+			_repositoryMock.Verify(repo => repo.GetPassengers(cancellationToken, 1, 10), Times.Once);
 		}
 
 		[Fact]
@@ -44,9 +46,10 @@ namespace AirportAutomationApi.Test.Services
 		[Fact]
 		public async Task GetPassengersByName_Should_Call_Repository_GetPassengersByName()
 		{
-			await _service.GetPassengersByName(1, 10, "John", "Doe");
+			var cancellationToken = new CancellationToken();
+			await _service.GetPassengersByName(cancellationToken, 1, 10, "John", "Doe");
 
-			_repositoryMock.Verify(repo => repo.GetPassengersByName(1, 10, "John", "Doe"), Times.Once);
+			_repositoryMock.Verify(repo => repo.GetPassengersByName(cancellationToken, 1, 10, "John", "Doe"), Times.Once);
 		}
 
 		[Fact]
@@ -99,10 +102,11 @@ namespace AirportAutomationApi.Test.Services
 		[Fact]
 		public async Task PassengersCount_ShouldReturnCorrectCount()
 		{
+			var cancellationToken = new CancellationToken();
 			var expectedCount = 5;
-			_repositoryMock.Setup(repo => repo.PassengersCount(null, null)).ReturnsAsync(expectedCount);
+			_repositoryMock.Setup(repo => repo.PassengersCount(cancellationToken, null, null)).ReturnsAsync(expectedCount);
 
-			int count = await _service.PassengersCount();
+			int count = await _service.PassengersCount(cancellationToken);
 
 			Assert.Equal(expectedCount, count);
 		}

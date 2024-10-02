@@ -13,9 +13,9 @@ namespace AirportAutomation.Application.Services
 			_travelClassRepository = travelClassRepository;
 		}
 
-		public async Task<IList<TravelClassEntity>> GetTravelClasses(int page, int pageSize)
+		public async Task<IList<TravelClassEntity>> GetTravelClasses(CancellationToken cancellationToken, int page, int pageSize)
 		{
-			return await _travelClassRepository.GetTravelClasses(page, pageSize);
+			return await _travelClassRepository.GetTravelClasses(cancellationToken, page, pageSize);
 		}
 
 		public async Task<TravelClassEntity?> GetTravelClass(int id)
@@ -28,9 +28,9 @@ namespace AirportAutomation.Application.Services
 			return await _travelClassRepository.TravelClassExists(id);
 		}
 
-		public async Task<int> TravelClassesCount()
+		public async Task<int> TravelClassesCount(CancellationToken cancellationToken)
 		{
-			return await _travelClassRepository.TravelClassesCount();
+			return await _travelClassRepository.TravelClassesCount(cancellationToken);
 		}
 
 	}

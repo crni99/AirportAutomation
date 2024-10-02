@@ -14,14 +14,14 @@ namespace AirportAutomation.Application.Services
 			_pilotRepository = pilotRepository;
 		}
 
-		public async Task<IList<PilotEntity>> GetAllPilots()
+		public async Task<IList<PilotEntity>> GetAllPilots(CancellationToken cancellationToken)
 		{
-			return await _pilotRepository.GetAllPilots();
+			return await _pilotRepository.GetAllPilots(cancellationToken);
 		}
 
-		public async Task<IList<PilotEntity>> GetPilots(int page, int pageSize)
+		public async Task<IList<PilotEntity>> GetPilots(CancellationToken cancellationToken, int page, int pageSize)
 		{
-			return await _pilotRepository.GetPilots(page, pageSize);
+			return await _pilotRepository.GetPilots(cancellationToken, page, pageSize);
 		}
 
 		public async Task<PilotEntity?> GetPilot(int id)
@@ -29,9 +29,9 @@ namespace AirportAutomation.Application.Services
 			return await _pilotRepository.GetPilot(id);
 		}
 
-		public async Task<IList<PilotEntity?>> GetPilotsByName(int page, int pageSize, string firstName, string lastName)
+		public async Task<IList<PilotEntity?>> GetPilotsByName(CancellationToken cancellationToken, int page, int pageSize, string firstName, string lastName)
 		{
-			return await _pilotRepository.GetPilotsByName(page, pageSize, firstName, lastName);
+			return await _pilotRepository.GetPilotsByName(cancellationToken, page, pageSize, firstName, lastName);
 		}
 
 		public async Task<PilotEntity> PostPilot(PilotEntity pilot)
@@ -58,9 +58,9 @@ namespace AirportAutomation.Application.Services
 			return await _pilotRepository.PilotExists(id);
 		}
 
-		public async Task<int> PilotsCount(string firstName = null, string lastName = null)
+		public async Task<int> PilotsCount(CancellationToken cancellationToken, string firstName = null, string lastName = null)
 		{
-			return await _pilotRepository.PilotsCount(firstName, lastName);
+			return await _pilotRepository.PilotsCount(cancellationToken, firstName, lastName);
 		}
 	}
 }

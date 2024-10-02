@@ -14,14 +14,14 @@ namespace AirportAutomation.Application.Services
 			_airlineRepository = airlineRepository;
 		}
 
-		public async Task<IList<AirlineEntity>> GetAllAirlines()
+		public async Task<IList<AirlineEntity>> GetAllAirlines(CancellationToken cancellationToken)
 		{
-			return await _airlineRepository.GetAllAirlines();
+			return await _airlineRepository.GetAllAirlines(cancellationToken);
 		}
 
-		public async Task<IList<AirlineEntity>> GetAirlines(int page, int pageSize)
+		public async Task<IList<AirlineEntity>> GetAirlines(CancellationToken cancellationToken, int page, int pageSize)
 		{
-			return await _airlineRepository.GetAirlines(page, pageSize);
+			return await _airlineRepository.GetAirlines(cancellationToken, page, pageSize);
 		}
 
 		public async Task<AirlineEntity?> GetAirline(int id)
@@ -29,9 +29,9 @@ namespace AirportAutomation.Application.Services
 			return await _airlineRepository.GetAirline(id);
 		}
 
-		public async Task<IList<AirlineEntity?>> GetAirlinesByName(int page, int pageSize, string name)
+		public async Task<IList<AirlineEntity?>> GetAirlinesByName(CancellationToken cancellationToken, int page, int pageSize, string name)
 		{
-			return await _airlineRepository.GetAirlinesByName(page, pageSize, name);
+			return await _airlineRepository.GetAirlinesByName(cancellationToken, page, pageSize, name);
 		}
 
 		public async Task<AirlineEntity> PostAirline(AirlineEntity airline)
@@ -59,9 +59,9 @@ namespace AirportAutomation.Application.Services
 			return await _airlineRepository.AirlineExists(id);
 		}
 
-		public async Task<int> AirlinesCount(string? name = null)
+		public async Task<int> AirlinesCount(CancellationToken cancellationToken, string? name = null)
 		{
-			return await _airlineRepository.AirlinesCount(name);
+			return await _airlineRepository.AirlinesCount(cancellationToken, name);
 		}
 
 	}

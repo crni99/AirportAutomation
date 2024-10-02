@@ -14,9 +14,9 @@ namespace AirportAutomation.Application.Services
 			_apiUserManagementRepository = apiUserManagementRepository;
 		}
 
-		public async Task<IList<ApiUserEntity>> GetApiUsers(int page, int pageSize)
+		public async Task<IList<ApiUserEntity>> GetApiUsers(CancellationToken cancellationToken, int page, int pageSize)
 		{
-			return await _apiUserManagementRepository.GetApiUsers(page, pageSize);
+			return await _apiUserManagementRepository.GetApiUsers(cancellationToken, page, pageSize);
 		}
 
 		public async Task<ApiUserEntity?> GetApiUser(int id)
@@ -24,9 +24,9 @@ namespace AirportAutomation.Application.Services
 			return await _apiUserManagementRepository.GetApiUser(id);
 		}
 
-		public async Task<IList<ApiUserEntity?>> GetApiUsersByRole(int page, int pageSize, string role)
+		public async Task<IList<ApiUserEntity?>> GetApiUsersByRole(CancellationToken cancellationToken, int page, int pageSize, string role)
 		{
-			return await _apiUserManagementRepository.GetApiUsersByRole(page, pageSize, role);
+			return await _apiUserManagementRepository.GetApiUsersByRole(cancellationToken, page, pageSize, role);
 		}
 
 		public async Task PutApiUser(ApiUserEntity apiUser)
@@ -44,9 +44,9 @@ namespace AirportAutomation.Application.Services
 			return await _apiUserManagementRepository.ApiUserExists(id);
 		}
 
-		public async Task<int> ApiUsersCount(string? role = null)
+		public async Task<int> ApiUsersCount(CancellationToken cancellationToken, string? role = null)
 		{
-			return await _apiUserManagementRepository.ApiUsersCount(role);
+			return await _apiUserManagementRepository.ApiUsersCount(cancellationToken, role);
 		}
 	}
 }

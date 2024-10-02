@@ -20,17 +20,19 @@ namespace AirportAutomationApi.Test.Services
 		[Fact]
 		public async Task GetAllPlaneTickets_Should_Call_Repository_GetAllPlaneTickets()
 		{
-			await _service.GetAllPlaneTickets();
+			var cancellationToken = new CancellationToken();
+			await _service.GetAllPlaneTickets(cancellationToken);
 
-			_repositoryMock.Verify(repo => repo.GetAllPlaneTickets(), Times.Once);
+			_repositoryMock.Verify(repo => repo.GetAllPlaneTickets(cancellationToken), Times.Once);
 		}
 
 		[Fact]
 		public async Task GetPlaneTickets_Should_Call_Repository_GetPlaneTickets()
 		{
-			await _service.GetPlaneTickets(1, 10);
+			var cancellationToken = new CancellationToken();
+			await _service.GetPlaneTickets(cancellationToken, 1, 10);
 
-			_repositoryMock.Verify(repo => repo.GetPlaneTickets(1, 10), Times.Once);
+			_repositoryMock.Verify(repo => repo.GetPlaneTickets(cancellationToken, 1, 10), Times.Once);
 		}
 
 		[Fact]
@@ -44,9 +46,10 @@ namespace AirportAutomationApi.Test.Services
 		[Fact]
 		public async Task GetPlaneTicketsForPrice_Should_Call_Repository_GetPlaneTicketsForPrice()
 		{
-			await _service.GetPlaneTicketsForPrice(1, 10, 100, 200);
+			var cancellationToken = new CancellationToken();
+			await _service.GetPlaneTicketsForPrice(cancellationToken, 1, 10, 100, 200);
 
-			_repositoryMock.Verify(repo => repo.GetPlaneTicketsForPrice(1, 10, 100, 200), Times.Once);
+			_repositoryMock.Verify(repo => repo.GetPlaneTicketsForPrice(cancellationToken, 1, 10, 100, 200), Times.Once);
 		}
 
 		[Fact]
@@ -99,10 +102,11 @@ namespace AirportAutomationApi.Test.Services
 		[Fact]
 		public async Task PlaneTicketClassesCount_ShouldReturnCorrectCount()
 		{
+			var cancellationToken = new CancellationToken();
 			var expectedCount = 5;
-			_repositoryMock.Setup(repo => repo.PlaneTicketsCount(null, null)).ReturnsAsync(expectedCount);
+			_repositoryMock.Setup(repo => repo.PlaneTicketsCount(cancellationToken, null, null)).ReturnsAsync(expectedCount);
 
-			int count = await _service.PlaneTicketsCount();
+			int count = await _service.PlaneTicketsCount(cancellationToken);
 
 			Assert.Equal(expectedCount, count);
 		}

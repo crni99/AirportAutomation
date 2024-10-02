@@ -61,6 +61,7 @@ namespace AirportАutomation.Api.Controllers
 		/// <summary>
 		/// Endpoint for retrieving a paginated list of plane tickets.
 		/// </summary>
+		/// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
 		/// <param name="page">The page number for pagination (optional).</param>
 		/// <param name="pageSize">The number of items per page (optional).</param>
 		/// <returns>A paginated list of plane tickets.</returns>
@@ -73,20 +74,23 @@ namespace AirportАutomation.Api.Controllers
 		[ProducesResponseType(204)]
 		[ProducesResponseType(400)]
 		[ProducesResponseType(401)]
-		public async Task<ActionResult<PagedResponse<PlaneTicketDto>>> GetPlaneTickets([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
+		public async Task<ActionResult<PagedResponse<PlaneTicketDto>>> GetPlaneTickets(
+			CancellationToken cancellationToken,
+			[FromQuery] int page = 1,
+			[FromQuery] int pageSize = 10)
 		{
 			var (isValid, correctedPageSize, result) = _paginationValidationService.ValidatePaginationParameters(page, pageSize, maxPageSize);
 			if (!isValid)
 			{
 				return result;
 			}
-			var planeTickets = await _planeTicketService.GetPlaneTickets(page, correctedPageSize);
+			var planeTickets = await _planeTicketService.GetPlaneTickets(cancellationToken, page, correctedPageSize);
 			if (planeTickets is null || !planeTickets.Any())
 			{
 				_logger.LogInformation("Plane tickets not found.");
 				return NoContent();
 			}
-			var totalItems = await _planeTicketService.PlaneTicketsCount();
+			var totalItems = await _planeTicketService.PlaneTicketsCount(cancellationToken);
 			var data = _mapper.Map<IEnumerable<PlaneTicketDto>>(planeTickets);
 			var response = new PagedResponse<PlaneTicketDto>(data, page, correctedPageSize, totalItems);
 			return Ok(response);
@@ -126,6 +130,7 @@ namespace AirportАutomation.Api.Controllers
 		/// <summary>
 		/// Endpoint for retrieving a paginated list of plane tickets containing the specified name.
 		/// </summary>
+		/// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
 		/// <param name="minPrice">The minimum price to search for.</param>
 		/// <param name = "maxPrice" > The maximum price to search for.</param>
 		/// <param name="page">The page number for pagination (optional).</param>
@@ -141,6 +146,7 @@ namespace AirportАutomation.Api.Controllers
 		[ProducesResponseType(404)]
 		[ProducesResponseType(401)]
 		public async Task<ActionResult<PagedResponse<PlaneTicketDto>>> GetPlaneTicketsForPrice(
+			CancellationToken cancellationToken,
 			[FromQuery] int? minPrice = null,
 			[FromQuery] int? maxPrice = null,
 			[FromQuery] int page = 1,
@@ -156,13 +162,13 @@ namespace AirportАutomation.Api.Controllers
 			{
 				return result;
 			}
-			var planeTickets = await _planeTicketService.GetPlaneTicketsForPrice(page, correctedPageSize, minPrice, maxPrice);
+			var planeTickets = await _planeTicketService.GetPlaneTicketsForPrice(cancellationToken, page, correctedPageSize, minPrice, maxPrice);
 			if (planeTickets is null || !planeTickets.Any())
 			{
 				_logger.LogInformation("Plane tickets not found.");
 				return NotFound();
 			}
-			var totalItems = await _planeTicketService.PlaneTicketsCount(minPrice, maxPrice);
+			var totalItems = await _planeTicketService.PlaneTicketsCount(cancellationToken, minPrice, maxPrice);
 			var data = _mapper.Map<IEnumerable<PlaneTicketDto>>(planeTickets);
 			var response = new PagedResponse<PlaneTicketDto>(data, page, correctedPageSize, totalItems);
 			return Ok(response);
@@ -320,6 +326,7 @@ namespace AirportАutomation.Api.Controllers
 		/// <summary>
 		/// Endpoint for exporting plane ticket data to PDF.
 		/// </summary>
+		/// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
 		/// <param name="page">The page number for pagination (optional, default is 1).</param>
 		/// <param name="pageSize">The page size for pagination (optional, default is 10).</param>
 		/// <param name="getAll">Flag indicating whether to retrieve all data (optional, default is false).</param>
@@ -337,6 +344,7 @@ namespace AirportАutomation.Api.Controllers
 		[ProducesResponseType(401)]
 		[ProducesResponseType(403)]
 		public async Task<ActionResult> ExportToPdf(
+			CancellationToken cancellationToken,
 			[FromQuery] int page = 1,
 			[FromQuery] int pageSize = 10,
 			[FromQuery] bool getAll = false,
@@ -346,7 +354,7 @@ namespace AirportАutomation.Api.Controllers
 			IList<PlaneTicketEntity> planeTickets;
 			if (getAll)
 			{
-				planeTickets = await _planeTicketService.GetAllPlaneTickets();
+				planeTickets = await _planeTicketService.GetAllPlaneTickets(cancellationToken);
 			}
 			else
 			{
@@ -357,11 +365,11 @@ namespace AirportАutomation.Api.Controllers
 				}
 				if (!minPrice.HasValue && !maxPrice.HasValue)
 				{
-					planeTickets = await _planeTicketService.GetPlaneTickets(page, correctedPageSize);
+					planeTickets = await _planeTicketService.GetPlaneTickets(cancellationToken, page, correctedPageSize);
 				}
 				else
 				{
-					planeTickets = await _planeTicketService.GetPlaneTicketsForPrice(page, correctedPageSize, minPrice, maxPrice);
+					planeTickets = await _planeTicketService.GetPlaneTicketsForPrice(cancellationToken, page, correctedPageSize, minPrice, maxPrice);
 				}
 			}
 			if (planeTickets is null || !planeTickets.Any())

@@ -1,7 +1,6 @@
 ﻿using AirportAutomation.Api.Interfaces;
 using AirportAutomation.Application.Dtos.Response;
 using AirportAutomation.Application.Dtos.TravelClass;
-using AirportAutomation.Application.Dtos.TravelClass;
 using AirportAutomation.Core.Entities;
 using AirportAutomation.Core.Interfaces.IServices;
 using AirportАutomation.Api.Controllers;
@@ -73,6 +72,7 @@ namespace AirportAutomationApi.Test.Controllers
 		public async Task GetTravelClasses_InvalidPaginationParameters_ReturnsBadRequest()
 		{
 			// Arrange
+			var cancellationToken = new CancellationToken();
 			int invalidPage = -1;
 			int invalidPageSize = 0;
 			var expectedBadRequestResult = new BadRequestObjectResult("Invalid pagination parameters.");
@@ -82,7 +82,7 @@ namespace AirportAutomationApi.Test.Controllers
 				.Returns((false, 0, expectedBadRequestResult));
 
 			// Act
-			var result = await _controller.GetTravelClasses(invalidPage, invalidPageSize);
+			var result = await _controller.GetTravelClasses(cancellationToken, invalidPage, invalidPageSize);
 
 			// Assert
 			Assert.IsType<BadRequestObjectResult>(result.Result);
@@ -93,17 +93,18 @@ namespace AirportAutomationApi.Test.Controllers
 		public async Task GetTravelClasses_ReturnsNoContent_WhenNoTravelClassesFound()
 		{
 			// Arrange
+			var cancellationToken = new CancellationToken();
 			int page = 1;
 			int pageSize = 10;
 
 			_paginationValidationServiceMock
 				.Setup(x => x.ValidatePaginationParameters(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<int>()))
 				.Returns((true, pageSize, null));
-			_travelClassServiceMock.Setup(service => service.GetTravelClasses(It.IsAny<int>(), It.IsAny<int>()))
+			_travelClassServiceMock.Setup(service => service.GetTravelClasses(cancellationToken, It.IsAny<int>(), It.IsAny<int>()))
 				.ReturnsAsync(new List<TravelClassEntity>());
 
 			// Act
-			var result = await _controller.GetTravelClasses(page, pageSize);
+			var result = await _controller.GetTravelClasses(cancellationToken, page, pageSize);
 
 			// Assert
 			Assert.IsType<NoContentResult>(result.Result);
@@ -114,17 +115,18 @@ namespace AirportAutomationApi.Test.Controllers
 		public async Task GetTravelClasses_ReturnsInternalServerError_WhenExceptionThrown()
 		{
 			// Arrange
+			var cancellationToken = new CancellationToken();
 			int page = 1;
 			int pageSize = 10;
 
 			_paginationValidationServiceMock
 				.Setup(x => x.ValidatePaginationParameters(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<int>()))
 				.Returns((true, pageSize, null));
-			_travelClassServiceMock.Setup(service => service.GetTravelClasses(It.IsAny<int>(), It.IsAny<int>()))
+			_travelClassServiceMock.Setup(service => service.GetTravelClasses(cancellationToken, It.IsAny<int>(), It.IsAny<int>()))
 				.ThrowsAsync(new Exception("Simulated exception"));
 
 			// Act & Assert
-			await Assert.ThrowsAsync<Exception>(async () => await _controller.GetTravelClasses(page, pageSize));
+			await Assert.ThrowsAsync<Exception>(async () => await _controller.GetTravelClasses(cancellationToken, page, pageSize));
 		}
 
 		[Fact]
@@ -132,6 +134,7 @@ namespace AirportAutomationApi.Test.Controllers
 		public async Task GetTravelClasses_ReturnsOk_WithPaginatedTravelClasses()
 		{
 			// Arrange
+			var cancellationToken = new CancellationToken();
 			int page = 1;
 			int pageSize = 10;
 			var travelClasses = new List<TravelClassEntity>
@@ -145,10 +148,10 @@ namespace AirportAutomationApi.Test.Controllers
 				.Setup(x => x.ValidatePaginationParameters(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<int>()))
 				.Returns((true, pageSize, null));
 			_travelClassServiceMock
-				.Setup(service => service.GetTravelClasses(page, pageSize))
+				.Setup(service => service.GetTravelClasses(cancellationToken, page, pageSize))
 				.ReturnsAsync(travelClasses);
 			_travelClassServiceMock
-				.Setup(service => service.TravelClassesCount())
+				.Setup(service => service.TravelClassesCount(cancellationToken))
 				.ReturnsAsync(totalItems);
 
 			var expectedData = new List<TravelClassDto>
@@ -161,7 +164,7 @@ namespace AirportAutomationApi.Test.Controllers
 				.Returns(expectedData);
 
 			// Act
-			var result = await _controller.GetTravelClasses(page, pageSize);
+			var result = await _controller.GetTravelClasses(cancellationToken, page, pageSize);
 
 			// Assert
 			var actionResult = Assert.IsType<ActionResult<PagedResponse<TravelClassDto>>>(result);
@@ -178,6 +181,7 @@ namespace AirportAutomationApi.Test.Controllers
 		public async Task GetTravelClasses_ReturnsCorrectPageData()
 		{
 			// Arrange
+			var cancellationToken = new CancellationToken();
 			int page = 2;
 			int pageSize = 5;
 			var allTravelClasses = new List<TravelClassEntity>
@@ -199,10 +203,10 @@ namespace AirportAutomationApi.Test.Controllers
 				.Setup(x => x.ValidatePaginationParameters(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<int>()))
 				.Returns((true, pageSize, null));
 			_travelClassServiceMock
-				.Setup(service => service.GetTravelClasses(page, pageSize))
+				.Setup(service => service.GetTravelClasses(cancellationToken, page, pageSize))
 				.ReturnsAsync(pagedTravelClasses);
 			_travelClassServiceMock
-				.Setup(service => service.TravelClassesCount())
+				.Setup(service => service.TravelClassesCount(cancellationToken))
 				.ReturnsAsync(allTravelClasses.Count);
 
 			var expectedData = new List<TravelClassDto>
@@ -218,7 +222,7 @@ namespace AirportAutomationApi.Test.Controllers
 				.Returns(expectedData);
 
 			// Act
-			var result = await _controller.GetTravelClasses(page, pageSize);
+			var result = await _controller.GetTravelClasses(cancellationToken, page, pageSize);
 
 			// Assert
 			var actionResult = Assert.IsType<ActionResult<PagedResponse<TravelClassDto>>>(result);

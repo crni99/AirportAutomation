@@ -15,22 +15,22 @@ namespace AirportAutomation.Infrastructure.Repositories
 			_context = context ?? throw new ArgumentNullException(nameof(context));
 		}
 
-		public async Task<IList<DestinationEntity>> GetAllDestinations()
+		public async Task<IList<DestinationEntity>> GetAllDestinations(CancellationToken cancellationToken)
 		{
 			return await _context.Destination
 				.OrderBy(c => c.Id)
 				.AsNoTracking()
-				.ToListAsync();
+				.ToListAsync(cancellationToken);
 		}
 
-		public async Task<IList<DestinationEntity>> GetDestinations(int page, int pageSize)
+		public async Task<IList<DestinationEntity>> GetDestinations(CancellationToken cancellationToken, int page, int pageSize)
 		{
 			return await _context.Destination
 				.OrderBy(c => c.Id)
 				.Skip(pageSize * (page - 1))
 				.Take(pageSize)
 				.AsNoTracking()
-				.ToListAsync();
+				.ToListAsync(cancellationToken);
 		}
 
 		public async Task<DestinationEntity?> GetDestination(int id)
@@ -38,7 +38,7 @@ namespace AirportAutomation.Infrastructure.Repositories
 			return await _context.Destination.FindAsync(id);
 		}
 
-		public async Task<IList<DestinationEntity?>> GetDestinationsByCityOrAirport(int page, int pageSize, string city = null, string airport = null)
+		public async Task<IList<DestinationEntity?>> GetDestinationsByCityOrAirport(CancellationToken cancellationToken, int page, int pageSize, string city = null, string airport = null)
 		{
 			IQueryable<DestinationEntity> query = _context.Destination.AsNoTracking();
 
@@ -54,7 +54,7 @@ namespace AirportAutomation.Infrastructure.Repositories
 			return await query.OrderBy(c => c.Id)
 								.Skip(pageSize * (page - 1))
 								.Take(pageSize)
-								.ToListAsync()
+								.ToListAsync(cancellationToken)
 								.ConfigureAwait(false);
 		}
 
@@ -97,7 +97,7 @@ namespace AirportAutomation.Infrastructure.Repositories
 			return (_context.Destination?.Any(e => e.Id == id)).GetValueOrDefault();
 		}
 
-		public async Task<int> DestinationsCount(string city = null, string airport = null)
+		public async Task<int> DestinationsCount(CancellationToken cancellationToken, string city = null, string airport = null)
 		{
 			IQueryable<DestinationEntity> query = _context.Destination;
 
@@ -109,7 +109,7 @@ namespace AirportAutomation.Infrastructure.Repositories
 			{
 				query = query.Where(p => p.Airport.Contains(airport));
 			}
-			return await query.CountAsync().ConfigureAwait(false);
+			return await query.CountAsync(cancellationToken).ConfigureAwait(false);
 		}
 	}
 }

@@ -1,6 +1,5 @@
 ﻿using AirportAutomation.Api.Interfaces;
 using AirportAutomation.Application.Dtos.Flight;
-using AirportAutomation.Application.Dtos.Flight;
 using AirportAutomation.Application.Dtos.Response;
 using AirportAutomation.Core.Entities;
 using AirportAutomation.Core.Interfaces.IServices;
@@ -83,6 +82,7 @@ namespace AirportAutomationApi.Test.Controllers
 		public async Task GetFlights_InvalidPaginationParameters_ReturnsBadRequest()
 		{
 			// Arrange
+			var cancellationToken = new CancellationToken();
 			int invalidPage = -1;
 			int invalidPageSize = 0;
 			var expectedBadRequestResult = new BadRequestObjectResult("Invalid pagination parameters.");
@@ -92,7 +92,7 @@ namespace AirportAutomationApi.Test.Controllers
 				.Returns((false, 0, expectedBadRequestResult));
 
 			// Act
-			var result = await _controller.GetFlights(invalidPage, invalidPageSize);
+			var result = await _controller.GetFlights(cancellationToken, invalidPage, invalidPageSize);
 
 			// Assert
 			Assert.IsType<BadRequestObjectResult>(result.Result);
@@ -103,17 +103,18 @@ namespace AirportAutomationApi.Test.Controllers
 		public async Task GetFlights_ReturnsNoContent_WhenNoFlightsFound()
 		{
 			// Arrange
+			var cancellationToken = new CancellationToken();
 			int page = 1;
 			int pageSize = 10;
 
 			_paginationValidationServiceMock
 				.Setup(x => x.ValidatePaginationParameters(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<int>()))
 				.Returns((true, pageSize, null));
-			_flightServiceMock.Setup(service => service.GetFlights(It.IsAny<int>(), It.IsAny<int>()))
+			_flightServiceMock.Setup(service => service.GetFlights(cancellationToken, It.IsAny<int>(), It.IsAny<int>()))
 				.ReturnsAsync(new List<FlightEntity>());
 
 			// Act
-			var result = await _controller.GetFlights(page, pageSize);
+			var result = await _controller.GetFlights(cancellationToken, page, pageSize);
 
 			// Assert
 			Assert.IsType<NoContentResult>(result.Result);
@@ -124,17 +125,18 @@ namespace AirportAutomationApi.Test.Controllers
 		public async Task GetFlights_ReturnsInternalServerError_WhenExceptionThrown()
 		{
 			// Arrange
+			var cancellationToken = new CancellationToken();
 			int page = 1;
 			int pageSize = 10;
 
 			_paginationValidationServiceMock
 				.Setup(x => x.ValidatePaginationParameters(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<int>()))
 				.Returns((true, pageSize, null));
-			_flightServiceMock.Setup(service => service.GetFlights(It.IsAny<int>(), It.IsAny<int>()))
+			_flightServiceMock.Setup(service => service.GetFlights(cancellationToken, It.IsAny<int>(), It.IsAny<int>()))
 				.ThrowsAsync(new Exception("Simulated exception"));
 
 			// Act & Assert
-			await Assert.ThrowsAsync<Exception>(async () => await _controller.GetFlights(page, pageSize));
+			await Assert.ThrowsAsync<Exception>(async () => await _controller.GetFlights(cancellationToken, page, pageSize));
 		}
 
 		[Fact]
@@ -142,6 +144,7 @@ namespace AirportAutomationApi.Test.Controllers
 		public async Task GetFlights_ReturnsOk_WithPaginatedFlights()
 		{
 			// Arrange
+			var cancellationToken = new CancellationToken();
 			int page = 1;
 			int pageSize = 10;
 			var flights = new List<FlightEntity>
@@ -155,10 +158,10 @@ namespace AirportAutomationApi.Test.Controllers
 				.Setup(x => x.ValidatePaginationParameters(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<int>()))
 				.Returns((true, pageSize, null));
 			_flightServiceMock
-				.Setup(service => service.GetFlights(page, pageSize))
+				.Setup(service => service.GetFlights(cancellationToken, page, pageSize))
 				.ReturnsAsync(flights);
 			_flightServiceMock
-				.Setup(service => service.FlightsCount(null, null))
+				.Setup(service => service.FlightsCount(cancellationToken, null, null))
 				.ReturnsAsync(totalItems);
 
 			var expectedData = new List<FlightDto>
@@ -171,7 +174,7 @@ namespace AirportAutomationApi.Test.Controllers
 				.Returns(expectedData);
 
 			// Act
-			var result = await _controller.GetFlights(page, pageSize);
+			var result = await _controller.GetFlights(cancellationToken, page, pageSize);
 
 			// Assert
 			var actionResult = Assert.IsType<ActionResult<PagedResponse<FlightDto>>>(result);
@@ -188,6 +191,7 @@ namespace AirportAutomationApi.Test.Controllers
 		public async Task GetFlights_ReturnsCorrectPageData()
 		{
 			// Arrange
+			var cancellationToken = new CancellationToken();
 			int page = 2;
 			int pageSize = 5;
 			var allFlights = new List<FlightEntity>
@@ -209,10 +213,10 @@ namespace AirportAutomationApi.Test.Controllers
 				.Setup(x => x.ValidatePaginationParameters(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<int>()))
 				.Returns((true, pageSize, null));
 			_flightServiceMock
-				.Setup(service => service.GetFlights(page, pageSize))
+				.Setup(service => service.GetFlights(cancellationToken, page, pageSize))
 				.ReturnsAsync(pagedFlights);
 			_flightServiceMock
-				.Setup(service => service.FlightsCount(null, null))
+				.Setup(service => service.FlightsCount(cancellationToken, null, null))
 				.ReturnsAsync(allFlights.Count);
 
 			var expectedData = new List<FlightDto>
@@ -228,7 +232,7 @@ namespace AirportAutomationApi.Test.Controllers
 				.Returns(expectedData);
 
 			// Act
-			var result = await _controller.GetFlights(page, pageSize);
+			var result = await _controller.GetFlights(cancellationToken, page, pageSize);
 
 			// Assert
 			var actionResult = Assert.IsType<ActionResult<PagedResponse<FlightDto>>>(result);
@@ -317,6 +321,7 @@ namespace AirportAutomationApi.Test.Controllers
 		public async Task GetFlightsBetweenDates_NoDatesProvided_ReturnsBadRequest()
 		{
 			// Arrange
+			var cancellationToken = new CancellationToken();
 			DateOnly? startDate = null;
 			DateOnly? endDate = null;
 			var expectedErrorMessage = "Both start date and end date are missing in the request.";
@@ -326,7 +331,7 @@ namespace AirportAutomationApi.Test.Controllers
 				.Returns((true, 10, new OkResult()));
 
 			// Act
-			var result = await _controller.GetFlightsBetweenDates(startDate, endDate);
+			var result = await _controller.GetFlightsBetweenDates(cancellationToken, startDate, endDate);
 
 			// Assert
 			var badRequestResult = Assert.IsType<BadRequestObjectResult>(result.Result);
@@ -338,6 +343,7 @@ namespace AirportAutomationApi.Test.Controllers
 		public async Task GetFlightsBetweenDates_InvalidStartDateProvided_ReturnsBadRequest()
 		{
 			// Arrange
+			var cancellationToken = new CancellationToken();
 			var startDate = new DateOnly(1000, 1, 1);
 			var endDate = new DateOnly(2024, 12, 1);
 			var expectedErrorMessage = "Invalid input. The start and end dates must be valid dates.";
@@ -354,7 +360,7 @@ namespace AirportAutomationApi.Test.Controllers
 				.Returns(true); // valid end date
 
 			// Act
-			var result = await _controller.GetFlightsBetweenDates(startDate, endDate);
+			var result = await _controller.GetFlightsBetweenDates(cancellationToken, startDate, endDate);
 
 			// Assert
 			var badRequestResult = Assert.IsType<BadRequestObjectResult>(result.Result);
@@ -366,6 +372,7 @@ namespace AirportAutomationApi.Test.Controllers
 		public async Task GetFlightsBetweenDates_InvalidEndDateProvided_ReturnsBadRequest()
 		{
 			// Arrange
+			var cancellationToken = new CancellationToken();
 			var startDate = new DateOnly(2024, 1, 1);
 			var endDate = new DateOnly(1000, 12, 1);
 			var expectedErrorMessage = "Invalid input. The start and end dates must be valid dates.";
@@ -382,7 +389,7 @@ namespace AirportAutomationApi.Test.Controllers
 				.Returns(false); // invalid end date
 
 			// Act
-			var result = await _controller.GetFlightsBetweenDates(startDate, endDate);
+			var result = await _controller.GetFlightsBetweenDates(cancellationToken, startDate, endDate);
 
 			// Assert
 			var badRequestResult = Assert.IsType<BadRequestObjectResult>(result.Result);
@@ -394,6 +401,7 @@ namespace AirportAutomationApi.Test.Controllers
 		public async Task GetFlightsBetweenDates_InvalidPaginationParameters_ReturnsBadRequest()
 		{
 			// Arrange
+			var cancellationToken = new CancellationToken();
 			DateOnly startDate = new DateOnly();
 			int invalidPage = -1;
 			int invalidPageSize = 0;
@@ -407,7 +415,7 @@ namespace AirportAutomationApi.Test.Controllers
 				.Returns((false, 0, expectedBadRequestResult));
 
 			// Act
-			var result = await _controller.GetFlightsBetweenDates(startDate, null, invalidPage, invalidPageSize);
+			var result = await _controller.GetFlightsBetweenDates(cancellationToken, startDate, null, invalidPage, invalidPageSize);
 
 			// Assert
 			Assert.IsType<BadRequestObjectResult>(result.Result);
@@ -418,6 +426,7 @@ namespace AirportAutomationApi.Test.Controllers
 		public async Task GetFlightsBetweenDates_ValidDates_NoFlightsFound_ReturnsNotFound()
 		{
 			// Arrange
+			var cancellationToken = new CancellationToken();
 			var startDate = new DateOnly(2024, 1, 1);
 			var endDate = new DateOnly(2024, 1, 31);
 
@@ -432,18 +441,18 @@ namespace AirportAutomationApi.Test.Controllers
 				.Setup(x => x.IsValidDateOnly(endDate))
 				.Returns(true);
 			_flightServiceMock
-				.Setup(x => x.GetFlightsBetweenDates(It.IsAny<int>(), It.IsAny<int>(), startDate, endDate))
+				.Setup(x => x.GetFlightsBetweenDates(cancellationToken, It.IsAny<int>(), It.IsAny<int>(), startDate, endDate))
 				.ReturnsAsync(new List<FlightEntity>());
 			_flightServiceMock
-				.Setup(x => x.FlightsCount(startDate, endDate))
+				.Setup(x => x.FlightsCount(cancellationToken, startDate, endDate))
 				.ReturnsAsync(0);
 
 			// Act
-			var result = await _controller.GetFlightsBetweenDates(startDate, endDate);
+			var result = await _controller.GetFlightsBetweenDates(cancellationToken, startDate, endDate);
 
 			// Assert
 			var notFoundResult = Assert.IsType<NotFoundResult>(result.Result);
-			var flights = await _flightServiceMock.Object.GetFlightsBetweenDates(1, 10, startDate, endDate);
+			var flights = await _flightServiceMock.Object.GetFlightsBetweenDates(cancellationToken, 1, 10, startDate, endDate);
 			Assert.Empty(flights);
 		}
 
@@ -452,6 +461,7 @@ namespace AirportAutomationApi.Test.Controllers
 		public async Task GetFlightsBetweenDates_ReturnsPagedListOfFlights_WhenFlightsFound()
 		{
 			// Arrange
+			var cancellationToken = new CancellationToken();
 			DateOnly startDate = new DateOnly();
 			DateOnly endDate = new DateOnly();
 			int validPage = 1;
@@ -470,17 +480,17 @@ namespace AirportAutomationApi.Test.Controllers
 				.Setup(x => x.ValidatePaginationParameters(validPage, validPageSize, It.IsAny<int>()))
 				.Returns((true, validPageSize, null));
 			_flightServiceMock
-				.Setup(service => service.GetFlightsBetweenDates(validPage, validPageSize, startDate, endDate))
+				.Setup(service => service.GetFlightsBetweenDates(cancellationToken, validPage, validPageSize, startDate, endDate))
 				.ReturnsAsync(flightEntities);
 			_flightServiceMock
-				.Setup(service => service.FlightsCount(startDate, endDate))
+				.Setup(service => service.FlightsCount(cancellationToken, startDate, endDate))
 				.ReturnsAsync(totalItems);
 			_mapperMock
 				.Setup(m => m.Map<IEnumerable<FlightDto>>(flightEntities))
 				.Returns(flightDtos);
 
 			// Act
-			var result = await _controller.GetFlightsBetweenDates(startDate, endDate, validPage, validPageSize);
+			var result = await _controller.GetFlightsBetweenDates(cancellationToken, startDate, endDate, validPage, validPageSize);
 
 			// Assert
 			var actionResult = Assert.IsType<ActionResult<PagedResponse<FlightDto>>>(result);

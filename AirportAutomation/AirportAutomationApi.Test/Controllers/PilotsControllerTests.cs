@@ -78,6 +78,7 @@ namespace AirportAutomationApi.Test.Controllers
 		public async Task GetPilots_InvalidPaginationParameters_ReturnsBadRequest()
 		{
 			// Arrange
+			var cancellationToken = new CancellationToken();
 			int invalidPage = -1;
 			int invalidPageSize = 0;
 			var expectedBadRequestResult = new BadRequestObjectResult("Invalid pagination parameters.");
@@ -87,7 +88,7 @@ namespace AirportAutomationApi.Test.Controllers
 				.Returns((false, 0, expectedBadRequestResult));
 
 			// Act
-			var result = await _controller.GetPilots(invalidPage, invalidPageSize);
+			var result = await _controller.GetPilots(cancellationToken, invalidPage, invalidPageSize);
 
 			// Assert
 			Assert.IsType<BadRequestObjectResult>(result.Result);
@@ -98,17 +99,18 @@ namespace AirportAutomationApi.Test.Controllers
 		public async Task GetPilots_ReturnsNoContent_WhenNoPilotsFound()
 		{
 			// Arrange
+			var cancellationToken = new CancellationToken();
 			int page = 1;
 			int pageSize = 10;
 
 			_paginationValidationServiceMock
 				.Setup(x => x.ValidatePaginationParameters(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<int>()))
 				.Returns((true, pageSize, null));
-			_pilotServiceMock.Setup(service => service.GetPilots(It.IsAny<int>(), It.IsAny<int>()))
+			_pilotServiceMock.Setup(service => service.GetPilots(cancellationToken, It.IsAny<int>(), It.IsAny<int>()))
 				.ReturnsAsync(new List<PilotEntity>());
 
 			// Act
-			var result = await _controller.GetPilots(page, pageSize);
+			var result = await _controller.GetPilots(cancellationToken, page, pageSize);
 
 			// Assert
 			Assert.IsType<NoContentResult>(result.Result);
@@ -119,17 +121,18 @@ namespace AirportAutomationApi.Test.Controllers
 		public async Task GetPilots_ReturnsInternalServerError_WhenExceptionThrown()
 		{
 			// Arrange
+			var cancellationToken = new CancellationToken();
 			int page = 1;
 			int pageSize = 10;
 
 			_paginationValidationServiceMock
 				.Setup(x => x.ValidatePaginationParameters(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<int>()))
 				.Returns((true, pageSize, null));
-			_pilotServiceMock.Setup(service => service.GetPilots(It.IsAny<int>(), It.IsAny<int>()))
+			_pilotServiceMock.Setup(service => service.GetPilots(cancellationToken, It.IsAny<int>(), It.IsAny<int>()))
 				.ThrowsAsync(new Exception("Simulated exception"));
 
 			// Act & Assert
-			await Assert.ThrowsAsync<Exception>(async () => await _controller.GetPilots(page, pageSize));
+			await Assert.ThrowsAsync<Exception>(async () => await _controller.GetPilots(cancellationToken, page, pageSize));
 		}
 
 		[Fact]
@@ -137,6 +140,7 @@ namespace AirportAutomationApi.Test.Controllers
 		public async Task GetPilots_ReturnsOk_WithPaginatedPilots()
 		{
 			// Arrange
+			var cancellationToken = new CancellationToken();
 			int page = 1;
 			int pageSize = 10;
 			var pilots = new List<PilotEntity>
@@ -150,10 +154,10 @@ namespace AirportAutomationApi.Test.Controllers
 				.Setup(x => x.ValidatePaginationParameters(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<int>()))
 				.Returns((true, pageSize, null));
 			_pilotServiceMock
-				.Setup(service => service.GetPilots(page, pageSize))
+				.Setup(service => service.GetPilots(cancellationToken, page, pageSize))
 				.ReturnsAsync(pilots);
 			_pilotServiceMock
-				.Setup(service => service.PilotsCount(null, null))
+				.Setup(service => service.PilotsCount(cancellationToken, null, null))
 				.ReturnsAsync(totalItems);
 
 			var expectedData = new List<PilotDto>
@@ -166,7 +170,7 @@ namespace AirportAutomationApi.Test.Controllers
 				.Returns(expectedData);
 
 			// Act
-			var result = await _controller.GetPilots(page, pageSize);
+			var result = await _controller.GetPilots(cancellationToken, page, pageSize);
 
 			// Assert
 			var actionResult = Assert.IsType<ActionResult<PagedResponse<PilotDto>>>(result);
@@ -183,6 +187,7 @@ namespace AirportAutomationApi.Test.Controllers
 		public async Task GetPilots_ReturnsCorrectPageData()
 		{
 			// Arrange
+			var cancellationToken = new CancellationToken();
 			int page = 2;
 			int pageSize = 5;
 			var allPilots = new List<PilotEntity>
@@ -204,10 +209,10 @@ namespace AirportAutomationApi.Test.Controllers
 				.Setup(x => x.ValidatePaginationParameters(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<int>()))
 				.Returns((true, pageSize, null));
 			_pilotServiceMock
-				.Setup(service => service.GetPilots(page, pageSize))
+				.Setup(service => service.GetPilots(cancellationToken, page, pageSize))
 				.ReturnsAsync(pagedPilots);
 			_pilotServiceMock
-				.Setup(service => service.PilotsCount(null, null))
+				.Setup(service => service.PilotsCount(cancellationToken, null, null))
 				.ReturnsAsync(allPilots.Count);
 
 			var expectedData = new List<PilotDto>
@@ -223,7 +228,7 @@ namespace AirportAutomationApi.Test.Controllers
 				.Returns(expectedData);
 
 			// Act
-			var result = await _controller.GetPilots(page, pageSize);
+			var result = await _controller.GetPilots(cancellationToken, page, pageSize);
 
 			// Assert
 			var actionResult = Assert.IsType<ActionResult<PagedResponse<PilotDto>>>(result);
@@ -312,6 +317,7 @@ namespace AirportAutomationApi.Test.Controllers
 		public async Task GetPilotsByName_InvalidName_ReturnsBadRequest()
 		{
 			// Arrange
+			var cancellationToken = new CancellationToken();
 			string invalidName = string.Empty;
 			var expectedBadRequestResult = new BadRequestObjectResult("Both first name and last name are missing in the request.");
 
@@ -320,7 +326,7 @@ namespace AirportAutomationApi.Test.Controllers
 				.Returns(false);
 
 			// Act
-			var result = await _controller.GetPilotsByName(invalidName);
+			var result = await _controller.GetPilotsByName(cancellationToken, invalidName);
 
 			// Assert
 			Assert.IsType<BadRequestObjectResult>(result.Result);
@@ -333,6 +339,7 @@ namespace AirportAutomationApi.Test.Controllers
 		public async Task GetPilotsByName_InvalidPaginationParameters_ReturnsBadRequest()
 		{
 			// Arrange
+			var cancellationToken = new CancellationToken();
 			string validName1 = "ValidName1";
 			string validName2 = "ValidName2";
 			int invalidPage = -1;
@@ -350,7 +357,7 @@ namespace AirportAutomationApi.Test.Controllers
 				.Returns((false, 0, expectedBadRequestResult));
 
 			// Act
-			var result = await _controller.GetPilotsByName(validName1, validName2, invalidPage, invalidPageSize);
+			var result = await _controller.GetPilotsByName(cancellationToken, validName1, validName2, invalidPage, invalidPageSize);
 
 			// Assert
 			Assert.IsType<BadRequestObjectResult>(result.Result);
@@ -361,6 +368,7 @@ namespace AirportAutomationApi.Test.Controllers
 		public async Task GetPilotsByName_PilotsNotFound_ReturnsNotFound()
 		{
 			// Arrange
+			var cancellationToken = new CancellationToken();
 			string validName = "NonExistentName";
 			int validPage = 1;
 			int validPageSize = 10;
@@ -372,11 +380,11 @@ namespace AirportAutomationApi.Test.Controllers
 				.Setup(x => x.ValidatePaginationParameters(validPage, validPageSize, It.IsAny<int>()))
 				.Returns((true, validPageSize, null));
 			_pilotServiceMock
-				.Setup(service => service.GetPilotsByName(validPage, validPageSize, validName, null))
+				.Setup(service => service.GetPilotsByName(cancellationToken, validPage, validPageSize, validName, null))
 				.ReturnsAsync(new List<PilotEntity>());
 
 			// Act
-			var result = await _controller.GetPilotsByName(validName, null, validPage, validPageSize);
+			var result = await _controller.GetPilotsByName(cancellationToken, validName, null, validPage, validPageSize);
 
 			// Assert
 			Assert.IsType<NotFoundResult>(result.Result);
@@ -387,6 +395,7 @@ namespace AirportAutomationApi.Test.Controllers
 		public async Task GetPilotsByName_ReturnsPagedListOfPilots_WhenPilotsFound()
 		{
 			// Arrange
+			var cancellationToken = new CancellationToken();
 			string validName1 = "ValidName1";
 			string validName2 = "ValidName2";
 			int validPage = 1;
@@ -405,17 +414,17 @@ namespace AirportAutomationApi.Test.Controllers
 				.Setup(x => x.ValidatePaginationParameters(validPage, validPageSize, It.IsAny<int>()))
 				.Returns((true, validPageSize, null));
 			_pilotServiceMock
-				.Setup(service => service.GetPilotsByName(validPage, validPageSize, validName1, validName2))
+				.Setup(service => service.GetPilotsByName(cancellationToken, validPage, validPageSize, validName1, validName2))
 				.ReturnsAsync(pilotEntities);
 			_pilotServiceMock
-				.Setup(service => service.PilotsCount(validName1, validName2))
+				.Setup(service => service.PilotsCount(cancellationToken, validName1, validName2))
 				.ReturnsAsync(totalItems);
 			_mapperMock
 				.Setup(m => m.Map<IEnumerable<PilotDto>>(pilotEntities))
 				.Returns(pilotDtos);
 
 			// Act
-			var result = await _controller.GetPilotsByName(validName1, validName2, validPage, validPageSize);
+			var result = await _controller.GetPilotsByName(cancellationToken, validName1, validName2, validPage, validPageSize);
 
 			// Assert
 			var actionResult = Assert.IsType<ActionResult<PagedResponse<PilotDto>>>(result);
