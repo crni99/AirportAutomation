@@ -17,7 +17,6 @@ tr {
 .pagination-container-absolute {
     position: absolute;
     bottom: 60px;
-    background-color: #ffffff;
     padding: 10px 0;
     z-index: 1000;
 }

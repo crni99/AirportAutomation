@@ -4,16 +4,14 @@
 }
 
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-bs-theme="light">
 <head>
 	<meta charset="utf-8" />
 	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-	<title>@ViewData["Title"] - AirportAutomationWeb</title>
-
-	<meta name="description" content="AirportAutomationWeb - Manage passengers, pilots, flights, and more." />
-	<meta name="keywords" content="airport, automation, web, passengers, pilots, flights, travel, management" />
+	<title>AirportAutomationWeb</title>
+	<meta name="description" content="AirportAutomationWeb - Manage airlines, destinations, flights, passengers, pilots, plane tickets, and more." />
+	<meta name="keywords" content="airport, automation, web, airlines, destinations, flights, passengers, pilots, plane tickets, travel, management" />
 	<meta name="author" content="Ognjen Andjelic" />
-
 	<link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.css" />
 	<link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
 	<link rel="stylesheet" href="~/css/style.css" asp-append-version="true" />
@@ -22,7 +20,7 @@
 	@if (!string.IsNullOrEmpty(ViewBag.ApiUserRole))
 	{
 		<header>
-			<nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
+			<nav class="navbar navbar-expand-sm navbar-toggleable-sm border-bottom box-shadow mb-3">
 				<div class="container-fluid">
 					<a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">AirportAutomationWeb</a>
 					<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
@@ -32,43 +30,46 @@
 					<div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
 						<ul class="navbar-nav flex-grow-1">
 							<li class="nav-item">
-								<a class="nav-link text-dark" asp-area="" asp-controller="Passenger" asp-action="Index">Passenger</a>
+								<a class="nav-link" asp-area="" asp-controller="Passenger" asp-action="Index">Passenger</a>
 							</li>
 							<li class="nav-item">
-								<a class="nav-link text-dark" asp-area="" asp-controller="TravelClass" asp-action="Index">Travel Class</a>
+								<a class="nav-link" asp-area="" asp-controller="TravelClass" asp-action="Index">Travel Class</a>
 							</li>
 							<li class="nav-item">
-								<a class="nav-link text-dark" asp-area="" asp-controller="Destination" asp-action="Index">Destination</a>
+								<a class="nav-link" asp-area="" asp-controller="Destination" asp-action="Index">Destination</a>
 							</li>
 							<li class="nav-item">
-								<a class="nav-link text-dark" asp-area="" asp-controller="Pilot" asp-action="Index">Pilot</a>
+								<a class="nav-link" asp-area="" asp-controller="Pilot" asp-action="Index">Pilot</a>
 							</li>
 							<li class="nav-item">
-								<a class="nav-link text-dark" asp-area="" asp-controller="Airline" asp-action="Index">Airline</a>
+								<a class="nav-link" asp-area="" asp-controller="Airline" asp-action="Index">Airline</a>
 							</li>
 							<li class="nav-item">
-								<a class="nav-link text-dark" asp-area="" asp-controller="Flight" asp-action="Index">Flight</a>
+								<a class="nav-link" asp-area="" asp-controller="Flight" asp-action="Index">Flight</a>
 							</li>
 							<li class="nav-item">
-								<a class="nav-link text-dark" asp-area="" asp-controller="PlaneTicket" asp-action="Index">Plane Ticket</a>
+								<a class="nav-link" asp-area="" asp-controller="PlaneTicket" asp-action="Index">Plane Ticket</a>
 							</li>
 							@if (ViewBag.ApiUserRole == "SuperAdmin")
 							{
 								<li class="nav-item">
-									<a class="nav-link text-dark" asp-area="" asp-controller="ApiUser" asp-action="Index">Api User</a>
+									<a class="nav-link" asp-area="" asp-controller="ApiUser" asp-action="Index">Api User</a>
 								</li>
 							}
 						</ul>
 						<ul class="navbar-nav">
+							<li class="nav-item">
+								<a class="nav-link" asp-area="" asp-controller="HealthCheck" asp-action="Index">Status Check</a>
+							</li>
+							<li>
+								<button id="darkModeToggle" class="btn btn-secondary">Dark Mode</button>
+							</li>
 							@if (!string.IsNullOrEmpty(token))
 							{
 								<li class="nav-item">
-									<a id="signOut" class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="SignOut">Sign Out</a>
+									<a id="signOut" class="nav-link" asp-area="" asp-controller="Home" asp-action="SignOut">Sign Out</a>
 								</li>
 							}
-							<li class="nav-item">
-								<a class="nav-link text-dark" asp-area="" asp-controller="HealthCheck" asp-action="Index">Status Check</a>
-							</li>
 						</ul>
 					</div>
 				</div>
@@ -104,6 +105,25 @@
 	<script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
 	<script src="~/js/site.js" asp-append-version="true"></script>
 	<script src="~/js/Signout.js"></script>
+	<script>
+	document.addEventListener('DOMContentLoaded', function () {
+		const toggleButton = document.getElementById('darkModeToggle');
+		const htmlElement = document.documentElement;
+		const DARK_MODE = 'dark';
+		const LIGHT_MODE = 'light';
+		const darkModeEnabled = localStorage.getItem('dark-mode') === 'true';
+
+		htmlElement.setAttribute('data-bs-theme', darkModeEnabled ? DARK_MODE : LIGHT_MODE);
+		toggleButton.textContent = darkModeEnabled ? 'Light Mode' : 'Dark Mode';
+
+		toggleButton.addEventListener('click', function () {
+			const newTheme = htmlElement.getAttribute('data-bs-theme') === DARK_MODE ? LIGHT_MODE : DARK_MODE;
+			htmlElement.setAttribute('data-bs-theme', newTheme);
+			localStorage.setItem('dark-mode', newTheme === DARK_MODE);
+			toggleButton.textContent = newTheme === DARK_MODE ? 'Light Mode' : 'Dark Mode';
+		});
+	});
+	</script>
 	@await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

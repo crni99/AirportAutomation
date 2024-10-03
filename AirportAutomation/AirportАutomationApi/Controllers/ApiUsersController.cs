@@ -130,7 +130,7 @@ namespace AirportАutomation.Api.Controllers
 		/// Endpoint for retrieving a paginated list of api users containing the specified role.
 		/// </summary>
 		/// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
-		/// <param name="role">The role to search for.</param>
+		/// <param name="role">The role of the users to retrieve. Valid values are "user", "admin" and "superadmin".</param>
 		/// <param name="page">The page number for pagination (optional).</param>
 		/// <param name="pageSize">The size of each page for pagination (optional).</param>
 		/// <returns>A list of api users that match the specified role.</returns>
