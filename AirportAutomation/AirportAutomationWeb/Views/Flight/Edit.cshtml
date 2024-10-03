@@ -1,16 +1,15 @@
 ﻿@model AirportAutomation.Web.Models.Flight.FlightViewModel;
 
 @{
-	ViewData["Title"] = "Edit";
+	ViewBag.Title = "Edit Flight";
 }
-
-@Html.AntiForgeryToken()
 
 @if (ViewBag.ApiUserRole != "User")
 {
 	<h4>Edit Flight</h4>
 	<hr />
 	<form asp-action="EditFlight" method="post">
+		@Html.AntiForgeryToken()
 		<div asp-validation-summary="ModelOnly" class="text-danger"></div>
 		<div class="row">
 			<div class="col-md-4">

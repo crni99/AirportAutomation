@@ -1,19 +1,15 @@
 ﻿@model AirportAutomation.Web.Models.PlaneTicket.PlaneTicketCreateViewModel;
 
 @{
-	ViewData["Title"] = "View";
-}
-@{
 	ViewBag.Title = "Create Plane Ticket";
 }
-
-@Html.AntiForgeryToken()
 
 @if (ViewBag.ApiUserRole != "User")
 {
 	<h4>Create Plane Ticket</h4>
 	<hr />
 	<form asp-action="CreatePlaneTicket">
+		@Html.AntiForgeryToken()
 		<div asp-validation-summary="ModelOnly" class="text-danger"></div>
 		<div class="row">
 			<div class="col-md-4">

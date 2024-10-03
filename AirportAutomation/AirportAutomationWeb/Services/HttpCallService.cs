@@ -561,6 +561,47 @@ namespace AirportAutomation.Web.Services
 		}
 
 		/// <summary>
+		/// Gets data of a specified type by role in JSON format.
+		/// </summary>
+		/// <typeparam name="T">The type of data to retrieve.</typeparam>
+		/// <param name="role">The role used to filter the data.</param>
+		/// <returns>
+		/// Returns a JSON string containing the data of type <typeparamref name="T"/> filtered by the specified role.
+		/// If the retrieval fails, returns null with an error logged.
+		/// </returns>
+		public async Task<string> GetDataByRole<T>(string role)
+		{
+			var modelName = GetModelName<T>();
+
+			string requestUri = $"{apiURL}/{modelName}";
+			if (modelName.Equals("TravelClass"))
+			{
+				requestUri += $"es/byRole/{role}";
+			}
+			else
+			{
+				requestUri += $"s/byRole/{role}";
+			}
+
+			var httpRequestMessage = new HttpRequestMessage(HttpMethod.Get, requestUri);
+
+			using var httpClient = _httpClientFactory.CreateClient("AirportAutomationApi");
+			ConfigureHttpClient(httpClient);
+
+			var response = await httpClient.SendAsync(httpRequestMessage);
+
+			if (response.IsSuccessStatusCode)
+			{
+				return await response.Content.ReadAsStringAsync();
+			}
+			else
+			{
+				_logger.LogInformation("Failed to retrieve data. Status code: {StatusCode}", response.StatusCode);
+			}
+			return null;
+		}
+
+		/// <summary>
 		/// Creates a new data entry of a specified type.
 		/// </summary>
 		/// <typeparam name="T">The type of data to create.</typeparam>

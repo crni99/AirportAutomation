@@ -205,3 +205,42 @@ function searchByCityOrAirport(searchUrl, tableBody, entityType) {
         });
     });
 }
+
+function searchByRole(searchUrl, tableBody, entityType) {
+    $('#searchButton').click(function () {
+        var searchTerm = $('#roleSelect').val();
+        if (!searchTerm || searchTerm.trim() === '') {
+            return;
+        }
+
+        $.ajax({
+            url: searchUrl + '/' + searchTerm,
+            type: 'GET',
+            success: function (data) {
+                if (data === null || data.trim() === "") {
+                    showAlertInContainer('No data found for the given search term.', 'danger');
+                    return;
+                }
+                var jsonData = JSON.parse(data);
+                tableBody.empty();
+
+                $.each(jsonData.data, function (index, item) {
+                    var row = document.createElement("tr");
+                    row.innerHTML = '<td>' + item.apiUserId + '</td>' +
+                        '<td>' + item.userName + '</td>' +
+                        '<td>' + item.password + '</td>' +
+                        '<td>' + item.roles + '</td>';
+
+                    row.classList.add("clickable-row");
+                    row.addEventListener("click", function () {
+                        window.open('/' + entityType + '/' + item.id, '_blank');
+                    });
+                    tableBody.append(row);
+                });
+            },
+            error: function (error) {
+                console.error('Error:', error);
+            }
+        });
+    });
+}

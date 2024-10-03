@@ -1,13 +1,8 @@
 ﻿@model AirportAutomation.Web.Models.ApiUser.ApiUserViewModel;
 
 @{
-	ViewData["Title"] = "View";
-}
-@{
 	ViewBag.Title = "Api User Details";
 }
-
-@Html.AntiForgeryToken()
 
 @if (ViewBag.ApiUserRole == "SuperAdmin")
 {

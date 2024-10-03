@@ -57,15 +57,15 @@ namespace AirportAutomation.Web.Controllers
 
 
 		[HttpGet]
-		[Route("GetApiUsersByName/{name}")]
-		public async Task<IActionResult> GetApiUsersByName(string name)
+		[Route("GetApiUsersByRole/{role}")]
+		public async Task<IActionResult> GetApiUsersByName(string role)
 		{
-			if (string.IsNullOrEmpty(name))
+			if (string.IsNullOrEmpty(role))
 			{
 				_alertService.SetAlertMessage(TempData, "missing_field", false);
 				return RedirectToAction("Index");
 			}
-			var response = await _httpCallService.GetDataByName<ApiUserEntity>(name);
+			var response = await _httpCallService.GetDataByRole<ApiUserEntity>(role);
 			return Json(response);
 		}
 

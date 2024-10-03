@@ -12,8 +12,13 @@
 				@if (Model != null)
 				{
 					<div class="input-group mb-3" style="width: 70%;">
-						<label for="searchInput" class="input-group-text">Search by Role:</label>
-						<input type="text" id="searchInput" class="form-control" required />
+						<label for="roleSelect" class="input-group-text">Search by Role:</label>
+						<select id="roleSelect" class="form-control" required>
+							<option value="" disabled selected>Select a role</option>
+							<option value="User">User</option>
+							<option value="Admin">Admin</option>
+							<option value="SuperAdmin">Super Admin</option>
+						</select>
 						<button id="searchButton" class="btn btn-primary">Search</button>
 					</div>
 				}
@@ -89,7 +94,7 @@ else
 		$(document).ready(function () {
 			var searchUrl = '@Url.Action("GetApiUsersByRole", "ApiUser", new { area = "", name = "" })';
 			var tableBody = $('#tableBody');
-			searchByName(searchUrl, tableBody, 'ApiUser');
+			searchByRole(searchUrl, tableBody, 'ApiUser');
 		});
 	</script>
 	<script src="~/js/AlertHelper.js"></script>
