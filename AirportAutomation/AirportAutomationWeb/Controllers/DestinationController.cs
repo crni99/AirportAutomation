@@ -22,20 +22,27 @@ namespace AirportAutomation.Web.Controllers
 		}
 
 		[HttpGet]
-		public async Task<IActionResult> Index(int page = 1, int pageSize = 10)
+		public async Task<IActionResult> Index()
+		{
+			return View();
+		}
+
+		[HttpGet]
+		[Route("GetDestinations")]
+		public async Task<IActionResult> GetDestinations(int page = 1, int pageSize = 10)
 		{
 			if (page < 1)
 			{
 				_alertService.SetAlertMessage(TempData, "invalid_page_number", false);
-				return RedirectToAction("Index");
+				return Json(new { success = false, message = "Page number must be greater than or equal to 1." });
 			}
 			var response = await _httpCallService.GetDataList<DestinationEntity>(page, pageSize);
 			if (response == null)
 			{
-				return View();
+				return Json(new { success = false, message = "No destinations found." });
 			}
 			var pagedResponse = _mapper.Map<PagedResponse<DestinationViewModel>>(response);
-			return View(pagedResponse);
+			return Json(new { success = true, data = pagedResponse });
 		}
 
 		[HttpGet]
@@ -150,18 +157,6 @@ namespace AirportAutomation.Web.Controllers
 				_alertService.SetAlertMessage(TempData, "delete_data_failed", false);
 				return RedirectToAction("Details", new { id });
 			}
-		}
-
-		[HttpGet]
-		[Route("GetDestinations")]
-		public async Task<IActionResult> GetDestinations(int page = 1, int pageSize = 10)
-		{
-			var response = await _httpCallService.GetDataList<DestinationEntity>(page, pageSize);
-			if (response == null || response.Data == null || !response.Data.Any())
-			{
-				return Json(new { success = false, data = response });
-			}
-			return Json(new { success = true, data = response });
 		}
 
 	}

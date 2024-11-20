@@ -1,0 +1,12 @@
+﻿<div class="form-horizontal">
+	<div class="form-group" id="dataForm" style="display:none;">
+		<hr />
+		@await Html.PartialAsync("_TableLayout")
+	</div>
+	<div id="paginationContainer" style="display:none;">
+		@await Html.PartialAsync("_Pagination")
+	</div>
+	<div id="dataNotFoundContainer" style="display:none;">
+		@await Html.PartialAsync("_DataNotFound")
+	</div>
+</div>

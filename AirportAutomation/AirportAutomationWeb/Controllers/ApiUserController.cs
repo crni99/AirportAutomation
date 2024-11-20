@@ -1,6 +1,7 @@
 ﻿using AirportAutomation.Application.Dtos.ApiUser;
 using AirportAutomation.Core.Entities;
 using AirportAutomation.Web.Interfaces;
+using AirportAutomation.Web.Models.Airline;
 using AirportAutomation.Web.Models.ApiUser;
 using AirportAutomation.Web.Models.Response;
 using AutoMapper;
@@ -23,20 +24,27 @@ namespace AirportAutomation.Web.Controllers
 		}
 
 		[HttpGet]
-		public async Task<IActionResult> Index(int page = 1, int pageSize = 10)
+		public async Task<IActionResult> Index()
+		{
+			return View();
+		}
+
+		[HttpGet]
+		[Route("GetApiUsers")]
+		public async Task<IActionResult> GetApiUsers(int page = 1, int pageSize = 10)
 		{
 			if (page < 1)
 			{
 				_alertService.SetAlertMessage(TempData, "invalid_page_number", false);
-				return RedirectToAction("Index");
+				return Json(new { success = false, message = "Page number must be greater than or equal to 1." });
 			}
 			var response = await _httpCallService.GetDataList<ApiUserEntity>(page, pageSize);
 			if (response == null)
 			{
-				return View();
+				return Json(new { success = false, message = "No api users found." });
 			}
 			var pagedResponse = _mapper.Map<PagedResponse<ApiUserViewModel>>(response);
-			return View(pagedResponse);
+			return Json(new { success = true, data = pagedResponse });
 		}
 
 		[HttpGet]

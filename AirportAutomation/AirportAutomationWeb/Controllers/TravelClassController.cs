@@ -21,33 +21,27 @@ namespace AirportAutomation.Web.Controllers
 			_mapper = mapper;
 		}
 
-		[HttpGet]
-		public async Task<IActionResult> Index(int page = 1, int pageSize = 10)
+		public async Task<IActionResult> Index()
 		{
-			if (page < 1)
-			{
-				_alertService.SetAlertMessage(TempData, "invalid_page_number", false);
-				return RedirectToAction("Index");
-			}
-			var response = await _httpCallService.GetDataList<TravelClassEntity>(page, pageSize);
-			if (response == null)
-			{
-				return View();
-			}
-			var pagedResponse = _mapper.Map<PagedResponse<TravelClassViewModel>>(response);
-			return View(pagedResponse);
+			return View();
 		}
 
 		[HttpGet]
 		[Route("GetTravelClasses")]
 		public async Task<IActionResult> GetTravelClasses(int page = 1, int pageSize = 10)
 		{
-			var response = await _httpCallService.GetDataList<TravelClassEntity>(page, pageSize);
-			if (response == null || response.Data == null || !response.Data.Any())
+			if (page < 1)
 			{
-				return Json(new { success = false, data = response });
+				_alertService.SetAlertMessage(TempData, "invalid_page_number", false);
+				return Json(new { success = false, message = "Page number must be greater than or equal to 1." });
 			}
-			return Json(new { success = true, data = response });
+			var response = await _httpCallService.GetDataList<TravelClassEntity>(page, pageSize);
+			if (response == null)
+			{
+				return Json(new { success = false, message = "No travel classes found." });
+			}
+			var pagedResponse = _mapper.Map<PagedResponse<TravelClassViewModel>>(response);
+			return Json(new { success = true, data = pagedResponse });
 		}
 	}
 }

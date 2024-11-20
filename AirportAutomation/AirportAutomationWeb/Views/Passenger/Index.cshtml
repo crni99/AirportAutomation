@@ -1,7 +1,6 @@
-﻿@model PagedResponse<AirportAutomation.Web.Models.Passenger.PassengerViewModel>
-
-@{
+﻿@{
 	ViewBag.Title = "Passengers";
+	string typeName = "Passenger";
 }
 
 <div class="container mt-5">
@@ -9,22 +8,17 @@
 		<div class="col-md-6">
 			@if (ViewBag.ApiUserRole != "User")
 			{
-				<div class="d-flex justify-content-start mb-3">
-					<a class="btn btn-success" asp-area="" asp-controller="Passenger" asp-action="Create">Create Passenger</a>
-				</div>
+				@await Html.PartialAsync("Index/_CreateButtonIndex", typeName)
 			}
-			@if (Model != null)
-			{
-				<div class="input-group justify-content-start" style="width: 100%;">
-					<label for="firstName" class="input-group-text">First Name:</label>
-					<input type="text" class="form-control" id="firstName" name="firstName">
+			<div class="input-group justify-content-start" style="width: 100%;">
+				<label for="firstName" class="input-group-text">First Name:</label>
+				<input type="text" class="form-control" id="firstName" name="firstName">
 
-					<label for="lastName" class="input-group-text">Last Name:</label>
-					<input type="text" class="form-control" id="lastName" name="lastName">
+				<label for="lastName" class="input-group-text">Last Name:</label>
+				<input type="text" class="form-control" id="lastName" name="lastName">
 
-					<button id="searchButton" class="btn btn-primary">Search</button>
-				</div>
-			}
+				<button id="searchButton" class="btn btn-primary">Search</button>
+			</div>
 		</div>
 	</div>
 </div>
@@ -36,89 +30,34 @@
 	}
 </div>
 
-<div class="form-horizontal">
-	<div class="form-group">
-		@if (Model != null)
-		{
-			<hr />
-			<table class="table table-responsive table-striped table-hover">
-				<thead>
-					<tr>
-						<th>
-							@Html.DisplayNameFor(model => model.Data.First().Id)
-						</th>
-						<th>
-							@Html.DisplayNameFor(model => model.Data.First().FirstName)
-						</th>
-						<th>
-							@Html.DisplayNameFor(model => model.Data.First().LastName)
-						</th>
-						<th>
-							@Html.DisplayNameFor(model => model.Data.First().UPRN)
-						</th>
-						<th>
-							@Html.DisplayNameFor(model => model.Data.First().Passport)
-						</th>
-						<th>
-							@Html.DisplayNameFor(model => model.Data.First().Address)
-						</th>
-						<th>
-							@Html.DisplayNameFor(model => model.Data.First().Phone)
-						</th>
-					</tr>
-				</thead>
-				<tbody id="tableBody">
-					@foreach (var item in Model.Data)
-					{
-						<tr class="clickable-row">
-							<td onclick="openDetails('@item.Id')">
-								@Html.DisplayFor(modelItem => item.Id)
-							</td>
-							<td onclick="openDetails('@item.Id')">
-								@Html.DisplayFor(modelItem => item.FirstName)
-							</td>
-							<td onclick="openDetails('@item.Id')">
-								@Html.DisplayFor(modelItem => item.LastName)
-							</td>
-							<td onclick="openDetails('@item.Id')">
-								@Html.DisplayFor(modelItem => item.UPRN)
-							</td>
-							<td onclick="openDetails('@item.Id')">
-								@Html.DisplayFor(modelItem => item.Passport)
-							</td>
-							<td onclick="openMap('@item.Address')" class="link-primary">
-								@Html.DisplayFor(modelItem => item.Address)
-							</td>
-							<td onclick="openDetails('@item.Id')">
-								@Html.DisplayFor(modelItem => item.Phone)
-							</td>
-						</tr>
-					}
-				</tbody>
-			</table>
-			@await Html.PartialAsync("_Pagination", Model)
-		}
-		else
-		{
-			@await Html.PartialAsync("_DataNotFound")
-		}
-	</div>
-</div>
+@await Html.PartialAsync("Index/_FormContainer")
 
 @section Scripts {
 	<script>
-		function openDetails(id) {
-			window.open('@Url.Action("Details", new { id = "__id__" })'.replace('__id__', id), '_blank');
-		}
+		$(document).ready(function () {
+			var typeName = '@typeName';
+			var fetchUrl = '@Url.Action("GetPassengers", typeName, new { area = "", name = "" })';
+			var tableBody = $('#tableBody');
+			fetchData(fetchUrl, typeName, 1);
+			$(document).on('click', '.page-link', function (e) {
+				e.preventDefault();
+				var page = $(this).data('page');
+				if (page) {
+					fetchData(fetchUrl, typeName, page);
+				}
+			});
+		});
 	</script>
 	<script>
 		$(document).ready(function () {
-			var searchUrl = '@Url.Action("GetPassengersByName", "Passenger", new { area = "", name = "" })';
+			var typeName = '@typeName';
+			var searchUrl = '@Url.Action("GetPassengersByName", typeName, new { area = "", name = "" })';
 			var tableBody = $('#tableBody');
-			searchByFNameOrLName(searchUrl, tableBody, 'Passenger');
+			searchByFNameOrLName(searchUrl, tableBody, typeName);
 		});
 	</script>
+	<script src="~/js/GetHelper.js"></script>
 	<script src="~/js/OpenHelper.js"></script>
-	<script src="~/js/AlertHelper.js"></script>
 	<script src="~/js/SearchHelper.js"></script>
+	<script src="~/js/AlertHelper.js"></script>
 }

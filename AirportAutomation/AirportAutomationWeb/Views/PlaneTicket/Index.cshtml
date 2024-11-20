@@ -1,7 +1,6 @@
-﻿@model PagedResponse<AirportAutomation.Web.Models.PlaneTicket.PlaneTicketViewModel>
-
-@{
+﻿@{
 	ViewBag.Title = "Plane Tickets";
+	string typeName = "PlaneTicket";
 }
 
 <div class="container mt-5">
@@ -9,22 +8,17 @@
 		<div class="col-md-6">
 			@if (ViewBag.ApiUserRole != "User")
 			{
-				<div class="d-flex justify-content-start mb-3">
-					<a class="btn btn-success" asp-area="" asp-controller="PlaneTicket" asp-action="Create">Create Plane Ticket</a>
-				</div>
+				@await Html.PartialAsync("Index/_CreateButtonIndex", typeName)
 			}
-			@if (Model != null)
-			{
-				<div class="input-group justify-content-start" style="width: 100%;">
-					<label for="minPrice" class="input-group-text">Min Price:</label>
-					<input type="number" class="form-control" id="minPrice" name="minPrice">
+			<div class="input-group justify-content-start" style="width: 100%;">
+				<label for="minPrice" class="input-group-text">Min Price:</label>
+				<input type="number" class="form-control" id="minPrice" name="minPrice">
 
-					<label for="maxPrice" class="input-group-text">Max Price:</label>
-					<input type="number" class="form-control" id="maxPrice" name="maxPrice">
+				<label for="maxPrice" class="input-group-text">Max Price:</label>
+				<input type="number" class="form-control" id="maxPrice" name="maxPrice">
 
-					<button id="searchButton" class="btn btn-primary">Search</button>
-				</div>
-			}
+				<button id="searchButton" class="btn btn-primary">Search</button>
+			</div>
 		</div>
 	</div>
 </div>
@@ -36,65 +30,34 @@
 	}
 </div>
 
-<div class="form-horizontal">
-	<div class="form-group">
-		@if (Model != null)
-		{
-			<hr />
-			<table class="table table-responsive table-striped table-hover">
-				<thead>
-					<tr>
-						<th>
-							@Html.DisplayNameFor(model => model.Data.First().Id)
-						</th>
-						<th>
-							@Html.DisplayNameFor(model => model.Data.First().Price)
-						</th>
-						<th>
-							@Html.DisplayNameFor(model => model.Data.First().PurchaseDate)
-						</th>
-						<th>
-							@Html.DisplayNameFor(model => model.Data.First().SeatNumber)
-						</th>
-					</tr>
-				</thead>
-				<tbody id="tableBody">
-					@foreach (var item in Model.Data)
-					{
-						<tr class="clickable-row" onclick="window.open('@Url.Action("Details", new { id = item.Id })', '_blank');">
-							<td>
-								@Html.DisplayFor(modelItem => item.Id)
-							</td>
-							<td>
-								@Html.DisplayFor(modelItem => item.Price)
-							</td>
-							<td>
-								@Html.DisplayFor(modelItem => item.PurchaseDate)
-							</td>
-							<td>
-								@Html.DisplayFor(modelItem => item.SeatNumber)
-							</td>
-						</tr>
-					}
-				</tbody>
-			</table>
-			@await Html.PartialAsync("_Pagination", Model)
-		}
-		else
-		{
-			@await Html.PartialAsync("_DataNotFound")
-		}
-	</div>
-</div>
+@await Html.PartialAsync("Index/_FormContainer")
 
 @section Scripts {
 	<script>
 		$(document).ready(function () {
-			var searchUrl = '@Url.Action("GetPlaneTicketsForPrice", "PlaneTicket", new { area = "", name = "" })';
+			var typeName = '@typeName';
+			var fetchUrl = '@Url.Action("GetPlaneTickets", typeName, new { area = "", name = "" })';
 			var tableBody = $('#tableBody');
-			searchByPrice(searchUrl, tableBody, 'PlaneTicket');
+			fetchData(fetchUrl, typeName, 1);
+			$(document).on('click', '.page-link', function (e) {
+				e.preventDefault();
+				var page = $(this).data('page');
+				if (page) {
+					fetchData(fetchUrl, typeName, page);
+				}
+			});
 		});
 	</script>
-	<script src="~/js/AlertHelper.js"></script>
+	<script>
+		$(document).ready(function () {
+			var typeName = '@typeName';
+			var searchUrl = '@Url.Action("GetPlaneTicketsForPrice", typeName, new { area = "", name = "" })';
+			var tableBody = $('#tableBody');
+			searchByPrice(searchUrl, tableBody, typeName);
+		});
+	</script>
+	<script src="~/js/GetHelper.js"></script>
+	<script src="~/js/OpenHelper.js"></script>
 	<script src="~/js/SearchHelper.js"></script>
+	<script src="~/js/AlertHelper.js"></script>
 }

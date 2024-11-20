@@ -7,7 +7,7 @@
 <div class="form-horizontal">
 	<div class="form-group">
 		<h1>Airport Automation</h1>
-		<p>The time is @DateTime.Now</p>
+		<p id="currentDateTime"></p>
 	</div>
 </div>
 
@@ -35,4 +35,18 @@
 @if (TempData["AlertMessage"] != null)
 {
 	@await Html.PartialAsync("_AlertPartial", TempData)
+}
+@section Scripts {
+	<script type="text/javascript">
+		function updateDateTime() {
+			var now = new Date();
+			var dateOptions = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+			var timeOptions = { hour12: false };
+			document.getElementById("currentDateTime").innerHTML = now.toLocaleDateString([], dateOptions) + " - " + now.toLocaleTimeString([], timeOptions);
+		}
+		window.onload = function () {
+			updateDateTime();
+			setInterval(updateDateTime, 1000);
+		};
+	</script>
 }

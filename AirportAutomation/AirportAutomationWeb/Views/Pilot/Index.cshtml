@@ -1,7 +1,6 @@
-﻿@model PagedResponse<AirportAutomation.Web.Models.Pilot.PilotViewModel>
-
-@{
+﻿@{
 	ViewBag.Title = "Pilots";
+	string typeName = "Pilot";
 }
 
 <div class="container mt-5">
@@ -9,22 +8,17 @@
 		<div class="col-md-6">
 			@if (ViewBag.ApiUserRole != "User")
 			{
-				<div class="d-flex justify-content-start mb-3">
-					<a class="btn btn-success" asp-area="" asp-controller="Pilot" asp-action="Create">Create Pilot</a>
-				</div>
+				@await Html.PartialAsync("Index/_CreateButtonIndex", typeName)
 			}
-			@if (Model != null)
-			{
-				<div class="input-group justify-content-start" style="width: 100%;">
-					<label for="firstName" class="input-group-text">First Name:</label>
-					<input type="text" class="form-control" id="firstName" name="firstName">
+			<div class="input-group justify-content-start" style="width: 100%;">
+				<label for="firstName" class="input-group-text">First Name:</label>
+				<input type="text" class="form-control" id="firstName" name="firstName">
 
-					<label for="lastName" class="input-group-text">Last Name:</label>
-					<input type="text" class="form-control" id="lastName" name="lastName">
+				<label for="lastName" class="input-group-text">Last Name:</label>
+				<input type="text" class="form-control" id="lastName" name="lastName">
 
-					<button id="searchButton" class="btn btn-primary">Search</button>
-				</div>
-			}
+				<button id="searchButton" class="btn btn-primary">Search</button>
+			</div>
 		</div>
 	</div>
 </div>
@@ -36,71 +30,34 @@
 	}
 </div>
 
-<div class="form-horizontal">
-	<div class="form-group">
-		@if (Model != null)
-		{
-			<hr />
-			<table class="table table-responsive table-striped table-hover">
-				<thead>
-					<tr>
-						<th>
-							@Html.DisplayNameFor(model => model.Data.First().Id)
-						</th>
-						<th>
-							@Html.DisplayNameFor(model => model.Data.First().FirstName)
-						</th>
-						<th>
-							@Html.DisplayNameFor(model => model.Data.First().LastName)
-						</th>
-						<th>
-							@Html.DisplayNameFor(model => model.Data.First().UPRN)
-						</th>
-						<th>
-							@Html.DisplayNameFor(model => model.Data.First().FlyingHours)
-						</th>
-					</tr>
-				</thead>
-				<tbody id="tableBody">
-					@foreach (var item in Model.Data)
-					{
-						<tr class="clickable-row" onclick="window.open('@Url.Action("Details", new { id = item.Id })', '_blank');">
-							<td>
-								@Html.DisplayFor(modelItem => item.Id)
-							</td>
-							<td>
-								@Html.DisplayFor(modelItem => item.FirstName)
-							</td>
-							<td>
-								@Html.DisplayFor(modelItem => item.LastName)
-							</td>
-							<td>
-								@Html.DisplayFor(modelItem => item.UPRN)
-							</td>
-							<td>
-								@Html.DisplayFor(modelItem => item.FlyingHours)
-							</td>
-						</tr>
-					}
-				</tbody>
-			</table>
-			@await Html.PartialAsync("_Pagination", Model)
-		}
-		else
-		{
-			@await Html.PartialAsync("_DataNotFound")
-		}
-	</div>
-</div>
+@await Html.PartialAsync("Index/_FormContainer")
 
 @section Scripts {
 	<script>
 		$(document).ready(function () {
-			var searchUrl = '@Url.Action("GetPilotsByName", "Pilot", new { area = "", name = "" })';
+			var typeName = '@typeName';
+			var fetchUrl = '@Url.Action("GetPilots", typeName, new { area = "", name = "" })';
 			var tableBody = $('#tableBody');
-			searchByFNameOrLName(searchUrl, tableBody, 'Pilot');
+			fetchData(fetchUrl, typeName, 1);
+			$(document).on('click', '.page-link', function (e) {
+				e.preventDefault();
+				var page = $(this).data('page');
+				if (page) {
+					fetchData(fetchUrl, typeName, page);
+				}
+			});
 		});
 	</script>
-	<script src="~/js/AlertHelper.js"></script>
+	<script>
+		$(document).ready(function () {
+			var typeName = '@typeName';
+			var searchUrl = '@Url.Action("GetPilotsByName", typeName, new { area = "", name = "" })';
+			var tableBody = $('#tableBody');
+			searchByFNameOrLName(searchUrl, tableBody, typeName);
+		});
+	</script>
+	<script src="~/js/GetHelper.js"></script>
+	<script src="~/js/OpenHelper.js"></script>
 	<script src="~/js/SearchHelper.js"></script>
+	<script src="~/js/AlertHelper.js"></script>
 }
