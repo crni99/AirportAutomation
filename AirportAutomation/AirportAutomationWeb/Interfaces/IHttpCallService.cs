@@ -14,12 +14,12 @@ namespace AirportAutomation.Web.Interfaces
 		Task<T> CreateData<T>(T t);
 		Task<bool> EditData<T>(T t, int id);
 		Task<bool> DeleteData<T>(int id);
-		Task<string> GetDataByName<T>(string name);
-		Task<string> GetDataByFNameOrLName<T>(string? firstName, string? lastName);
-		Task<string> GetDataForPrice<T>(int? minPrice, int? maxPrice);
-		Task<string> GetDataBetweenDates<T>(string? startDate, string? endDate);
-		Task<string> GetDataByCityOrAirport<T>(string? city, string? airport);
-		Task<string> GetDataByRole<T>(string role);
+		Task<PagedResponse<T>> GetDataByName<T>(string name, int page, int pageSize);
+		Task<PagedResponse<T>> GetDataByFNameOrLName<T>(string? firstName, string? lastName, int page, int pageSize);
+		Task<PagedResponse<T>> GetDataForPrice<T>(int? minPrice, int? maxPrice, int page, int pageSize);
+		Task<PagedResponse<T>> GetDataBetweenDates<T>(string? startDate, string? endDate, int page, int pageSize);
+		Task<PagedResponse<T>> GetDataByCityOrAirport<T>(string? city, string? airport, int page, int pageSize);
+		Task<PagedResponse<T>> GetDataByRole<T>(string role, int page, int pageSize);
 		Task<T> GetHealthCheck<T>();
 		string GetModelName<T>();
 	}

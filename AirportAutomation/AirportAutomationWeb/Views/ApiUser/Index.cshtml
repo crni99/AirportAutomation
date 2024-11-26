@@ -8,7 +8,6 @@
 	<div class="container mt-5">
 		<div class="row">
 			<div class="col-md-6 d-flex justify-content-between">
-
 				<div class="input-group mb-3" style="width: 70%;">
 					<label for="roleSelect" class="input-group-text">Search by Role:</label>
 					<select id="roleSelect" class="form-control" required>
@@ -57,8 +56,7 @@ else
 		$(document).ready(function () {
 			var typeName = '@typeName';
 			var searchUrl = '@Url.Action("GetApiUsersByRole", typeName, new { area = "", name = "" })';
-			var tableBody = $('#tableBody');
-			searchByRole(searchUrl, tableBody, typeName);
+			searchByRole(searchUrl, typeName, 1);
 		});
 	</script>
 	<script src="~/js/GetHelper.js"></script>

@@ -1,6 +1,5 @@
 ﻿using AirportAutomation.Core.Entities;
 using AirportAutomation.Web.Interfaces;
-using AirportAutomation.Web.Models.Flight;
 using AirportAutomation.Web.Models.Passenger;
 using AirportAutomation.Web.Models.Response;
 using AutoMapper;
@@ -64,15 +63,25 @@ namespace AirportAutomation.Web.Controllers
 
 		[HttpGet]
 		[Route("GetPassengersByName")]
-		public async Task<IActionResult> GetPassengersByName([FromQuery] string firstName, [FromQuery] string lastName)
+		public async Task<IActionResult> GetPassengersByName([FromQuery] string firstName, [FromQuery] string lastName, int page = 1, int pageSize = 10)
 		{
+			if (page < 1)
+			{
+				_alertService.SetAlertMessage(TempData, "invalid_page_number", false);
+				return Json(new { success = false, message = "Page number must be greater than or equal to 1." });
+			}
 			if (string.IsNullOrEmpty(firstName) && string.IsNullOrEmpty(lastName))
 			{
 				_alertService.SetAlertMessage(TempData, "missing_field", false);
 				return RedirectToAction("Index");
 			}
-			var response = await _httpCallService.GetDataByFNameOrLName<PassengerEntity>(firstName, lastName);
-			return Json(response);
+			var response = await _httpCallService.GetDataByFNameOrLName<PassengerEntity>(firstName, lastName, page, pageSize);
+			if (response == null)
+			{
+				return Json(new { success = false, message = "No passengers found." });
+			}
+			var pagedResponse = _mapper.Map<PagedResponse<PassengerViewModel>>(response);
+			return Json(new { success = true, data = pagedResponse });
 		}
 
 		[HttpGet]

@@ -3,21 +3,25 @@
 	string typeName = "Flight";
 }
 
-<div class="container mt-5">
+<div class="container container-spacing-top">
 	<div class="row justify-content-between">
-		<div class="col-md-6">
-			@if (ViewBag.ApiUserRole != "User")
-			{
-				@await Html.PartialAsync("Index/_CreateButtonIndex", typeName)
-			}
-			<div class="input-group justify-content-start" style="width: 100%;">
-				<label for="startDate" class="input-group-text">Start Date:</label>
-				<input type="text" class="form-control" id="startDate" name="startDate">
-
-				<label for="endDate" class="input-group-text">End Date:</label>
-				<input type="text" class="form-control" id="endDate" name="endDate">
-
-				<button id="searchButton" class="btn btn-primary">Search</button>
+		<div class="col-md-12">
+			<div class="d-flex justify-content-between align-items-center" style="width: 100%;">
+				@if (ViewBag.ApiUserRole != "User")
+				{
+					@await Html.PartialAsync("Index/_CreateButtonIndex", typeName)
+				}
+				<div class="d-flex">
+					<div class="input-group me-3">
+						<label for="startDate" class="input-group-text">Start Date:</label>
+						<input type="text" class="form-control" id="startDate" name="startDate">
+					</div>
+					<div class="input-group me-3">
+						<label for="endDate" class="input-group-text">End Date:</label>
+						<input type="text" class="form-control" id="endDate" name="endDate">
+					</div>
+					<button id="searchButton" class="btn btn-primary">Search</button>
+				</div>
 			</div>
 		</div>
 	</div>
@@ -52,8 +56,7 @@
 		$(document).ready(function () {
 			var typeName = '@typeName';
 			var searchUrl = '@Url.Action("GetFlightsBetweenDates", typeName, new { area = "", name = "" })';
-			var tableBody = $('#tableBody');
-			searchByDate(searchUrl, tableBody, typeName);
+			searchByDate(searchUrl, typeName, 1);
 		});
 	</script>
 	<script src="~/js/GetHelper.js"></script>

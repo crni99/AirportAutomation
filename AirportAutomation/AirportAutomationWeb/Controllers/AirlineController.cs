@@ -1,7 +1,6 @@
 ﻿using AirportAutomation.Core.Entities;
 using AirportAutomation.Web.Interfaces;
 using AirportAutomation.Web.Models.Airline;
-using AirportAutomation.Web.Models.Destination;
 using AirportAutomation.Web.Models.Response;
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
@@ -64,16 +63,26 @@ namespace AirportAutomation.Web.Controllers
 
 
 		[HttpGet]
-		[Route("GetAirlinesByName/{name}")]
-		public async Task<IActionResult> GetAirlinesByName(string name)
+		[Route("GetAirlinesByName")]
+		public async Task<IActionResult> GetAirlinesByName([FromQuery] string name, int page = 1, int pageSize = 10)
 		{
+			if (page < 1)
+			{
+				_alertService.SetAlertMessage(TempData, "invalid_page_number", false);
+				return Json(new { success = false, message = "Page number must be greater than or equal to 1." });
+			}
 			if (string.IsNullOrEmpty(name))
 			{
 				_alertService.SetAlertMessage(TempData, "missing_field", false);
 				return RedirectToAction("Index");
 			}
-			var response = await _httpCallService.GetDataByName<AirlineEntity>(name);
-			return Json(response);
+			var response = await _httpCallService.GetDataByName<AirlineEntity>(name, page, pageSize);
+			if (response == null)
+			{
+				return Json(new { success = false, message = "No airlines found." });
+			}
+			var pagedResponse = _mapper.Map<PagedResponse<AirlineViewModel>>(response);
+			return Json(new { success = true, data = pagedResponse });
 		}
 
 		[HttpGet]

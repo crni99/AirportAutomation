@@ -34,3 +34,11 @@ body {
 .clickable-row {
     cursor: pointer;
 }
+
+.table {
+    box-shadow: 0 2px 6px 0 rgba(0, 0, 0, 0.1), 0 2px 4px 0 rgba(0, 0, 0, 0.3) !important;
+}
+
+.container-spacing-top {
+    margin-top: 2.5rem;
+}

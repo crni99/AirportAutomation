@@ -1,130 +1,142 @@
-﻿function searchByFNameOrLName(searchUrl, tableBody, entityType) {
-    $('#searchButton').click(function () {
+﻿function searchByFNameOrLName(searchUrl, entityType, page = 1) {
+    $('#searchButton').on('click', function () {
         var firstName = $('#firstName').val();
         var lastName = $('#lastName').val();
         if ((!firstName || firstName.trim() === '') && (!lastName || lastName.trim() === '')) {
             return;
         }
-        var urlWithParams = searchUrl + '/?firstName=' + firstName + '&lastName=' + lastName;
+        var pageSize = 10;
+        var requestUrl = `${searchUrl}?firstName=${encodeURIComponent(firstName)}&lastName=${encodeURIComponent(lastName)}&page=${page}&pageSize=${pageSize}`;
+
+        var tableHead = $('#tableHead');
+        var tableBody = $('#tableBody');
 
         $.ajax({
-            url: urlWithParams,
+            url: requestUrl,
             type: 'GET',
             success: function (data) {
-                if (data === null || data.trim() === "") {
-                    showAlertInContainer('No data found for the given search term.', 'danger');
+                if (data.success !== true || !data.data || data.data.totalCount === 0) {
+                    $('#dataNotFoundContainer').show();
+                    showAlertInContainer('No data found.', 'danger');
                     return;
                 }
-                var jsonData = JSON.parse(data);
+                $('#dataForm').show();
+                $('#paginationContainer').show();
+
+                tableHead.empty();
                 tableBody.empty();
 
-                $.each(jsonData.data, function (index, item) {
-                    var row = document.createElement("tr");
-                    row.innerHTML = '<td>' + item.id + '</td>' +
-                        '<td>' + item.firstName + '</td>' +
-                        '<td>' + item.lastName + '</td>' +
-                        '<td>' + item.uprn + '</td>';
+                var fields = Object.keys(data.data.data[0]);
+                createTableHead(tableHead, fields, entityType);
 
-                    if (entityType === 'Passenger') {
-                        row.innerHTML += '<td>' + item.passport + '</td>' +
-                            '<td>' + item.address + '</td>' +
-                            '<td>' + item.phone + '</td>';
-                    } else if (entityType === 'Pilot') {
-                        row.innerHTML += '<td>' + item.flyingHours + '</td>';
-                    }
-                    row.classList.add("clickable-row");
-                    row.addEventListener("click", function () {
-                        window.open('/' + entityType + '/' + item.id, '_blank');
-                    });
-                    tableBody.append(row);
+                var rowsData = data.data.data || [];
+                $.each(rowsData, function (_, item) {
+                    createTableBody(item, tableBody, entityType);
                 });
             },
-            error: function (error) {
-                console.error('Error:', error);
+            error: function (xhr, status, error) {
+                console.error('Error:', status, error);
+                console.error('Response:', xhr.responseText);
+                showAlertInContainer('An error occurred while fetching data.', 'danger');
             }
         });
     });
 }
 
-function searchByName(searchUrl, tableBody, entityType) {
-    $('#searchButton').click(function () {
+function searchByName(searchUrl, entityType, page = 1) {
+    $('#searchButton').on('click', function () {
         var searchTerm = $('#searchInput').val();
         if (!searchTerm || searchTerm.trim() === '') {
             return;
         }
+        var pageSize = 10;
+        var requestUrl = `${searchUrl}?name=${encodeURIComponent(searchTerm)}&page=${page}&pageSize=${pageSize}`;
+        console.log(searchUrl);
+        console.log(requestUrl);
+        console.log(searchTerm);
+
+        var tableHead = $('#tableHead');
+        var tableBody = $('#tableBody');
 
         $.ajax({
-            url: searchUrl + '/' + searchTerm,
+            url: requestUrl,
             type: 'GET',
             success: function (data) {
-                if (data === null || data.trim() === "") {
-                    showAlertInContainer('No data found for the given search term.', 'danger');
+                if (data.success !== true || !data.data || data.data.totalCount === 0) {
+                    $('#dataNotFoundContainer').show();
+                    showAlertInContainer('No data found.', 'danger');
                     return;
                 }
-                var jsonData = JSON.parse(data);
+                $('#dataForm').show();
+                $('#paginationContainer').show();
+
+                tableHead.empty();
                 tableBody.empty();
 
-                $.each(jsonData.data, function (index, item) {
-                    var row = document.createElement("tr");
-                    row.innerHTML = '<td>' + item.id + '</td>' +
-                        '<td>' + item.name + '</td>';
+                var fields = Object.keys(data.data.data[0]);
+                createTableHead(tableHead, fields, entityType);
 
-                    row.classList.add("clickable-row");
-                    row.addEventListener("click", function () {
-                        window.open('/' + entityType + '/' + item.id, '_blank');
-                    });
-                    tableBody.append(row);
+                var rowsData = data.data.data || [];
+                $.each(rowsData, function (_, item) {
+                    createTableBody(item, tableBody, entityType);
                 });
             },
-            error: function (error) {
-                console.error('Error:', error);
+            error: function (xhr, status, error) {
+                console.error('Error:', status, error);
+                console.error('Response:', xhr.responseText);
+                showAlertInContainer('An error occurred while fetching data.', 'danger');
             }
         });
     });
 }
 
-function searchByDate(searchUrl, tableBody, entityType) {
-    $('#searchButton').click(function () {
+function searchByDate(searchUrl, entityType, page = 1) {
+    $('#searchButton').on('click', function () {
         var startDate = $('#startDate').val();
         var endDate = $('#endDate').val();
         if ((!startDate || startDate.trim() === '') && (!endDate || endDate.trim() === '')) {
             return;
         }
-        var urlWithParams = searchUrl + '/?startDate=' + startDate + '&endDate=' + endDate;
+        var pageSize = 10;
+        var requestUrl = `${searchUrl}?startDate=${encodeURIComponent(startDate)}&endDate=${encodeURIComponent(endDate)}&page=${page}&pageSize=${pageSize}`;
+
+        var tableHead = $('#tableHead');
+        var tableBody = $('#tableBody');
 
         $.ajax({
-            url: urlWithParams,
+            url: requestUrl,
             type: 'GET',
             success: function (data) {
-                if (data === null || data.trim() === "") {
-                    showAlertInContainer('No data found for the given search term.', 'danger');
+                if (data.success !== true || !data.data || data.data.totalCount === 0) {
+                    $('#dataNotFoundContainer').show();
+                    showAlertInContainer('No data found.', 'danger');
                     return;
                 }
-                var jsonData = JSON.parse(data);
+                $('#dataForm').show();
+                $('#paginationContainer').show();
+
+                tableHead.empty();
                 tableBody.empty();
 
-                $.each(jsonData.data, function (index, item) {
-                    var row = document.createElement("tr");
-                    row.innerHTML = '<td>' + item.id + '</td>' +
-                        '<td>' + item.departureDate + '</td>' +
-                        '<td>' + item.departureTime + '</td>';
+                var fields = Object.keys(data.data.data[0]);
+                createTableHead(tableHead, fields, entityType);
 
-                    row.classList.add("clickable-row");
-                    row.addEventListener("click", function () {
-                        window.open('/' + entityType + '/' + item.id, '_blank');
-                    });
-                    tableBody.append(row);
+                var rowsData = data.data.data || [];
+                $.each(rowsData, function (_, item) {
+                    createTableBody(item, tableBody, entityType);
                 });
             },
-            error: function (error) {
-                console.error('Error:', error);
+            error: function (xhr, status, error) {
+                console.error('Error:', status, error);
+                console.error('Response:', xhr.responseText);
+                showAlertInContainer('An error occurred while fetching data.', 'danger');
             }
         });
     });
 }
 
-function searchByPrice(searchUrl, tableBody, entityType) {
-    $('#searchButton').click(function () {
+function searchByPrice(searchUrl, entityType, page = 1) {
+    $('#searchButton').on('click', function () {
         var minPrice = $('#minPrice').val();
         var maxPrice = $('#maxPrice').val();
         if (minPrice === null || minPrice === '' || maxPrice === null || maxPrice === '') {
@@ -133,113 +145,128 @@ function searchByPrice(searchUrl, tableBody, entityType) {
         if (isNaN(minPrice) || isNaN(maxPrice)) {
             return;
         }
-        var urlWithParams = searchUrl + '/?minPrice=' + minPrice + '&maxPrice=' + maxPrice;
+        var pageSize = 10;
+        var requestUrl = `${searchUrl}?minPrice=${encodeURIComponent(minPrice)}&maxPrice=${encodeURIComponent(maxPrice)}&page=${page}&pageSize=${pageSize}`;
+
+        var tableHead = $('#tableHead');
+        var tableBody = $('#tableBody');
 
         $.ajax({
-            url: urlWithParams,
+            url: requestUrl,
             type: 'GET',
             success: function (data) {
-                if (data === null || data.trim() === "") {
-                    showAlertInContainer('No data found for the given search term.', 'danger');
+                if (data.success !== true || !data.data || data.data.totalCount === 0) {
+                    $('#dataNotFoundContainer').show();
+                    showAlertInContainer('No data found.', 'danger');
                     return;
                 }
-                var jsonData = JSON.parse(data);
+                $('#dataForm').show();
+                $('#paginationContainer').show();
+
+                tableHead.empty();
                 tableBody.empty();
 
-                $.each(jsonData.data, function (index, item) {
-                    var row = document.createElement("tr");
-                    row.innerHTML = '<td>' + item.id + '</td>' +
-                        '<td>' + item.price + '</td>' +
-                        '<td>' + item.purchaseDate + '</td>' +
-                        '<td>' + item.seatNumber + '</td>';
+                var fields = Object.keys(data.data.data[0]);
+                createTableHead(tableHead, fields, entityType);
 
-                    row.classList.add("clickable-row");
-                    row.addEventListener("click", function () {
-                        window.open('/' + entityType + '/' + item.id, '_blank');
-                    });
-                    tableBody.append(row);
+                var rowsData = data.data.data || [];
+                $.each(rowsData, function (_, item) {
+                    createTableBody(item, tableBody, entityType);
                 });
             },
-            error: function (error) {
-                console.error('Error:', error);
+            error: function (xhr, status, error) {
+                console.error('Error:', status, error);
+                console.error('Response:', xhr.responseText);
+                showAlertInContainer('An error occurred while fetching data.', 'danger');
             }
         });
     });
 }
 
-function searchByCityOrAirport(searchUrl, tableBody, entityType) {
-    $('#searchButton').click(function () {
+function searchByCityOrAirport(searchUrl, entityType, page = 1) {
+    $('#searchButton').on('click', function () {
         var city = $('#city').val();
         var airport = $('#airport').val();
         if ((!city || city.trim() === '') && (!airport || airport.trim() === '')) {
             return;
         }
-        var urlWithParams = searchUrl + '/?city=' + city + '&airport=' + airport;
+        var pageSize = 10;
+        var requestUrl = `${searchUrl}?city=${encodeURIComponent(city)}&airport=${encodeURIComponent(airport)}&page=${page}&pageSize=${pageSize}`;
+
+        var tableHead = $('#tableHead');
+        var tableBody = $('#tableBody');
 
         $.ajax({
-            url: urlWithParams,
+            url: requestUrl,
             type: 'GET',
             success: function (data) {
-                if (data === null || data.trim() === "") {
-                    showAlertInContainer('No data found for the given search term.', 'danger');
+                if (data.success !== true || !data.data || data.data.totalCount === 0) {
+                    $('#dataNotFoundContainer').show();
+                    showAlertInContainer('No data found.', 'danger');
                     return;
                 }
-                var jsonData = JSON.parse(data);
+                $('#dataForm').show();
+                $('#paginationContainer').show();
+
+                tableHead.empty();
                 tableBody.empty();
 
-                $.each(jsonData.data, function (index, item) {
-                    var row = document.createElement("tr");
-                    row.innerHTML = '<td>' + item.id + '</td>' +
-                        '<td>' + item.city + '</td>' +
-                        '<td>' + item.airport + '</td>';
-                    row.classList.add("clickable-row");
-                    row.addEventListener("click", function () {
-                        window.open('/' + entityType + '/' + item.id, '_blank');
-                    });
-                    tableBody.append(row);
+                var fields = Object.keys(data.data.data[0]);
+                createTableHead(tableHead, fields, entityType);
+
+                var rowsData = data.data.data || [];
+                $.each(rowsData, function (_, item) {
+                    createTableBody(item, tableBody, entityType);
                 });
             },
-            error: function (error) {
-                console.error('Error:', error);
+            error: function (xhr, status, error) {
+                console.error('Error:', status, error);
+                console.error('Response:', xhr.responseText);
+                showAlertInContainer('An error occurred while fetching data.', 'danger');
             }
         });
     });
 }
 
-function searchByRole(searchUrl, tableBody, entityType) {
-    $('#searchButton').click(function () {
+function searchByRole(searchUrl, entityType, page = 1) {
+    $('#searchButton').on('click', function () {
         var searchTerm = $('#roleSelect').val();
         if (!searchTerm || searchTerm.trim() === '') {
             return;
         }
+        var pageSize = 10;
+        var requestUrl = `${searchUrl}?role=${encodeURIComponent(searchTerm)}&page=${page}&pageSize=${pageSize}`;
+
+        var tableHead = $('#tableHead');
+        var tableBody = $('#tableBody');
 
         $.ajax({
-            url: searchUrl + '/' + searchTerm,
+            url: requestUrl,
             type: 'GET',
             success: function (data) {
-                if (data === null || data.trim() === "") {
-                    showAlertInContainer('No data found for the given search term.', 'danger');
+                if (data.success !== true || !data.data || data.data.totalCount === 0) {
+                    $('#dataNotFoundContainer').show();
+                    showAlertInContainer('No data found.', 'danger');
                     return;
                 }
-                var jsonData = JSON.parse(data);
+                $('#dataForm').show();
+                $('#paginationContainer').show();
+
+                tableHead.empty();
                 tableBody.empty();
 
-                $.each(jsonData.data, function (index, item) {
-                    var row = document.createElement("tr");
-                    row.innerHTML = '<td>' + item.apiUserId + '</td>' +
-                        '<td>' + item.userName + '</td>' +
-                        '<td>' + item.password + '</td>' +
-                        '<td>' + item.roles + '</td>';
+                var fields = Object.keys(data.data.data[0]);
+                createTableHead(tableHead, fields, entityType);
 
-                    row.classList.add("clickable-row");
-                    row.addEventListener("click", function () {
-                        window.open('/' + entityType + '/' + item.id, '_blank');
-                    });
-                    tableBody.append(row);
+                var rowsData = data.data.data || [];
+                $.each(rowsData, function (_, item) {
+                    createTableBody(item, tableBody, entityType);
                 });
             },
-            error: function (error) {
-                console.error('Error:', error);
+            error: function (xhr, status, error) {
+                console.error('Error:', status, error);
+                console.error('Response:', xhr.responseText);
+                showAlertInContainer('An error occurred while fetching data.', 'danger');
             }
         });
     });

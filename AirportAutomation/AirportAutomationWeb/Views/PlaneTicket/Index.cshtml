@@ -3,21 +3,25 @@
 	string typeName = "PlaneTicket";
 }
 
-<div class="container mt-5">
+<div class="container container-spacing-top">
 	<div class="row justify-content-between">
-		<div class="col-md-6">
-			@if (ViewBag.ApiUserRole != "User")
-			{
-				@await Html.PartialAsync("Index/_CreateButtonIndex", typeName)
-			}
-			<div class="input-group justify-content-start" style="width: 100%;">
-				<label for="minPrice" class="input-group-text">Min Price:</label>
-				<input type="number" class="form-control" id="minPrice" name="minPrice">
-
-				<label for="maxPrice" class="input-group-text">Max Price:</label>
-				<input type="number" class="form-control" id="maxPrice" name="maxPrice">
-
-				<button id="searchButton" class="btn btn-primary">Search</button>
+		<div class="col-md-12">
+			<div class="d-flex justify-content-between align-items-center" style="width: 100%;">
+				@if (ViewBag.ApiUserRole != "User")
+				{
+					@await Html.PartialAsync("Index/_CreateButtonIndex", typeName)
+				}
+				<div class="d-flex">
+					<div class="input-group me-3">
+						<label for="minPrice" class="input-group-text">Min Price:</label>
+						<input type="number" class="form-control" id="minPrice" name="minPrice">
+					</div>
+					<div class="input-group me-3">
+						<label for="maxPrice" class="input-group-text">Max Price:</label>
+						<input type="number" class="form-control" id="maxPrice" name="maxPrice">
+					</div>
+					<button id="searchButton" class="btn btn-primary">Search</button>
+				</div>
 			</div>
 		</div>
 	</div>
@@ -52,8 +56,7 @@
 		$(document).ready(function () {
 			var typeName = '@typeName';
 			var searchUrl = '@Url.Action("GetPlaneTicketsForPrice", typeName, new { area = "", name = "" })';
-			var tableBody = $('#tableBody');
-			searchByPrice(searchUrl, tableBody, typeName);
+			searchByPrice(searchUrl, typeName, 1);
 		});
 	</script>
 	<script src="~/js/GetHelper.js"></script>

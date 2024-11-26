@@ -3,17 +3,21 @@
 	string typeName = "Airline";
 }
 
-<div class="container mt-5">
-	<div class="row">
-		<div class="col-md-6 d-flex justify-content-between">
-			@if (ViewBag.ApiUserRole != "User")
-			{
-				@await Html.PartialAsync("Index/_CreateButtonIndex", typeName)
-			}
-			<div class="input-group mb-3" style="width: 70%;">
-				<label for="searchInput" class="input-group-text">Search by Name:</label>
-				<input type="text" id="searchInput" class="form-control" required />
-				<button id="searchButton" class="btn btn-primary">Search</button>
+<div class="container container-spacing-top">
+	<div class="row justify-content-between">
+		<div class="col-md-12">
+			<div class="d-flex justify-content-between align-items-center" style="width: 100%;">
+				@if (ViewBag.ApiUserRole != "User")
+				{
+					@await Html.PartialAsync("Index/_CreateButtonIndex", typeName)
+				}
+				<div class="d-flex">
+					<div class="input-group me-3">
+						<label for="searchInput" class="input-group-text">Search by Name:</label>
+						<input type="text" id="searchInput" class="form-control" required />
+					</div>
+					<button id="searchButton" class="btn btn-primary">Search</button>
+				</div>
 			</div>
 		</div>
 	</div>
@@ -47,8 +51,7 @@
 		$(document).ready(function () {
 			var typeName = '@typeName';
 			var searchUrl = '@Url.Action("GetAirlinesByName", typeName, new { area = "", name = "" })';
-			var tableBody = $('#tableBody');
-			searchByName(searchUrl, tableBody, typeName);
+			searchByName(searchUrl, typeName, 1);
 		});
 	</script>
 	<script src="~/js/GetHelper.js"></script>

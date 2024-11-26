@@ -1,6 +1,5 @@
 ﻿using AirportAutomation.Core.Entities;
 using AirportAutomation.Web.Interfaces;
-using AirportAutomation.Web.Models.ApiUser;
 using AirportAutomation.Web.Models.Flight;
 using AirportAutomation.Web.Models.Response;
 using AutoMapper;
@@ -64,15 +63,25 @@ namespace AirportAutomation.Web.Controllers
 
 		[HttpGet]
 		[Route("GetFlightsBetweenDates")]
-		public async Task<IActionResult> GetFlightsBetweenDates([FromQuery] string startDate, [FromQuery] string endDate)
+		public async Task<IActionResult> GetFlightsBetweenDates([FromQuery] string startDate, [FromQuery] string endDate, int page = 1, int pageSize = 10)
 		{
+			if (page < 1)
+			{
+				_alertService.SetAlertMessage(TempData, "invalid_page_number", false);
+				return Json(new { success = false, message = "Page number must be greater than or equal to 1." });
+			}
 			if (string.IsNullOrEmpty(startDate) && string.IsNullOrEmpty(endDate))
 			{
 				_alertService.SetAlertMessage(TempData, "missing_field", false);
 				return RedirectToAction("Index");
 			}
-			var response = await _httpCallService.GetDataBetweenDates<FlightEntity>(startDate, endDate);
-			return Json(response);
+			var response = await _httpCallService.GetDataBetweenDates<FlightEntity>(startDate, endDate, page, pageSize);
+			if (response == null)
+			{
+				return Json(new { success = false, message = "No flights found." });
+			}
+			var pagedResponse = _mapper.Map<PagedResponse<FlightViewModel>>(response);
+			return Json(new { success = true, data = pagedResponse });
 		}
 
 		[HttpGet]

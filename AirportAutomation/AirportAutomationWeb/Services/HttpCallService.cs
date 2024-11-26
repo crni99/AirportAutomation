@@ -1,7 +1,9 @@
 ﻿using AirportAutomation.Web.Interfaces;
 using AirportAutomation.Web.Models.ApiUser;
 using AirportAutomation.Web.Models.Response;
+using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.IdentityModel.JsonWebTokens;
+using QuestPDF.Helpers;
 using System.Data;
 using System.Net;
 using System.Net.Http.Headers;
@@ -308,7 +310,7 @@ namespace AirportAutomation.Web.Services
 		/// Returns a JSON string containing the data of type <typeparamref name="T"/> filtered by the specified name.
 		/// If the retrieval fails, returns null with an error logged.
 		/// </returns>
-		public async Task<string> GetDataByName<T>(string name)
+		public async Task<PagedResponse<T>> GetDataByName<T>(string name, int page, int pageSize)
 		{
 			var modelName = GetModelName<T>();
 
@@ -329,15 +331,20 @@ namespace AirportAutomation.Web.Services
 
 			var response = await httpClient.SendAsync(httpRequestMessage);
 
-			if (response.IsSuccessStatusCode)
+			if (response.StatusCode == HttpStatusCode.OK)
 			{
-				return await response.Content.ReadAsStringAsync();
+				return await response.Content.ReadFromJsonAsync<PagedResponse<T>>().ConfigureAwait(false);
+			}
+			else if (response.StatusCode == HttpStatusCode.NoContent)
+			{
+				_logger.LogInformation("Data not found. Status code: {StatusCode}", response.StatusCode);
+				return new PagedResponse<T>(Enumerable.Empty<T>(), page, pageSize, 0);
 			}
 			else
 			{
 				_logger.LogInformation("Failed to retrieve data. Status code: {StatusCode}", response.StatusCode);
+				return null;
 			}
-			return null;
 		}
 
 		/// <summary>
@@ -350,7 +357,7 @@ namespace AirportAutomation.Web.Services
 		/// Returns a JSON string containing the data of type <typeparamref name="T"/> filtered by the specified first name and/or last name.
 		/// If the retrieval fails, returns null with an error logged.
 		/// </returns>
-		public async Task<string> GetDataByFNameOrLName<T>(string firstName, string lastName)
+		public async Task<PagedResponse<T>> GetDataByFNameOrLName<T>(string firstName, string lastName, int page, int pageSize)
 		{
 			var modelName = GetModelName<T>();
 
@@ -382,17 +389,22 @@ namespace AirportAutomation.Web.Services
 			using var httpClient = _httpClientFactory.CreateClient("AirportAutomationApi");
 			ConfigureHttpClient(httpClient);
 
-			var response = await httpClient.SendAsync(httpRequestMessage);
+			var response = await httpClient.GetAsync(requestUri).ConfigureAwait(false);
 
-			if (response.IsSuccessStatusCode)
+			if (response.StatusCode == HttpStatusCode.OK)
 			{
-				return await response.Content.ReadAsStringAsync();
+				return await response.Content.ReadFromJsonAsync<PagedResponse<T>>().ConfigureAwait(false);
+			}
+			else if (response.StatusCode == HttpStatusCode.NoContent)
+			{
+				_logger.LogInformation("Data not found. Status code: {StatusCode}", response.StatusCode);
+				return new PagedResponse<T>(Enumerable.Empty<T>(), page, pageSize, 0);
 			}
 			else
 			{
 				_logger.LogInformation("Failed to retrieve data. Status code: {StatusCode}", response.StatusCode);
+				return null;
 			}
-			return null;
 		}
 
 		/// <summary>
@@ -405,7 +417,7 @@ namespace AirportAutomation.Web.Services
 		/// Returns a JSON string containing the data of type <typeparamref name="T"/> filtered by the specified price range.
 		/// If the retrieval fails, returns null with an error logged.
 		/// </returns>
-		public async Task<string> GetDataForPrice<T>(int? minPrice, int? maxPrice)
+		public async Task<PagedResponse<T>> GetDataForPrice<T>(int? minPrice, int? maxPrice, int page, int pageSize)
 		{
 			var modelName = GetModelName<T>();
 
@@ -439,15 +451,20 @@ namespace AirportAutomation.Web.Services
 
 			var response = await httpClient.SendAsync(httpRequestMessage);
 
-			if (response.IsSuccessStatusCode)
+			if (response.StatusCode == HttpStatusCode.OK)
 			{
-				return await response.Content.ReadAsStringAsync();
+				return await response.Content.ReadFromJsonAsync<PagedResponse<T>>().ConfigureAwait(false);
+			}
+			else if (response.StatusCode == HttpStatusCode.NoContent)
+			{
+				_logger.LogInformation("Data not found. Status code: {StatusCode}", response.StatusCode);
+				return new PagedResponse<T>(Enumerable.Empty<T>(), page, pageSize, 0);
 			}
 			else
 			{
 				_logger.LogInformation("Failed to retrieve data. Status code: {StatusCode}", response.StatusCode);
+				return null;
 			}
-			return null;
 		}
 
 		/// <summary>
@@ -460,7 +477,7 @@ namespace AirportAutomation.Web.Services
 		/// Returns a JSON string containing the data of type <typeparamref name="T"/> filtered by the specified date range.
 		/// If the retrieval fails, returns null with an error logged.
 		/// </returns>
-		public async Task<string> GetDataBetweenDates<T>(string startDate, string endDate)
+		public async Task<PagedResponse<T>> GetDataBetweenDates<T>(string startDate, string endDate, int page, int pageSize)
 		{
 			var modelName = GetModelName<T>();
 
@@ -494,15 +511,20 @@ namespace AirportAutomation.Web.Services
 
 			var response = await httpClient.SendAsync(httpRequestMessage);
 
-			if (response.IsSuccessStatusCode)
+			if (response.StatusCode == HttpStatusCode.OK)
 			{
-				return await response.Content.ReadAsStringAsync();
+				return await response.Content.ReadFromJsonAsync<PagedResponse<T>>().ConfigureAwait(false);
+			}
+			else if (response.StatusCode == HttpStatusCode.NoContent)
+			{
+				_logger.LogInformation("Data not found. Status code: {StatusCode}", response.StatusCode);
+				return new PagedResponse<T>(Enumerable.Empty<T>(), page, pageSize, 0);
 			}
 			else
 			{
 				_logger.LogInformation("Failed to retrieve data. Status code: {StatusCode}", response.StatusCode);
+				return null;
 			}
-			return null;
 		}
 
 		/// <summary>
@@ -515,7 +537,7 @@ namespace AirportAutomation.Web.Services
 		/// Returns a JSON string containing the data of type <typeparamref name="T"/> filtered by the specified first name and/or last name.
 		/// If the retrieval fails, returns null with an error logged.
 		/// </returns>
-		public async Task<string> GetDataByCityOrAirport<T>(string city, string airport)
+		public async Task<PagedResponse<T>> GetDataByCityOrAirport<T>(string city, string airport, int page, int pageSize)
 		{
 			var modelName = GetModelName<T>();
 
@@ -549,15 +571,20 @@ namespace AirportAutomation.Web.Services
 
 			var response = await httpClient.SendAsync(httpRequestMessage);
 
-			if (response.IsSuccessStatusCode)
+			if (response.StatusCode == HttpStatusCode.OK)
 			{
-				return await response.Content.ReadAsStringAsync();
+				return await response.Content.ReadFromJsonAsync<PagedResponse<T>>().ConfigureAwait(false);
+			}
+			else if (response.StatusCode == HttpStatusCode.NoContent)
+			{
+				_logger.LogInformation("Data not found. Status code: {StatusCode}", response.StatusCode);
+				return new PagedResponse<T>(Enumerable.Empty<T>(), page, pageSize, 0);
 			}
 			else
 			{
 				_logger.LogInformation("Failed to retrieve data. Status code: {StatusCode}", response.StatusCode);
+				return null;
 			}
-			return null;
 		}
 
 		/// <summary>
@@ -569,7 +596,7 @@ namespace AirportAutomation.Web.Services
 		/// Returns a JSON string containing the data of type <typeparamref name="T"/> filtered by the specified role.
 		/// If the retrieval fails, returns null with an error logged.
 		/// </returns>
-		public async Task<string> GetDataByRole<T>(string role)
+		public async Task<PagedResponse<T>> GetDataByRole<T>(string role, int page, int pageSize)
 		{
 			var modelName = GetModelName<T>();
 
@@ -590,15 +617,20 @@ namespace AirportAutomation.Web.Services
 
 			var response = await httpClient.SendAsync(httpRequestMessage);
 
-			if (response.IsSuccessStatusCode)
+			if (response.StatusCode == HttpStatusCode.OK)
 			{
-				return await response.Content.ReadAsStringAsync();
+				return await response.Content.ReadFromJsonAsync<PagedResponse<T>>().ConfigureAwait(false);
+			}
+			else if (response.StatusCode == HttpStatusCode.NoContent)
+			{
+				_logger.LogInformation("Data not found. Status code: {StatusCode}", response.StatusCode);
+				return new PagedResponse<T>(Enumerable.Empty<T>(), page, pageSize, 0);
 			}
 			else
 			{
 				_logger.LogInformation("Failed to retrieve data. Status code: {StatusCode}", response.StatusCode);
+				return null;
 			}
-			return null;
 		}
 
 		/// <summary>

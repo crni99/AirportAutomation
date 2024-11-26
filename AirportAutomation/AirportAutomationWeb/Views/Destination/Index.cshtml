@@ -3,21 +3,25 @@
 	string typeName = "Destination";
 }
 
-<div class="container mt-5">
+<div class="container container-spacing-top">
 	<div class="row justify-content-between">
-		<div class="col-md-6">
-			@if (ViewBag.ApiUserRole != "User")
-			{
-				@await Html.PartialAsync("Index/_CreateButtonIndex", typeName)
-			}
-			<div class="input-group justify-content-start" style="width: 100%;">
-				<label for="city" class="input-group-text">City:</label>
-				<input type="text" class="form-control" id="city" name="city">
-
-				<label for="airport" class="input-group-text">Airport:</label>
-				<input type="text" class="form-control" id="airport" name="airport">
-
-				<button id="searchButton" class="btn btn-primary">Search</button>
+		<div class="col-md-12">
+			<div class="d-flex justify-content-between align-items-center" style="width: 100%;">
+				@if (ViewBag.ApiUserRole != "User")
+				{
+					@await Html.PartialAsync("Index/_CreateButtonIndex", typeName)
+				}
+				<div class="d-flex">
+					<div class="input-group me-3">
+						<label for="city" class="input-group-text">City:</label>
+						<input type="text" class="form-control" id="city" name="city">
+					</div>
+					<div class="input-group me-3">
+						<label for="airport" class="input-group-text">Airport:</label>
+						<input type="text" class="form-control" id="airport" name="airport">
+					</div>
+					<button id="searchButton" class="btn btn-primary">Search</button>
+				</div>
 			</div>
 		</div>
 	</div>
@@ -51,8 +55,7 @@
 		$(document).ready(function () {
 			var typeName = '@typeName';
 			var searchUrl = '@Url.Action("GetDestinationsByCityOrAirport", typeName, new { area = "", name = "" })';
-			var tableBody = $('#tableBody');
-			searchByCityOrAirport(searchUrl, tableBody, typeName);
+			searchByCityOrAirport(searchUrl, typeName, 1);
 		});
 	</script>
 	<script src="~/js/GetHelper.js"></script>
