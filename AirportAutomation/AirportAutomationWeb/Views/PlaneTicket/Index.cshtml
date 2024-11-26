@@ -56,7 +56,7 @@
 		$(document).ready(function () {
 			var typeName = '@typeName';
 			var searchUrl = '@Url.Action("GetPlaneTicketsForPrice", typeName, new { area = "", name = "" })';
-			searchByPrice(searchUrl, typeName, 1);
+			searchData(searchUrl, 'searchByPrice', typeName, 1);
 		});
 	</script>
 	<script src="~/js/GetHelper.js"></script>
