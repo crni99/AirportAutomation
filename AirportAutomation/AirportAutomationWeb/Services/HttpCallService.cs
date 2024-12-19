@@ -306,6 +306,8 @@ namespace AirportAutomation.Web.Services
 		/// </summary>
 		/// <typeparam name="T">The type of data to retrieve.</typeparam>
 		/// <param name="name">The name used to filter the data.</param>
+		/// <param name="page">The page number of the data to retrieve.</param>
+		/// <param name="pageSize">The number of items per page.</param>
 		/// <returns>
 		/// Returns a JSON string containing the data of type <typeparamref name="T"/> filtered by the specified name.
 		/// If the retrieval fails, returns null with an error logged.
@@ -323,6 +325,7 @@ namespace AirportAutomation.Web.Services
 			{
 				requestUri += $"s/byName/{name}";
 			}
+			requestUri += $"?page={page}&pageSize={pageSize}";
 
 			var httpRequestMessage = new HttpRequestMessage(HttpMethod.Get, requestUri);
 
@@ -353,6 +356,8 @@ namespace AirportAutomation.Web.Services
 		/// <typeparam name="T">The type of data to retrieve.</typeparam>
 		/// <param name="firstName">The first name used to filter the data.</param>
 		/// <param name="lastName">The last name used to filter the data.</param>
+		/// <param name="page">The page number of the data to retrieve.</param>
+		/// <param name="pageSize">The number of items per page.</param>
 		/// <returns>
 		/// Returns a JSON string containing the data of type <typeparamref name="T"/> filtered by the specified first name and/or last name.
 		/// If the retrieval fails, returns null with an error logged.
@@ -381,6 +386,8 @@ namespace AirportAutomation.Web.Services
 			{
 				query["lastName"] = lastName;
 			}
+			query["page"] = page.ToString();
+			query["pageSize"] = pageSize.ToString();
 			uriBuilder.Query = query.ToString();
 			requestUri = uriBuilder.ToString();
 
@@ -413,6 +420,8 @@ namespace AirportAutomation.Web.Services
 		/// <typeparam name="T">The type of data to retrieve.</typeparam>
 		/// <param name="minPrice">The minimum price used to filter the data.</param>
 		/// <param name="maxPrice">The maximum price used to filter the data.</param>
+		/// <param name="page">The page number of the data to retrieve.</param>
+		/// <param name="pageSize">The number of items per page.</param>
 		/// <returns>
 		/// Returns a JSON string containing the data of type <typeparamref name="T"/> filtered by the specified price range.
 		/// If the retrieval fails, returns null with an error logged.
@@ -441,6 +450,8 @@ namespace AirportAutomation.Web.Services
 			{
 				query["maxPrice"] = maxPrice.ToString();
 			}
+			query["page"] = page.ToString();
+			query["pageSize"] = pageSize.ToString();
 			uriBuilder.Query = query.ToString();
 			requestUri = uriBuilder.ToString();
 
@@ -473,6 +484,8 @@ namespace AirportAutomation.Web.Services
 		/// <typeparam name="T">The type of data to retrieve.</typeparam>
 		/// <param name="startDate">The start date used to filter the data.</param>
 		/// <param name="endDate">The end date used to filter the data.</param>
+		/// <param name="page">The page number of the data to retrieve.</param>
+		/// <param name="pageSize">The number of items per page.</param>
 		/// <returns>
 		/// Returns a JSON string containing the data of type <typeparamref name="T"/> filtered by the specified date range.
 		/// If the retrieval fails, returns null with an error logged.
@@ -501,6 +514,8 @@ namespace AirportAutomation.Web.Services
 			{
 				query["endDate"] = endDate;
 			}
+			query["page"] = page.ToString();
+			query["pageSize"] = pageSize.ToString();
 			uriBuilder.Query = query.ToString();
 			requestUri = uriBuilder.ToString();
 
@@ -533,6 +548,8 @@ namespace AirportAutomation.Web.Services
 		/// <typeparam name="T">The type of data to retrieve.</typeparam>
 		/// <param name="city">The city used to filter the data.</param>
 		/// <param name="airport">The airport used to filter the data.</param>
+		/// <param name="page">The page number of the data to retrieve.</param>
+		/// <param name="pageSize">The number of items per page.</param>
 		/// <returns>
 		/// Returns a JSON string containing the data of type <typeparamref name="T"/> filtered by the specified first name and/or last name.
 		/// If the retrieval fails, returns null with an error logged.
@@ -561,6 +578,8 @@ namespace AirportAutomation.Web.Services
 			{
 				query["airport"] = airport;
 			}
+			query["page"] = page.ToString();
+			query["pageSize"] = pageSize.ToString();
 			uriBuilder.Query = query.ToString();
 			requestUri = uriBuilder.ToString();
 
@@ -592,6 +611,8 @@ namespace AirportAutomation.Web.Services
 		/// </summary>
 		/// <typeparam name="T">The type of data to retrieve.</typeparam>
 		/// <param name="role">The role used to filter the data.</param>
+		/// <param name="page">The page number of the data to retrieve.</param>
+		/// <param name="pageSize">The number of items per page.</param>
 		/// <returns>
 		/// Returns a JSON string containing the data of type <typeparamref name="T"/> filtered by the specified role.
 		/// If the retrieval fails, returns null with an error logged.
@@ -609,6 +630,7 @@ namespace AirportAutomation.Web.Services
 			{
 				requestUri += $"s/byRole/{role}";
 			}
+			requestUri += $"?page={page}&pageSize={pageSize}";
 
 			var httpRequestMessage = new HttpRequestMessage(HttpMethod.Get, requestUri);
 

@@ -40,27 +40,24 @@
 	<script>
 		$(document).ready(function () {
 			var typeName = '@typeName';
-			var fetchUrl = '@Url.Action("GetPassengers", typeName, new { area = "", name = "" })';
-			var tableBody = $('#tableBody');
-			fetchData(fetchUrl, typeName, 1);
+			var fetchURL = '@Url.Action("GetPassengers", typeName, new { area = "", name = "" })';
+
+			$('#searchButton').on('click', function () {
+				fetchData(fetchURL, typeName, 1);
+			});
+
+			fetchData(fetchURL, typeName, 1);
+
 			$(document).on('click', '.page-link', function (e) {
 				e.preventDefault();
 				var page = $(this).data('page');
 				if (page) {
-					fetchData(fetchUrl, typeName, page);
+					fetchData(fetchURL, typeName, page);
 				}
 			});
 		});
 	</script>
-	<script>
-		$(document).ready(function () {
-			var typeName = '@typeName';
-			var searchUrl = '@Url.Action("GetPassengersByName", typeName, new { area = "", name = "" })';
-			searchData(searchUrl, 'searchByFNameOrLName', typeName, 1);
-		});
-	</script>
 	<script src="~/js/GetHelper.js"></script>
 	<script src="~/js/OpenHelper.js"></script>
-	<script src="~/js/SearchHelper.js"></script>
 	<script src="~/js/AlertHelper.js"></script>
 }

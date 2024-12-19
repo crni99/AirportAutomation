@@ -10,8 +10,13 @@
 		$(document).ready(function () {
 			var typeName = '@typeName';
 			var fetchUrl = '@Url.Action("GetTravelClasses", typeName, new { area = "", name = "" })';
-			var tableBody = $('#tableBody');
+
+			$('#searchButton').on('click', function () {
+				fetchData(fetchUrl, typeName, 1);
+			});
+
 			fetchData(fetchUrl, typeName, 1);
+
 			$(document).on('click', '.page-link', function (e) {
 				e.preventDefault();
 				var page = $(this).data('page');

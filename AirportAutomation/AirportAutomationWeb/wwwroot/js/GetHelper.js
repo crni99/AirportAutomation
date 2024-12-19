@@ -1,12 +1,12 @@
-﻿function fetchData(fetchUrl, entityType, page = 1) {
-    var pageSize = 10;
-    var requestUrl = `${fetchUrl}?page=${page}&pageSize=${pageSize}`;
+﻿function fetchData(fetchURL, entityType, page = 1) {
+
+    var requestURL = createURL(fetchURL, entityType, page);
 
     var tableHead = $('#tableHead');
     var tableBody = $('#tableBody');
 
     $.ajax({
-        url: requestUrl,
+        url: requestURL,
         type: 'GET',
         success: function (data) {
             if (data.success !== true || !data.data || data.data.totalCount === 0) {
@@ -37,6 +37,74 @@
     });
 }
 
+function createURL(fetchURL, entityType, page) {
+    var pageSize = 10;
+    var paginationParams = `page=${page}&pageSize=${pageSize}`;
+
+    switch (entityType) {
+
+        case 'Airline':
+            var searchName = $('#searchInput').val();
+            if (!searchName || searchName.trim() === '') {
+                return `${fetchURL}?${paginationParams}`;
+            }
+            return `/${entityType}/GetAirlinesByName?name=${encodeURIComponent(searchName)}&${paginationParams}`;
+
+        case 'ApiUser':
+            var searchRole = $('#roleSelect').val();
+            if (!searchRole || searchRole.trim() === '') {
+                return `${fetchURL}?${paginationParams}`;
+            }
+            return `/${entityType}/GetApiUsersByName?role=${encodeURIComponent(searchRole)}&${paginationParams}`;
+
+        case 'Destination':
+            var city = $('#city').val();
+            var airport = $('#airport').val();
+            if ((!city || city.trim() === '') && (!airport || airport.trim() === '')) {
+                return `${fetchURL}?${paginationParams}`;
+            }
+            return `/${entityType}/GetDestinationsByCityOrAirport?city=${encodeURIComponent(city)}&airport=${encodeURIComponent(airport)}&${paginationParams}`;
+
+        case 'Flight':
+            var startDate = $('#startDate').val();
+            var endDate = $('#endDate').val();
+            if ((!startDate || startDate.trim() === '') && (!endDate || endDate.trim() === '')) {
+                return `${fetchURL}?${paginationParams}`;
+            }
+            return `/${entityType}/GetFlightsBetweenDates?startDate=${encodeURIComponent(startDate)}&endDate=${encodeURIComponent(endDate)}&${paginationParams}`;
+
+        case 'Passenger':
+            var firstName = $('#firstName').val();
+            var lastName = $('#lastName').val();
+            if ((!firstName || firstName.trim() === '') && (!lastName || lastName.trim() === '')) {
+                return `${fetchURL}?${paginationParams}`;
+            }
+            return `/${entityType}/GetPassengersByName?firstName=${encodeURIComponent(firstName)}&lastName=${encodeURIComponent(lastName)}&${paginationParams}`;
+
+        case 'Pilot':
+            var firstName = $('#firstName').val();
+            var lastName = $('#lastName').val();
+            if ((!firstName || firstName.trim() === '') && (!lastName || lastName.trim() === '')) {
+                return `${fetchURL}?${paginationParams}`;
+            }
+            return `/${entityType}/GetPilotsByName?firstName=${encodeURIComponent(firstName)}&lastName=${encodeURIComponent(lastName)}&${paginationParams}`;
+
+        case 'PlaneTicket':
+            var minPrice = $('#minPrice').val();
+            var maxPrice = $('#maxPrice').val();
+            if ((!minPrice || minPrice.trim() === '') && (!maxPrice || maxPrice.trim() === '')) {
+                return `${fetchURL}?${paginationParams}`;
+            }
+            if (isNaN(minPrice) || isNaN(maxPrice)) {
+                return `${fetchURL}?${paginationParams}`;
+            }
+            return `/${entityType}/GetPlaneTicketsForPrice?minPrice=${encodeURIComponent(minPrice)}&maxPrice=${encodeURIComponent(maxPrice)}&${paginationParams}`;
+
+        default:
+            return `${fetchURL}?${paginationParams}`;
+    }
+}
+
 function createTableHead(tableHead, fields, entityType) {
     var headerRow = $('<tr>');
 
@@ -51,8 +119,7 @@ function createTableHead(tableHead, fields, entityType) {
         headerRow.append($('<th>').text('Purchase Date'));
         headerRow.append($('<th>').text('Seat Number'));
     }
-    else
-    {
+    else {
         fields.forEach(function (field) {
             var header = $('<th>');
             header.text(field);

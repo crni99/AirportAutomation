@@ -41,8 +41,13 @@
 		$(document).ready(function () {
 			var typeName = '@typeName';
 			var fetchUrl = '@Url.Action("GetFlights", typeName, new { area = "", name = "" })';
-			var tableBody = $('#tableBody');
+
+			$('#searchButton').on('click', function () {
+				fetchData(fetchUrl, typeName, 1);
+			});
+
 			fetchData(fetchUrl, typeName, 1);
+
 			$(document).on('click', '.page-link', function (e) {
 				e.preventDefault();
 				var page = $(this).data('page');
@@ -52,15 +57,7 @@
 			});
 		});
 	</script>
-	<script>
-		$(document).ready(function () {
-			var typeName = '@typeName';
-			var searchUrl = '@Url.Action("GetFlightsBetweenDates", typeName, new { area = "", name = "" })';
-			searchData(searchUrl, 'searchByDate', typeName, 1);
-		});
-	</script>
 	<script src="~/js/GetHelper.js"></script>
 	<script src="~/js/OpenHelper.js"></script>
-	<script src="~/js/SearchHelper.js"></script>
 	<script src="~/js/AlertHelper.js"></script>
 }
