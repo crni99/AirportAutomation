@@ -1,5 +1,5 @@
 
-# AirportAutomation [![.NET](https://github.com/crni99/AirportAutomation/actions/workflows/dotnet.yml/badge.svg)](https://github.com/crni99/AirportAutomation/actions/workflows/dotnet.yml)
+# AirportAutomation <br /> [![.NET](https://github.com/crni99/AirportAutomation/actions/workflows/dotnet.yml/badge.svg)](https://github.com/crni99/AirportAutomation/actions/workflows/dotnet.yml) [![CodeQL](https://github.com/crni99/AirportAutomation/actions/workflows/github-code-scanning/codeql/badge.svg)](https://github.com/crni99/AirportAutomation/actions/workflows/github-code-scanning/codeql)
 
 ## [AirportAutomationAPI](https://github.com/crni99/AirportAutomation/tree/main/AirportAutomation/Airport%D0%90utomationApi)
 In this project, I have undertaken the challenge of developing a full-fledged Web API. It involves several key components and practices that I believe are fundamental in building a successful API. Here's a brief overview of what you can expect to find in this project:
