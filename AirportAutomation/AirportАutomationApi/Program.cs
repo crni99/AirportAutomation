@@ -176,9 +176,6 @@ builder.Services.AddHttpClient();
 builder.Services
 	.AddHealthChecks()
 	.AddCheck<ApiHealthCheck>("API")
-	.AddSqlServer(
-		builder.Configuration.GetConnectionString("Default"),
-		name: "SQL Server")
 	.AddCheck<DatabaseHealthCheck>("Database");
 
 var app = builder.Build();
