@@ -11,6 +11,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using Npgsql.EntityFrameworkCore.PostgreSQL;
 using QuestPDF.Infrastructure;
 using Serilog;
 using System.Security.Claims;
@@ -97,7 +98,7 @@ builder.Services.AddSwaggerGen(setupAction =>
 
 BinderConfiguration.Binders(builder.Services);
 
-builder.Services.AddDbContext<DatabaseContext>(options => options.UseSqlServer(
+builder.Services.AddDbContext<DatabaseContext>(options => options.UseNpgsql(
 	builder.Configuration.GetConnectionString("Default")
 ));
 
