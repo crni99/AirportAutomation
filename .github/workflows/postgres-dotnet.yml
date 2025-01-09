@@ -32,9 +32,6 @@ jobs:
       run: |
         echo "ConnectionStrings__Default=${{ secrets.DATABASE_CONNECTION_STRING }}" >> $GITHUB_ENV
 
-    - name: Debug Connection String
-      run: echo "ConnectionStrings__Default=${{ secrets.DATABASE_CONNECTION_STRING }}"
-
     - name: Restore dependencies
       working-directory: ./AirportAutomation
       run: dotnet restore AirportAutomation.sln
