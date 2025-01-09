@@ -23,6 +23,9 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Configuration.AddEnvironmentVariables();
 
+string connString = builder.Configuration.GetConnectionString("Default");
+Console.WriteLine($"Connection String: {connString}");
+
 builder.Host.UseSerilog((context, loggerConfig) =>
 	loggerConfig.ReadFrom.Configuration(context.Configuration));
 
