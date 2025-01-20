@@ -1,0 +1,13 @@
+﻿@using System.Net;
+
+@{
+	var address = ViewData["MapAddress"]?.ToString();
+}
+
+<iframe src="https://maps.google.com/maps?q=@WebUtility.UrlEncode(address)&output=embed"
+		style="width: 100%; height: 320px; border: 0;"
+		allowfullscreen=""
+		loading="lazy"
+		referrerpolicy="no-referrer-when-downgrade"
+		title="Google Map">
+</iframe>
