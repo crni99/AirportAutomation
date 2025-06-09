@@ -2,6 +2,8 @@
 using AirportAutomation.Application.Dtos.PlaneTicket;
 using AirportAutomation.Application.Dtos.Response;
 using AirportAutomation.Core.Entities;
+using AirportAutomation.Core.FilterExtensions;
+using AirportAutomation.Core.Filters;
 using AirportAutomation.Core.Interfaces.IServices;
 using AirportАutomation.Api.Interfaces;
 using AutoMapper;
@@ -87,7 +89,7 @@ namespace AirportАutomation.Api.Controllers
 			var planeTickets = await _planeTicketService.GetPlaneTickets(cancellationToken, page, correctedPageSize);
 			if (planeTickets is null || !planeTickets.Any())
 			{
-				_logger.LogInformation("Plane tickets not found.");
+				_logger.LogInformation("Plane Tickets not found.");
 				return NoContent();
 			}
 			var totalItems = await _planeTicketService.PlaneTicketsCount(cancellationToken);
@@ -119,7 +121,7 @@ namespace AirportАutomation.Api.Controllers
 			}
 			if (!await _planeTicketService.PlaneTicketExists(id))
 			{
-				_logger.LogInformation("Plane ticket with id {Id} not found.", id);
+				_logger.LogInformation("Plane Ticket with id {Id} not found.", id);
 				return NotFound();
 			}
 			var planeTicket = await _planeTicketService.GetPlaneTicket(id);
@@ -165,10 +167,55 @@ namespace AirportАutomation.Api.Controllers
 			var planeTickets = await _planeTicketService.GetPlaneTicketsForPrice(cancellationToken, page, correctedPageSize, minPrice, maxPrice);
 			if (planeTickets is null || !planeTickets.Any())
 			{
-				_logger.LogInformation("Plane tickets not found.");
+				_logger.LogInformation("Plane Tickets not found.");
 				return NotFound();
 			}
 			var totalItems = await _planeTicketService.PlaneTicketsCount(cancellationToken, minPrice, maxPrice);
+			var data = _mapper.Map<IEnumerable<PlaneTicketDto>>(planeTickets);
+			var response = new PagedResponse<PlaneTicketDto>(data, page, correctedPageSize, totalItems);
+			return Ok(response);
+		}
+
+		/// <summary>
+		/// Retrieves a paginated list of plane tickets matching the specified search filter criteria.
+		/// </summary>
+		/// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
+		/// <param name="filter">The search filter containing plane ticket fields to filter by.</param>
+		/// <param name="page">The page number for pagination (optional, default is 1).</param>
+		/// <param name="pageSize">The number of items per page for pagination (optional, default is 10).</param>
+		/// <returns>A paged response containing the list of plane tickets that match the filter criteria.</returns>
+		/// <response code="200">Returns a paged list of plane tickets if found.</response>
+		/// <response code="400">If the request is invalid or the filter criteria are missing or invalid.</response>
+		/// <response code="404">If no plane tickets matching the filter criteria are found.</response>
+		/// <response code="401">If the user does not have permission to access the requested resource.</response>
+		[HttpGet("byFilter")]
+		[ProducesResponseType(200, Type = typeof(PagedResponse<PlaneTicketDto>))]
+		[ProducesResponseType(400)]
+		[ProducesResponseType(404)]
+		[ProducesResponseType(401)]
+		public async Task<ActionResult<PagedResponse<PlaneTicketDto>>> GetPlaneTicketsByFilter(
+			CancellationToken cancellationToken,
+			[FromQuery] PlaneTicketSearchFilter filter,
+			[FromQuery] int page = 1,
+			[FromQuery] int pageSize = 10)
+		{
+			if (filter.IsEmpty())
+			{
+				_logger.LogInformation("At least one filter criterion must be provided.");
+				return BadRequest("At least one filter criterion must be provided.");
+			}
+			var (isValid, correctedPageSize, result) = _paginationValidationService.ValidatePaginationParameters(page, pageSize, maxPageSize);
+			if (!isValid)
+			{
+				return result;
+			}
+			var planeTickets = await _planeTicketService.GetPlaneTicketsByFilter(cancellationToken, page, correctedPageSize, filter);
+			if (planeTickets is null || !planeTickets.Any())
+			{
+				_logger.LogInformation("Plane Tickets not found.");
+				return NotFound();
+			}
+			var totalItems = await _planeTicketService.PlaneTicketsCountFilter(cancellationToken, filter);
 			var data = _mapper.Map<IEnumerable<PlaneTicketDto>>(planeTickets);
 			var response = new PagedResponse<PlaneTicketDto>(data, page, correctedPageSize, totalItems);
 			return Ok(response);
@@ -229,7 +276,7 @@ namespace AirportАutomation.Api.Controllers
 			}
 			if (!await _planeTicketService.PlaneTicketExists(id))
 			{
-				_logger.LogInformation("Plane ticket with id {Id} not found.", id);
+				_logger.LogInformation("Plane Ticket with id {Id} not found.", id);
 				return NotFound();
 			}
 			var planeTicket = _mapper.Map<PlaneTicketEntity>(planeTicketUpdateDto);
@@ -309,7 +356,7 @@ namespace AirportАutomation.Api.Controllers
 			}
 			if (!await _planeTicketService.PlaneTicketExists(id))
 			{
-				_logger.LogInformation("Plane ticket with id {Id} not found.", id);
+				_logger.LogInformation("Plane Ticket with id {Id} not found.", id);
 				return NotFound();
 			}
 			bool deleted = await _planeTicketService.DeletePlaneTicket(id);

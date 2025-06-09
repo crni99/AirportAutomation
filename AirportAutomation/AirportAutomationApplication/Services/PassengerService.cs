@@ -1,4 +1,5 @@
 ﻿using AirportAutomation.Core.Entities;
+using AirportAutomation.Core.Filters;
 using AirportAutomation.Core.Interfaces.IRepositories;
 using AirportAutomation.Core.Interfaces.IServices;
 using Microsoft.AspNetCore.JsonPatch;
@@ -34,6 +35,11 @@ namespace AirportAutomation.Application.Services
 			return await _passengerRepository.GetPassengersByName(cancellationToken, page, pageSize, firstName, lastName);
 		}
 
+		public async Task<IList<PassengerEntity?>> GetPassengersByFilter(CancellationToken cancellationToken, int page, int pageSize, PassengerSearchFilter filter)
+		{
+			return await _passengerRepository.GetPassengersByFilter(cancellationToken, page, pageSize, filter);
+		}
+
 		public async Task<PassengerEntity> PostPassenger(PassengerEntity passenger)
 		{
 			return await _passengerRepository.PostPassenger(passenger);
@@ -62,6 +68,11 @@ namespace AirportAutomation.Application.Services
 		public async Task<int> PassengersCount(CancellationToken cancellationToken, string firstName = null, string lastName = null)
 		{
 			return await _passengerRepository.PassengersCount(cancellationToken, firstName, lastName);
+		}
+
+		public async Task<int> PassengersCountFilter(CancellationToken cancellationToken, PassengerSearchFilter filter)
+		{
+			return await _passengerRepository.PassengersCountFilter(cancellationToken, filter);
 		}
 	}
 }

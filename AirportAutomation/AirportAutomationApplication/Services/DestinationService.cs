@@ -1,4 +1,5 @@
 ﻿using AirportAutomation.Core.Entities;
+using AirportAutomation.Core.Filters;
 using AirportAutomation.Core.Interfaces.IRepositories;
 using AirportAutomation.Core.Interfaces.IServices;
 using Microsoft.AspNetCore.JsonPatch;
@@ -34,6 +35,11 @@ namespace AirportAutomation.Application.Services
 			return await _destinationRepository.GetDestinationsByCityOrAirport(cancellationToken, page, pageSize, city, airport);
 		}
 
+		public async Task<IList<DestinationEntity?>> GetDestinationsByFilter(CancellationToken cancellationToken, int page, int pageSize, DestinationSearchFilter filter)
+		{
+			return await _destinationRepository.GetDestinationsByFilter(cancellationToken, page, pageSize, filter);
+		}
+
 		public async Task<DestinationEntity> PostDestination(DestinationEntity destination)
 		{
 			return await _destinationRepository.PostDestination(destination);
@@ -61,6 +67,11 @@ namespace AirportAutomation.Application.Services
 		public async Task<int> DestinationsCount(CancellationToken cancellationToken, string city = null, string airport = null)
 		{
 			return await _destinationRepository.DestinationsCount(cancellationToken, city, airport);
+		}
+
+		public async Task<int> DestinationsCountFilter(CancellationToken cancellationToken, DestinationSearchFilter filter)
+		{
+			return await _destinationRepository.DestinationsCountFilter(cancellationToken, filter);
 		}
 	}
 }

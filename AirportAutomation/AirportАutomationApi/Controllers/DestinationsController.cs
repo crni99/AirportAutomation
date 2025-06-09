@@ -2,6 +2,8 @@
 using AirportAutomation.Application.Dtos.Destination;
 using AirportAutomation.Application.Dtos.Response;
 using AirportAutomation.Core.Entities;
+using AirportAutomation.Core.FilterExtensions;
+using AirportAutomation.Core.Filters;
 using AirportAutomation.Core.Interfaces.IServices;
 using AirportАutomation.Api.Interfaces;
 using AutoMapper;
@@ -169,6 +171,51 @@ namespace AirportАutomation.Api.Controllers
 				return NotFound();
 			}
 			var totalItems = await _destinationService.DestinationsCount(cancellationToken, city, airport);
+			var data = _mapper.Map<IEnumerable<DestinationDto>>(destinations);
+			var response = new PagedResponse<DestinationDto>(data, page, correctedPageSize, totalItems);
+			return Ok(response);
+		}
+
+		/// <summary>
+		/// Retrieves a paginated list of destinations matching the specified search filter criteria.
+		/// </summary>
+		/// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
+		/// <param name="filter">The search filter containing destination fields to filter by.</param>
+		/// <param name="page">The page number for pagination (optional, default is 1).</param>
+		/// <param name="pageSize">The number of items per page for pagination (optional, default is 10).</param>
+		/// <returns>A paged response containing the list of destinations that match the filter criteria.</returns>
+		/// <response code="200">Returns a paged list of destinations if found.</response>
+		/// <response code="400">If the request is invalid or the filter criteria are missing or invalid.</response>
+		/// <response code="404">If no destinations matching the filter criteria are found.</response>
+		/// <response code="401">If the user does not have permission to access the requested resource.</response>
+		[HttpGet("byFilter")]
+		[ProducesResponseType(200, Type = typeof(PagedResponse<DestinationDto>))]
+		[ProducesResponseType(400, Type = typeof(string))]
+		[ProducesResponseType(404)]
+		[ProducesResponseType(401)]
+		public async Task<ActionResult<PagedResponse<DestinationDto>>> GetDestinationsByFilter(
+			CancellationToken cancellationToken,
+			[FromQuery] DestinationSearchFilter filter,
+			[FromQuery] int page = 1,
+			[FromQuery] int pageSize = 10)
+		{
+			if (filter.IsEmpty())
+			{
+				_logger.LogInformation("At least one filter criterion must be provided.");
+				return BadRequest("At least one filter criterion must be provided.");
+			}
+			var (isValid, correctedPageSize, result) = _paginationValidationService.ValidatePaginationParameters(page, pageSize, maxPageSize);
+			if (!isValid)
+			{
+				return result;
+			}
+			var destinations = await _destinationService.GetDestinationsByFilter(cancellationToken, page, correctedPageSize, filter);
+			if (destinations == null || destinations.Count == 0)
+			{
+				_logger.LogInformation("Destinations not found.");
+				return NotFound();
+			}
+			var totalItems = await _destinationService.DestinationsCountFilter(cancellationToken, filter);
 			var data = _mapper.Map<IEnumerable<DestinationDto>>(destinations);
 			var response = new PagedResponse<DestinationDto>(data, page, correctedPageSize, totalItems);
 			return Ok(response);

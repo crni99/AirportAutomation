@@ -1,4 +1,5 @@
 ﻿using AirportAutomation.Core.Entities;
+using AirportAutomation.Core.Filters;
 using AirportAutomation.Core.Interfaces.IRepositories;
 using AirportAutomation.Infrastructure.Data;
 using Microsoft.AspNetCore.JsonPatch;
@@ -58,6 +59,36 @@ namespace AirportAutomation.Infrastructure.Repositories
 								.ConfigureAwait(false);
 		}
 
+		public async Task<IList<PilotEntity?>> GetPilotsByFilter(
+			CancellationToken cancellationToken,
+			int page,
+			int pageSize,
+			PilotSearchFilter filter)
+		{
+			IQueryable<PilotEntity> query = _context.Pilot.AsNoTracking();
+
+			if (!string.IsNullOrWhiteSpace(filter.FirstName))
+			{
+				query = query.Where(p => p.FirstName.Contains(filter.FirstName));
+			}
+			if (!string.IsNullOrWhiteSpace(filter.LastName))
+			{
+				query = query.Where(p => p.LastName.Contains(filter.LastName));
+			}
+			if (!string.IsNullOrWhiteSpace(filter.UPRN))
+			{
+				query = query.Where(p => p.UPRN.Contains(filter.UPRN));
+			}
+			if (filter.FlyingHours.HasValue)
+			{
+				query = query.Where(p => p.FlyingHours >= filter.FlyingHours.Value);
+			}
+			return await query.OrderBy(p => p.Id)
+				.Skip(pageSize * (page - 1))
+				.Take(pageSize)
+				.ToListAsync(cancellationToken);
+		}
+
 		public async Task<PilotEntity> PostPilot(PilotEntity pilot)
 		{
 			_context.Pilot.Add(pilot);
@@ -111,5 +142,31 @@ namespace AirportAutomation.Infrastructure.Repositories
 			}
 			return await query.CountAsync(cancellationToken).ConfigureAwait(false);
 		}
+
+		public async Task<int> PilotsCountFilter(
+			CancellationToken cancellationToken,
+			PilotSearchFilter filter)
+		{
+			IQueryable<PilotEntity> query = _context.Pilot.AsNoTracking();
+
+			if (!string.IsNullOrWhiteSpace(filter.FirstName))
+			{
+				query = query.Where(p => p.FirstName.Contains(filter.FirstName));
+			}
+			if (!string.IsNullOrWhiteSpace(filter.LastName))
+			{
+				query = query.Where(p => p.LastName.Contains(filter.LastName));
+			}
+			if (!string.IsNullOrWhiteSpace(filter.UPRN))
+			{
+				query = query.Where(p => p.UPRN.Contains(filter.UPRN));
+			}
+			if (filter.FlyingHours.HasValue)
+			{
+				query = query.Where(p => p.FlyingHours >= filter.FlyingHours.Value);
+			}
+			return await query.CountAsync(cancellationToken);
+		}
+
 	}
 }

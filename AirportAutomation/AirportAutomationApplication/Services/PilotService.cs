@@ -1,4 +1,5 @@
 ﻿using AirportAutomation.Core.Entities;
+using AirportAutomation.Core.Filters;
 using AirportAutomation.Core.Interfaces.IRepositories;
 using AirportAutomation.Core.Interfaces.IServices;
 using Microsoft.AspNetCore.JsonPatch;
@@ -34,6 +35,11 @@ namespace AirportAutomation.Application.Services
 			return await _pilotRepository.GetPilotsByName(cancellationToken, page, pageSize, firstName, lastName);
 		}
 
+		public async Task<IList<PilotEntity?>> GetPilotsByFilter(CancellationToken cancellationToken, int page, int pageSize, PilotSearchFilter filter)
+		{
+			return await _pilotRepository.GetPilotsByFilter(cancellationToken, page, pageSize, filter);
+		}
+
 		public async Task<PilotEntity> PostPilot(PilotEntity pilot)
 		{
 			return await _pilotRepository.PostPilot(pilot);
@@ -61,6 +67,11 @@ namespace AirportAutomation.Application.Services
 		public async Task<int> PilotsCount(CancellationToken cancellationToken, string firstName = null, string lastName = null)
 		{
 			return await _pilotRepository.PilotsCount(cancellationToken, firstName, lastName);
+		}
+
+		public async Task<int> PilotsCountFilter(CancellationToken cancellationToken, PilotSearchFilter filter)
+		{
+			return await _pilotRepository.PilotsCountFilter(cancellationToken, filter);
 		}
 	}
 }

@@ -1,4 +1,5 @@
 ﻿using AirportAutomation.Core.Entities;
+using AirportAutomation.Core.Filters;
 using AirportAutomation.Core.Interfaces.IRepositories;
 using AirportAutomation.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
@@ -38,6 +39,32 @@ namespace AirportAutomation.Infrastructure.Repositories
 				.ToListAsync(cancellationToken);
 		}
 
+		public async Task<IList<ApiUserEntity?>> GetApiUsersByFilter(
+			CancellationToken cancellationToken,
+			int page,
+			int pageSize,
+			ApiUserSearchFilter filter)
+		{
+			IQueryable<ApiUserEntity> query = _context.ApiUser.AsNoTracking();
+
+			if (!string.IsNullOrWhiteSpace(filter.UserName))
+			{
+				query = query.Where(a => a.UserName.Contains(filter.UserName));
+			}
+			if (!string.IsNullOrWhiteSpace(filter.Password))
+			{
+				query = query.Where(a => a.Password.Contains(filter.Password));
+			}
+			if (!string.IsNullOrWhiteSpace(filter.Roles))
+			{
+				query = query.Where(a => a.Roles == filter.Roles);
+			}
+			return await query.OrderBy(a => a.ApiUserId)
+				.Skip(pageSize * (page - 1))
+				.Take(pageSize)
+				.ToListAsync(cancellationToken);
+		}
+
 		public async Task PutApiUser(ApiUserEntity apiUser)
 		{
 			_context.Entry(apiUser).State = EntityState.Modified;
@@ -66,5 +93,27 @@ namespace AirportAutomation.Infrastructure.Repositories
 			}
 			return await query.CountAsync(cancellationToken).ConfigureAwait(false);
 		}
+
+		public async Task<int> ApiUsersCountFilter(
+			CancellationToken cancellationToken,
+			ApiUserSearchFilter filter)
+		{
+			IQueryable<ApiUserEntity> query = _context.ApiUser.AsNoTracking();
+
+			if (!string.IsNullOrWhiteSpace(filter.UserName))
+			{
+				query = query.Where(a => a.UserName.Contains(filter.UserName));
+			}
+			if (!string.IsNullOrWhiteSpace(filter.Password))
+			{
+				query = query.Where(a => a.Password.Contains(filter.Password));
+			}
+			if (!string.IsNullOrWhiteSpace(filter.Roles))
+			{
+				query = query.Where(a => a.Roles == filter.Roles);
+			}
+			return await query.CountAsync(cancellationToken).ConfigureAwait(false);
+		}
+
 	}
 }

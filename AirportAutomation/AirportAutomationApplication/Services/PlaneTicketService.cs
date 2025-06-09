@@ -1,4 +1,5 @@
 ﻿using AirportAutomation.Core.Entities;
+using AirportAutomation.Core.Filters;
 using AirportAutomation.Core.Interfaces.IRepositories;
 using AirportAutomation.Core.Interfaces.IServices;
 using Microsoft.AspNetCore.JsonPatch;
@@ -34,6 +35,11 @@ namespace AirportAutomation.Application.Services
 			return await _planeTicketRepository.GetPlaneTicketsForPrice(cancellationToken, page, pageSize, minPrice, maxPrice);
 		}
 
+		public async Task<IList<PlaneTicketEntity?>> GetPlaneTicketsByFilter(CancellationToken cancellationToken, int page, int pageSize, PlaneTicketSearchFilter filter)
+		{
+			return await _planeTicketRepository.GetPlaneTicketsByFilter(cancellationToken, page, pageSize, filter);
+		}
+
 		public async Task<PlaneTicketEntity> PostPlaneTicket(PlaneTicketEntity planeTicket)
 		{
 			return await _planeTicketRepository.PostPlaneTicket(planeTicket);
@@ -62,6 +68,11 @@ namespace AirportAutomation.Application.Services
 		public async Task<int> PlaneTicketsCount(CancellationToken cancellationToken, int? minPrice = null, int? maxPrice = null)
 		{
 			return await _planeTicketRepository.PlaneTicketsCount(cancellationToken, minPrice, maxPrice);
+		}
+
+		public async Task<int> PlaneTicketsCountFilter(CancellationToken cancellationToken, PlaneTicketSearchFilter filter)
+		{
+			return await _planeTicketRepository.PlaneTicketsCountFilter(cancellationToken, filter);
 		}
 
 	}

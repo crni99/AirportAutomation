@@ -1,4 +1,5 @@
 ﻿using AirportAutomation.Core.Entities;
+using AirportAutomation.Core.Filters;
 using AirportAutomation.Core.Interfaces.IRepositories;
 using AirportAutomation.Infrastructure.Data;
 using Microsoft.AspNetCore.JsonPatch;
@@ -51,6 +52,25 @@ namespace AirportAutomation.Infrastructure.Repositories
 				query = query.Where(p => p.Airport.Contains(airport));
 			}
 
+			return await query.OrderBy(c => c.Id)
+								.Skip(pageSize * (page - 1))
+								.Take(pageSize)
+								.ToListAsync(cancellationToken)
+								.ConfigureAwait(false);
+		}
+
+		public async Task<IList<DestinationEntity?>> GetDestinationsByFilter(CancellationToken cancellationToken, int page, int pageSize, DestinationSearchFilter filter)
+		{
+			IQueryable<DestinationEntity> query = _context.Destination.AsNoTracking();
+
+			if (!string.IsNullOrEmpty(filter.City))
+			{
+				query = query.Where(p => p.City.Contains(filter.City));
+			}
+			if (!string.IsNullOrEmpty(filter.Airport))
+			{
+				query = query.Where(p => p.Airport.Contains(filter.Airport));
+			}
 			return await query.OrderBy(c => c.Id)
 								.Skip(pageSize * (page - 1))
 								.Take(pageSize)
@@ -111,5 +131,21 @@ namespace AirportAutomation.Infrastructure.Repositories
 			}
 			return await query.CountAsync(cancellationToken).ConfigureAwait(false);
 		}
+
+		public async Task<int> DestinationsCountFilter(CancellationToken cancellationToken, DestinationSearchFilter filter)
+		{
+			IQueryable<DestinationEntity> query = _context.Destination;
+
+			if (!string.IsNullOrEmpty(filter.City))
+			{
+				query = query.Where(p => p.City.Contains(filter.City));
+			}
+			if (!string.IsNullOrEmpty(filter.Airport))
+			{
+				query = query.Where(p => p.Airport.Contains(filter.Airport));
+			}
+			return await query.CountAsync(cancellationToken).ConfigureAwait(false);
+		}
+
 	}
 }

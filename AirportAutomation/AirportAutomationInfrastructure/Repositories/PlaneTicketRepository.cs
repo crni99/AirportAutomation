@@ -1,4 +1,5 @@
 ﻿using AirportAutomation.Core.Entities;
+using AirportAutomation.Core.Filters;
 using AirportAutomation.Core.Interfaces.IRepositories;
 using AirportAutomation.Infrastructure.Data;
 using Microsoft.AspNetCore.JsonPatch;
@@ -77,6 +78,36 @@ namespace AirportAutomation.Infrastructure.Repositories
 								.ConfigureAwait(false);
 		}
 
+		public async Task<IList<PlaneTicketEntity?>> GetPlaneTicketsByFilter(
+			CancellationToken cancellationToken,
+			int page,
+			int pageSize,
+			PlaneTicketSearchFilter filter)
+		{
+			IQueryable<PlaneTicketEntity> query = _context.PlaneTicket
+				.Include(k => k.Passenger)
+				.Include(k => k.TravelClass)
+				.Include(k => k.Flight)
+				.AsNoTracking();
+
+			if (filter.Price.HasValue)
+			{
+				query = query.Where(t => t.Price == filter.Price.Value);
+			}
+			if (filter.PurchaseDate.HasValue)
+			{
+				query = query.Where(t => t.PurchaseDate == filter.PurchaseDate.Value);
+			}
+			if (filter.SeatNumber.HasValue)
+			{
+				query = query.Where(t => t.SeatNumber == filter.SeatNumber.Value);
+			}
+			return await query.OrderBy(t => t.Id)
+				.Skip(pageSize * (page - 1))
+				.Take(pageSize)
+				.ToListAsync(cancellationToken);
+		}
+
 		public async Task<PlaneTicketEntity> PostPlaneTicket(PlaneTicketEntity planeTicket)
 		{
 			_context.PlaneTicket.Add(planeTicket);
@@ -125,5 +156,28 @@ namespace AirportAutomation.Infrastructure.Repositories
 			}
 			return await query.CountAsync(cancellationToken).ConfigureAwait(false);
 		}
+
+		public async Task<int> PlaneTicketsCountFilter(
+			CancellationToken cancellationToken,
+			PlaneTicketSearchFilter filter)
+		{
+			IQueryable<PlaneTicketEntity> query = _context.PlaneTicket
+				.AsNoTracking();
+
+			if (filter.Price.HasValue)
+			{
+				query = query.Where(t => t.Price == filter.Price.Value);
+			}
+			if (filter.PurchaseDate.HasValue)
+			{
+				query = query.Where(t => t.PurchaseDate == filter.PurchaseDate.Value);
+			}
+			if (filter.SeatNumber.HasValue)
+			{
+				query = query.Where(t => t.SeatNumber == filter.SeatNumber.Value);
+			}
+			return await query.CountAsync(cancellationToken);
+		}
+
 	}
 }
