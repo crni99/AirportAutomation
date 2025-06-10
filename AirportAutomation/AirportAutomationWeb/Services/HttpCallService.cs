@@ -1,4 +1,5 @@
-﻿using AirportAutomation.Web.Interfaces;
+﻿using AirportAutomation.Core.Filters;
+using AirportAutomation.Web.Interfaces;
 using AirportAutomation.Web.Models.ApiUser;
 using AirportAutomation.Web.Models.Response;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -655,6 +656,35 @@ namespace AirportAutomation.Web.Services
 			}
 		}
 
+		public async Task<PagedResponse<T>> GetDataByFilter<T>(object filter, int page, int pageSize)
+		{
+			var modelName = GetModelName<T>();
+
+			string requestUri = BuildRequestUriByModelName(modelName, filter, page, pageSize);
+
+			var httpRequestMessage = new HttpRequestMessage(HttpMethod.Get, requestUri);
+
+			using var httpClient = _httpClientFactory.CreateClient("AirportAutomationApi");
+			ConfigureHttpClient(httpClient);
+
+			var response = await httpClient.SendAsync(httpRequestMessage);
+
+			if (response.StatusCode == HttpStatusCode.OK)
+			{
+				return await response.Content.ReadFromJsonAsync<PagedResponse<T>>().ConfigureAwait(false);
+			}
+			else if (response.StatusCode == HttpStatusCode.NoContent)
+			{
+				_logger.LogInformation("Data not found. Status code: {StatusCode}", response.StatusCode);
+				return new PagedResponse<T>(Enumerable.Empty<T>(), page, pageSize, 0);
+			}
+			else
+			{
+				_logger.LogInformation("Failed to retrieve data. Status code: {StatusCode}", response.StatusCode);
+				return null;
+			}
+		}
+
 		/// <summary>
 		/// Creates a new data entry of a specified type.
 		/// </summary>
@@ -807,5 +837,110 @@ namespace AirportAutomation.Web.Services
 			}
 			return modelName;
 		}
+
+		public string BuildRequestUriByModelName(string modelName, object filter, int page, int pageSize)
+		{
+			string requestUri;
+
+			var specialModels = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+			{
+				"ApiUser",
+				"Destination",
+				"Passenger",
+				"Pilot",
+				"PlaneTicket"
+			};
+			requestUri = $"{apiURL}/{modelName}/byFilter";
+
+			var filterQuery = BuildFilterQueryString(modelName, filter);
+
+			string pluralSuffix = modelName.Equals("TravelClass", StringComparison.OrdinalIgnoreCase) ? "es" : "s";
+			requestUri = $"{apiURL}/{modelName}{pluralSuffix}/byFilter";
+			requestUri += $"?{filterQuery}&page={page}&pageSize={pageSize}";
+
+			return requestUri;
+		}
+
+		private string BuildFilterQueryString(string modelName, object filter)
+		{
+			if (filter == null) return string.Empty;
+
+			var queryParameters = new List<string>();
+
+			switch (modelName.ToLower())
+			{
+				case "apiuser":
+					if (filter is ApiUserSearchFilter userFilter)
+					{
+						if (!string.IsNullOrEmpty(userFilter.UserName))
+							queryParameters.Add($"UserName={Uri.EscapeDataString(userFilter.UserName)}");
+						if (!string.IsNullOrEmpty(userFilter.Password))
+							queryParameters.Add($"Password={Uri.EscapeDataString(userFilter.Password)}");
+						if (!string.IsNullOrEmpty(userFilter.Roles))
+							queryParameters.Add($"Roles={Uri.EscapeDataString(userFilter.Roles)}");
+					}
+					break;
+
+				case "destination":
+					if (filter is DestinationSearchFilter destFilter)
+					{
+						if (!string.IsNullOrEmpty(destFilter.City))
+							queryParameters.Add($"City={Uri.EscapeDataString(destFilter.City)}");
+						if (!string.IsNullOrEmpty(destFilter.Airport))
+							queryParameters.Add($"Airport={Uri.EscapeDataString(destFilter.Airport)}");
+					}
+					break;
+
+				case "passenger":
+					if (filter is PassengerSearchFilter passengerFilter)
+					{
+						if (!string.IsNullOrEmpty(passengerFilter.FirstName))
+							queryParameters.Add($"FirstName={Uri.EscapeDataString(passengerFilter.FirstName)}");
+						if (!string.IsNullOrEmpty(passengerFilter.LastName))
+							queryParameters.Add($"LastName={Uri.EscapeDataString(passengerFilter.LastName)}");
+						if (!string.IsNullOrEmpty(passengerFilter.UPRN))
+							queryParameters.Add($"UPRN={Uri.EscapeDataString(passengerFilter.UPRN)}");
+						if (!string.IsNullOrEmpty(passengerFilter.Passport))
+							queryParameters.Add($"Passport={Uri.EscapeDataString(passengerFilter.Passport)}");
+						if (!string.IsNullOrEmpty(passengerFilter.Address))
+							queryParameters.Add($"Address={Uri.EscapeDataString(passengerFilter.Address)}");
+						if (!string.IsNullOrEmpty(passengerFilter.Phone))
+							queryParameters.Add($"Phone={Uri.EscapeDataString(passengerFilter.Phone)}");
+					}
+					break;
+
+				case "pilot":
+					if (filter is PilotSearchFilter pilotFilter)
+					{
+						if (!string.IsNullOrEmpty(pilotFilter.FirstName))
+							queryParameters.Add($"FirstName={Uri.EscapeDataString(pilotFilter.FirstName)}");
+						if (!string.IsNullOrEmpty(pilotFilter.LastName))
+							queryParameters.Add($"LastName={Uri.EscapeDataString(pilotFilter.LastName)}");
+						if (!string.IsNullOrEmpty(pilotFilter.UPRN))
+							queryParameters.Add($"UPRN={Uri.EscapeDataString(pilotFilter.UPRN)}");
+						if (pilotFilter.FlyingHours.HasValue)
+							queryParameters.Add($"FlyingHours={pilotFilter.FlyingHours.Value}");
+					}
+					break;
+
+				case "planeticket":
+					if (filter is PlaneTicketSearchFilter ticketFilter)
+					{
+						if (ticketFilter.Price.HasValue)
+							queryParameters.Add($"Price={ticketFilter.Price.Value}");
+						if (ticketFilter.PurchaseDate.HasValue)
+							queryParameters.Add($"PurchaseDate={Uri.EscapeDataString(ticketFilter.PurchaseDate.Value.ToString("yyyy-MM-dd"))}");
+						if (ticketFilter.SeatNumber.HasValue)
+							queryParameters.Add($"SeatNumber={ticketFilter.SeatNumber.Value}");
+					}
+					break;
+
+				default:
+					break;
+			}
+
+			return string.Join("&", queryParameters);
+		}
+
 	}
 }

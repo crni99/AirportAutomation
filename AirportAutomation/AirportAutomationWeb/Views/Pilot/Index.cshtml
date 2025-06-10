@@ -20,7 +20,15 @@
 						<label for="lastName" class="input-group-text">Last Name:</label>
 						<input type="text" class="form-control" id="lastName" name="lastName">
 					</div>
-					<button id="searchButton" class="btn btn-primary">Search</button>
+					<div class="input-group me-3">
+						<label for="uprn" class="input-group-text">UPRN:</label>
+						<input type="number" class="form-control" id="uprn" name="uprn">
+					</div>
+					<div class="input-group me-3">
+						<label for="flyingHours" class="input-group-text">Flying Hours:</label>
+						<input type="number" class="form-control" id="flyingHours" name="flyingHours">
+					</div>
+					@await Html.PartialAsync("_SearchButton")
 				</div>
 			</div>
 		</div>

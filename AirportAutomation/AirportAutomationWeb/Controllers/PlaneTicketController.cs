@@ -1,4 +1,6 @@
 ﻿using AirportAutomation.Core.Entities;
+using AirportAutomation.Core.FilterExtensions;
+using AirportAutomation.Core.Filters;
 using AirportAutomation.Web.Interfaces;
 using AirportAutomation.Web.Models.PlaneTicket;
 using AirportAutomation.Web.Models.Response;
@@ -77,6 +79,30 @@ namespace AirportAutomation.Web.Controllers
 				return RedirectToAction("Index");
 			}
 			var response = await _httpCallService.GetDataForPrice<PlaneTicketEntity>(minPrice, maxPrice, page, pageSize);
+			if (response == null)
+			{
+				return Json(new { success = false, message = "No plane tickets found." });
+			}
+			var pagedResponse = _mapper.Map<PagedResponse<PlaneTicketViewModel>>(response);
+			return Json(new { success = true, data = pagedResponse });
+		}
+
+		[HttpGet]
+		[Route("GetPlaneTicketsByFilter")]
+		public async Task<IActionResult> GetPlaneTicketsByFilter(
+			[FromQuery] PlaneTicketSearchFilter filter, int page = 1, int pageSize = 10)
+		{
+			if (page < 1)
+			{
+				_alertService.SetAlertMessage(TempData, "invalid_page_number", false);
+				return Json(new { success = false, message = "Page number must be greater than or equal to 1." });
+			}
+			if (filter.IsEmpty())
+			{
+				_alertService.SetAlertMessage(TempData, "missing_field", false);
+				return RedirectToAction("Index");
+			}
+			var response = await _httpCallService.GetDataByFilter<PlaneTicketEntity>(filter, page, pageSize);
 			if (response == null)
 			{
 				return Json(new { success = false, message = "No plane tickets found." });

@@ -20,7 +20,7 @@
 						<label for="airport" class="input-group-text">Airport:</label>
 						<input type="text" class="form-control" id="airport" name="airport">
 					</div>
-					<button id="searchButton" class="btn btn-primary">Search</button>
+					@await Html.PartialAsync("_SearchButton")
 				</div>
 			</div>
 		</div>

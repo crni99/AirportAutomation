@@ -16,7 +16,7 @@
 						<label for="searchInput" class="input-group-text">Search by Name:</label>
 						<input type="text" id="searchInput" class="form-control" required />
 					</div>
-					<button id="searchButton" class="btn btn-primary">Search</button>
+					@await Html.PartialAsync("_SearchButton")
 				</div>
 			</div>
 		</div>

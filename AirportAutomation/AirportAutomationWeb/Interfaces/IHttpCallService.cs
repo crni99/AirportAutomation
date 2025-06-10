@@ -1,5 +1,6 @@
 ﻿using AirportAutomation.Web.Models.ApiUser;
 using AirportAutomation.Web.Models.Response;
+using System.Linq.Expressions;
 
 namespace AirportAutomation.Web.Interfaces
 {
@@ -20,6 +21,7 @@ namespace AirportAutomation.Web.Interfaces
 		Task<PagedResponse<T>> GetDataBetweenDates<T>(string? startDate, string? endDate, int page, int pageSize);
 		Task<PagedResponse<T>> GetDataByCityOrAirport<T>(string? city, string? airport, int page, int pageSize);
 		Task<PagedResponse<T>> GetDataByRole<T>(string role, int page, int pageSize);
+		Task<PagedResponse<T>> GetDataByFilter<T>(object filter, int page, int pageSize);
 		Task<T> GetHealthCheck<T>();
 		string GetModelName<T>();
 	}

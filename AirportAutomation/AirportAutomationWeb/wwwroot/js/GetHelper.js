@@ -51,11 +51,13 @@ function createURL(fetchURL, entityType, page) {
             return `/${entityType}/GetAirlinesByName?name=${encodeURIComponent(searchName)}&${paginationParams}`;
 
         case 'ApiUser':
+            var username = $('#usernameInput').val();
+            var password = $('#passwordInput').val();
             var searchRole = $('#roleSelect').val();
-            if (!searchRole || searchRole.trim() === '') {
+            if ((!username || username.trim() === '') && (!password || password.trim() === '') && (!searchRole || searchRole.trim() === '')) {
                 return `${fetchURL}?${paginationParams}`;
             }
-            return `/${entityType}/GetApiUsersByName?role=${encodeURIComponent(searchRole)}&${paginationParams}`;
+            return `/${entityType}/GetApiUsersByFilter?username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}&roles=${encodeURIComponent(searchRole)}&${paginationParams}`;
 
         case 'Destination':
             var city = $('#city').val();
@@ -63,7 +65,7 @@ function createURL(fetchURL, entityType, page) {
             if ((!city || city.trim() === '') && (!airport || airport.trim() === '')) {
                 return `${fetchURL}?${paginationParams}`;
             }
-            return `/${entityType}/GetDestinationsByCityOrAirport?city=${encodeURIComponent(city)}&airport=${encodeURIComponent(airport)}&${paginationParams}`;
+            return `/${entityType}/GetDestinationsByFilter?city=${encodeURIComponent(city)}&airport=${encodeURIComponent(airport)}&${paginationParams}`;
 
         case 'Flight':
             var startDate = $('#startDate').val();
@@ -76,29 +78,39 @@ function createURL(fetchURL, entityType, page) {
         case 'Passenger':
             var firstName = $('#firstName').val();
             var lastName = $('#lastName').val();
-            if ((!firstName || firstName.trim() === '') && (!lastName || lastName.trim() === '')) {
+            var uprn = $('#uprn').val();
+            var passport = $('#passport').val();
+            var address = $('#address').val();
+            var phone = $('#phone').val();
+            if ((!firstName || firstName.trim() === '') && (!lastName || lastName.trim() === '') && (!uprn || uprn.trim() === '')
+                && (!passport || passport.trim() === '') && (!address || address.trim() === '') && (!phone || phone.trim() === '')) {
                 return `${fetchURL}?${paginationParams}`;
             }
-            return `/${entityType}/GetPassengersByName?firstName=${encodeURIComponent(firstName)}&lastName=${encodeURIComponent(lastName)}&${paginationParams}`;
+            return `/${entityType}/GetPassengersByFilter?firstName=${encodeURIComponent(firstName)}&lastName=${encodeURIComponent(lastName)}&uprn=${encodeURIComponent(uprn)}&passport=${encodeURIComponent(passport)}&address=${encodeURIComponent(address)}&phone=${encodeURIComponent(phone)}&${paginationParams}`;
 
         case 'Pilot':
             var firstName = $('#firstName').val();
             var lastName = $('#lastName').val();
-            if ((!firstName || firstName.trim() === '') && (!lastName || lastName.trim() === '')) {
+            var uprn = $('#uprn').val();
+            var flyingHours = $('#flyingHours').val();
+            if ((!firstName || firstName.trim() === '') && (!lastName || lastName.trim() === '') &&
+                (!uprn || uprn.trim() === '') && (!flyingHours || flyingHours.trim() === '')) {
                 return `${fetchURL}?${paginationParams}`;
             }
-            return `/${entityType}/GetPilotsByName?firstName=${encodeURIComponent(firstName)}&lastName=${encodeURIComponent(lastName)}&${paginationParams}`;
+            return `/${entityType}/GetPilotsByFilter?firstName=${encodeURIComponent(firstName)}&lastName=${encodeURIComponent(lastName)}&uprn=${encodeURIComponent(uprn)}&flyingHours=${encodeURIComponent(flyingHours)}&${paginationParams}`;
 
         case 'PlaneTicket':
-            var minPrice = $('#minPrice').val();
-            var maxPrice = $('#maxPrice').val();
-            if ((!minPrice || minPrice.trim() === '') && (!maxPrice || maxPrice.trim() === '')) {
+            var price = $('#price').val();
+            var purchaseDate = $('#purchaseDate').val();
+            var seatNumber = $('#seatNumber').val();
+            if (
+                (!price || price.trim() === '') &&
+                (!purchaseDate || purchaseDate.trim() === '') &&
+                (!seatNumber || seatNumber.trim() === '')
+            ) {
                 return `${fetchURL}?${paginationParams}`;
             }
-            if (isNaN(minPrice) || isNaN(maxPrice)) {
-                return `${fetchURL}?${paginationParams}`;
-            }
-            return `/${entityType}/GetPlaneTicketsForPrice?minPrice=${encodeURIComponent(minPrice)}&maxPrice=${encodeURIComponent(maxPrice)}&${paginationParams}`;
+            return `/${entityType}/GetPlaneTicketsByFilter?price=${encodeURIComponent(price)}&purchaseDate=${encodeURIComponent(purchaseDate)}&seatNumber=${encodeURIComponent(seatNumber)}&${paginationParams}`;
 
         default:
             return `${fetchURL}?${paginationParams}`;

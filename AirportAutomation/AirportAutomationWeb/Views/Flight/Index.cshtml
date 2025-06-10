@@ -20,7 +20,7 @@
 						<label for="endDate" class="input-group-text">End Date:</label>
 						<input type="text" class="form-control" id="endDate" name="endDate">
 					</div>
-					<button id="searchButton" class="btn btn-primary">Search</button>
+					@await Html.PartialAsync("_SearchButton")
 				</div>
 			</div>
 		</div>

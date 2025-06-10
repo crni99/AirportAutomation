@@ -6,22 +6,24 @@
 <div class="container container-spacing-top">
 	<div class="row justify-content-between">
 		<div class="col-md-12">
-			<div class="d-flex justify-content-between align-items-center" style="width: 100%;">
+			<div class="d-flex justify-content-between align-items-center gap-3" style="width: 100%;">
 				@if (ViewBag.ApiUserRole != "User")
 				{
 					@await Html.PartialAsync("Index/_CreateButtonIndex", typeName)
 				}
-				<div class="d-flex">
-					<div class="input-group me-3">
-						<label for="minPrice" class="input-group-text">Min Price:</label>
-						<input type="number" class="form-control" id="minPrice" name="minPrice">
-					</div>
-					<div class="input-group me-3">
-						<label for="maxPrice" class="input-group-text">Max Price:</label>
-						<input type="number" class="form-control" id="maxPrice" name="maxPrice">
-					</div>
-					<button id="searchButton" class="btn btn-primary">Search</button>
+				<div class="input-group" style="width: 70%;">
+					<label for="price" class="input-group-text">Price:</label>
+					<input type="number" class="form-control" id="price" name="price">
 				</div>
+				<div class="input-group" style="width: 70%;">
+					<label for="purchaseDate" class="input-group-text">Purchase Date:</label>
+					<input type="date" class="form-control" id="purchaseDate" name="purchaseDate">
+				</div>
+				<div class="input-group" style="width: 70%;">
+					<label for="seatNumber" class="input-group-text">Seat Number:</label>
+					<input type="number" class="form-control" id="seatNumber" name="seatNumber">
+				</div>
+				@await Html.PartialAsync("_SearchButton")
 			</div>
 		</div>
 	</div>

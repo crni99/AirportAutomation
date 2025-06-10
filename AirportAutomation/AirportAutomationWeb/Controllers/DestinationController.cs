@@ -1,9 +1,12 @@
 ﻿using AirportAutomation.Core.Entities;
+using AirportAutomation.Core.FilterExtensions;
+using AirportAutomation.Core.Filters;
 using AirportAutomation.Web.Interfaces;
 using AirportAutomation.Web.Models.Destination;
 using AirportAutomation.Web.Models.Response;
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
+using System.Globalization;
 
 namespace AirportAutomation.Web.Controllers
 {
@@ -76,6 +79,29 @@ namespace AirportAutomation.Web.Controllers
 				return RedirectToAction("Index");
 			}
 			var response = await _httpCallService.GetDataByCityOrAirport<DestinationEntity>(city, airport, page, pageSize);
+			if (response == null)
+			{
+				return Json(new { success = false, message = "No destinations found." });
+			}
+			var pagedResponse = _mapper.Map<PagedResponse<DestinationViewModel>>(response);
+			return Json(new { success = true, data = pagedResponse });
+		}
+
+		[HttpGet]
+		[Route("GetDestinationsByFilter")]
+		public async Task<IActionResult> GetDestinationsByFilter([FromQuery] DestinationSearchFilter filter, int page = 1, int pageSize = 10)
+		{
+			if (page < 1)
+			{
+				_alertService.SetAlertMessage(TempData, "invalid_page_number", false);
+				return Json(new { success = false, message = "Page number must be greater than or equal to 1." });
+			}
+			if (filter.IsEmpty())
+			{
+				_alertService.SetAlertMessage(TempData, "missing_field", false);
+				return RedirectToAction("Index");
+			}
+			var response = await _httpCallService.GetDataByFilter<DestinationEntity>(filter, page, pageSize);
 			if (response == null)
 			{
 				return Json(new { success = false, message = "No destinations found." });

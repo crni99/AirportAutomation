@@ -11,5 +11,4 @@ namespace AirportAutomation.Core.Filters
 		public string? Phone { get; set; }
 	}
 
-
 }
