@@ -6,16 +6,9 @@
 @if (ViewBag.ApiUserRole == "SuperAdmin")
 {
 	<div class="container mt-5">
-		<div class="row">
-			<div class="col-md-8">
-				<div class="input-group mb-3" style="width: 70%;">
-					<label for="usernameInput" class="input-group-text">Username:</label>
-					<input type="text" id="usernameInput" class="form-control" placeholder="Enter username" required>
-
-					<label for="passwordInput" class="input-group-text">Password:</label>
-					<input type="password" id="passwordInput" class="form-control" placeholder="Enter password" required>
-				</div>
-				<div class="input-group mb-3" style="width: 70%;">
+		<div class="row mb-3">
+			<div class="col-md-4 mb-2">
+				<div class="input-group">
 					<label for="roleSelect" class="input-group-text">Search by Role:</label>
 					<select id="roleSelect" class="form-control" required>
 						<option value="" selected>Select a role</option>
@@ -23,11 +16,39 @@
 						<option value="Admin">Admin</option>
 						<option value="SuperAdmin">Super Admin</option>
 					</select>
-					@await Html.PartialAsync("_SearchButton")
+				</div>
+			</div>
+			<div class="col-md-4 mb-2">
+				<div class="input-group">
+					<label for="passwordInput" class="input-group-text">Password:</label>
+					<input type="text" id="passwordInput" class="form-control" placeholder="Enter password" required>
+				</div>
+			</div>
+			<div class="col-md-4 mb-2">
+				<div class="input-group">
+					<label for="usernameInput" class="input-group-text">Username:</label>
+					<input type="text" id="usernameInput" class="form-control" placeholder="Enter username" required>
+				</div>
 				</div>
 			</div>
 		</div>
-	</div>
+		<div class="row mb-3">
+			<div class="col-md-4 mb-2">
+				&nbsp;
+			</div>
+			<div class="col-md-4 mb-2">
+				&nbsp;
+			</div>
+			<div class="col-md-2 mb-2 ">
+			&nbsp;
+			</div>
+			<div class="col-md-2 mb-2 d-flex justify-content-end">
+				<div class="me-4">
+					@await Html.PartialAsync("_ClearInputsButton")
+				</div>
+				@await Html.PartialAsync("_SearchButton")
+			</div>
+		</div>
 	<br />
 	<div id="alert">
 		@if (TempData["AlertMessage"] != null)
@@ -67,4 +88,5 @@ else
 	<script src="~/js/GetHelper.js"></script>
 	<script src="~/js/OpenHelper.js"></script>
 	<script src="~/js/AlertHelper.js"></script>
+	<script src="~/js/ClearHelper.js"></script>
 }

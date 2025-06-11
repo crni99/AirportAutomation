@@ -1,4 +1,5 @@
-﻿using AirportAutomation.Infrastructure.Data;
+﻿using AirportAutomation.Api.HealthChecks;
+using AirportAutomation.Infrastructure.Data;
 using AirportAutomation.Infrastructure.Middlewares;
 using AirportАutomation.Api.Binders;
 using AirportАutomation.Api.HealthChecks;
@@ -173,9 +174,7 @@ builder.Services.AddHttpClient();
 builder.Services
 	.AddHealthChecks()
 	.AddCheck<ApiHealthCheck>("API")
-	.AddSqlServer(
-		builder.Configuration.GetConnectionString("Default"),
-		name: "SQL Server")
+	.AddCheck<SqlServerHealthCheck>("SQL Server")
 	.AddCheck<DatabaseHealthCheck>("Database");
 
 var app = builder.Build();

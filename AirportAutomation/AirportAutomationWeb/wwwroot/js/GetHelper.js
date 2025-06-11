@@ -16,6 +16,7 @@
             }
             $('#dataForm').show();
             $('#paginationContainer').show();
+            $('#paginationInfo').show();
 
             tableHead.empty();
             tableBody.empty();
@@ -27,6 +28,7 @@
             $.each(rowsData, function (_, item) {
                 createTableBody(item, tableBody, entityType);
             });
+            paginationInfo(data.data.pageNumber, data.data.totalPages, data.data.totalCount);
             updatePagination(data.data.pageNumber, data.data.lastPage);
         },
         error: function (xhr, status, error) {
@@ -341,6 +343,16 @@ function createTableBody(item, tableBody, entityType) {
             break;
     }
     tableBody.append(row);
+}
+
+function paginationInfo(dataPageNumber, dataTotalPages, dataTotalCount) {
+    var currentPage = $('#currentPage');
+    var totalPages = $('#totalPages');
+    var totalCount = $('#totalCount');
+
+    currentPage.text(dataPageNumber);
+    totalPages.text(dataTotalPages);
+    totalCount.text(dataTotalCount);
 }
 
 function updatePagination(currentPage, lastPage) {

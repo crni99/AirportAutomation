@@ -81,7 +81,7 @@ namespace AirportAutomation.Infrastructure.Repositories
 			}
 			if (filter.FlyingHours.HasValue)
 			{
-				query = query.Where(p => p.FlyingHours >= filter.FlyingHours.Value);
+				query = query.Where(p => p.FlyingHours >= filter.FlyingHours);
 			}
 			return await query.OrderBy(p => p.Id)
 				.Skip(pageSize * (page - 1))

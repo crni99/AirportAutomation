@@ -14,13 +14,16 @@
 				<div class="d-flex">
 					<div class="input-group me-3">
 						<label for="startDate" class="input-group-text">Start Date:</label>
-						<input type="text" class="form-control" id="startDate" name="startDate">
+						<input type="date" class="form-control" id="startDate" name="startDate">
 					</div>
 					<div class="input-group me-3">
 						<label for="endDate" class="input-group-text">End Date:</label>
-						<input type="text" class="form-control" id="endDate" name="endDate">
+						<input type="date" class="form-control" id="endDate" name="endDate">
 					</div>
-					@await Html.PartialAsync("_SearchButton")
+					<div class="me-3">
+						@await Html.PartialAsync("_SearchButton")
+					</div>
+					@await Html.PartialAsync("_ClearInputsButton")
 				</div>
 			</div>
 		</div>
@@ -60,4 +63,5 @@
 	<script src="~/js/GetHelper.js"></script>
 	<script src="~/js/OpenHelper.js"></script>
 	<script src="~/js/AlertHelper.js"></script>
+	<script src="~/js/ClearHelper.js"></script>
 }

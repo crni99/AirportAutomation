@@ -3,6 +3,9 @@
 		<hr />
 		@await Html.PartialAsync("_TableLayout")
 	</div>
+	<div id="paginationInfo" style="display:none;">
+		@await Html.PartialAsync("_PaginationInfo")
+	</div>
 	<div id="paginationContainer" style="display:none;">
 		@await Html.PartialAsync("_Pagination")
 	</div>

@@ -20,7 +20,10 @@
 						<label for="airport" class="input-group-text">Airport:</label>
 						<input type="text" class="form-control" id="airport" name="airport">
 					</div>
-					@await Html.PartialAsync("_SearchButton")
+					<div class="me-3">
+						@await Html.PartialAsync("_SearchButton")
+					</div>
+					@await Html.PartialAsync("_ClearInputsButton")
 				</div>
 			</div>
 		</div>
@@ -60,4 +63,5 @@
 	<script src="~/js/GetHelper.js"></script>
 	<script src="~/js/OpenHelper.js"></script>
 	<script src="~/js/AlertHelper.js"></script>
+	<script src="~/js/ClearHelper.js"></script>
 }
