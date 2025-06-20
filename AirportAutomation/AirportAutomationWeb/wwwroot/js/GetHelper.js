@@ -140,11 +140,14 @@ function createTableHead(tableHead, fields, entityType) {
             headerRow.append(header);
         });
     }
+    if (entityType !== 'TravelClass') {
+        headerRow.append($('<th>').text('Actions').addClass('text-decoration-underline fw-bold'));
+    }
     tableHead.append(headerRow);
 }
 
 function createTableBody(item, tableBody, entityType) {
-    var row = $('<tr class="clickable-row">');
+    var row = $('<tr class="">');
 
     switch (entityType) {
 
@@ -157,9 +160,8 @@ function createTableBody(item, tableBody, entityType) {
             nameCell.text(item.name);
             row.append(nameCell);
 
-            row.on("click", function () {
-                openDetails(entityType, item.id);
-            });
+            row.append(generateActionButtons(item.id, entityType));
+
             break;
 
         case 'ApiUser':
@@ -179,17 +181,13 @@ function createTableBody(item, tableBody, entityType) {
             rolesCell.text(item.roles);
             row.append(rolesCell);
 
-            row.on("click", function () {
-                openDetails(entityType, item.id);
-            });
+            row.append(generateActionButtons(item.id, entityType));
+
             break;
 
         case 'Destination':
             var idCell = $('<td>');
             idCell.text(item.id);
-            idCell.on("click", function () {
-                openDetails(entityType, item.id);
-            });
             row.append(idCell);
 
             var cityCell = $('<td class="link-primary">');
@@ -199,12 +197,15 @@ function createTableBody(item, tableBody, entityType) {
             });
             row.append(cityCell);
 
-            var airportCell = $('<td class="link-primary">');
+            var airportCell = $('<td class="link-primary clickable-row">');
             airportCell.text(item.airport);
             airportCell.on("click", function () {
                 openMap(item.airport);
             });
             row.append(airportCell);
+
+            row.append(generateActionButtons(item.id, entityType));
+
             break;
 
         case 'Flight':
@@ -220,48 +221,32 @@ function createTableBody(item, tableBody, entityType) {
             departureTimeCell.text(item.departureTime);
             row.append(departureTimeCell);
 
-            row.on("click", function () {
-                openDetails(entityType, item.id);
-            });
+            row.append(generateActionButtons(item.id, entityType));
+
             break;
 
         case 'Passenger':
             var idCell = $('<td>');
             idCell.text(item.id);
-            idCell.on("click", function () {
-                openDetails(entityType, item.id);
-            });
             row.append(idCell);
 
             var firstNameCell = $('<td>');
             firstNameCell.text(item.firstName);
-            firstNameCell.on("click", function () {
-                openDetails(entityType, item.id);
-            });
             row.append(firstNameCell);
 
             var lastNameCell = $('<td>');
             lastNameCell.text(item.lastName);
-            lastNameCell.on("click", function () {
-                openDetails(entityType, item.id);
-            });
             row.append(lastNameCell);
 
             var uprnCell = $('<td>');
             uprnCell.text(item.uprn);
-            uprnCell.on("click", function () {
-                openDetails(entityType, item.id);
-            });
             row.append(uprnCell);
 
             var passportCell = $('<td>');
             passportCell.text(item.passport);
-            passportCell.on("click", function () {
-                openDetails(entityType, item.id);
-            });
             row.append(passportCell);
 
-            var addressCell = $('<td class="link-primary">');
+            var addressCell = $('<td class="link-primary clickable-row">');
             addressCell.text(item.address);
             addressCell.on("click", function () {
                 openMap(item.address);
@@ -270,14 +255,11 @@ function createTableBody(item, tableBody, entityType) {
 
             var phoneCell = $('<td>');
             phoneCell.text(item.phone);
-            phoneCell.on("click", function () {
-                openDetails(entityType, item.id);
-            });
+        
             row.append(phoneCell);
 
-            row.on("click", function () {
-                openDetails(entityType, item.id);
-            });
+            row.append(generateActionButtons(item.id, entityType));
+
             break;
 
         case 'Pilot':
@@ -301,9 +283,8 @@ function createTableBody(item, tableBody, entityType) {
             flyingHoursCell.text(item.flyingHours);
             row.append(flyingHoursCell);
 
-            row.on("click", function () {
-                openDetails(entityType, item.id);
-            });
+            row.append(generateActionButtons(item.id, entityType));
+
             break;
 
         case 'PlaneTicket':
@@ -323,9 +304,8 @@ function createTableBody(item, tableBody, entityType) {
             seatNumberCell.text(item.seatNumber);
             row.append(seatNumberCell);
 
-            row.on("click", function () {
-                openDetails(entityType, item.id);
-            });
+            row.append(generateActionButtons(item.id, entityType));
+
             break;
 
         case 'TravelClass':
@@ -369,4 +349,32 @@ function updatePagination(currentPage, lastPage) {
     $('.page-item:nth-child(3) a').data('page', currentPage + 1);
     $('.page-item:first a').data('page', 1);
     $('.page-item:last a').data('page', lastPage);
+}
+
+function generateActionButtons(id, entityType) {
+    var openUrl = `/${entityType}/${id}`;
+    var editUrl = `/${entityType}/Edit/${id}`;
+    var deleteUrl = `/${entityType}/Delete/${id}`;
+
+    var buttons = `
+        <div class="btn-group btn-group-sm" role="group">
+             <a href="${openUrl}" class="btn btn-icon-open me-3" target="_blank">
+                <i class="fa-solid fa-square-up-right fa-2xl"></i>
+            </a>`;
+
+    if (currentUserRole !== 'User') {
+        buttons += `
+             <a href="${editUrl}" class="btn btn-icon-edit me-3" target="_blank">
+                <i class="fa-solid fa-square-pen fa-2xl"></i>
+            </a>`;
+
+        if (entityType !== 'ApiUser') {
+            buttons += `
+                <a href="${deleteUrl}" class="btn btn-icon-delete" target="_blank">
+                    <i class="fa-solid fa-trash-can fa-2xl"></i>
+                </a>`;
+        }
+    }
+    buttons += `</div>`;
+    return $('<td>').html(buttons);
 }
