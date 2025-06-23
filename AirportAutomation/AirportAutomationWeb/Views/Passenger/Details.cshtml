@@ -47,7 +47,11 @@
 						@Html.DisplayNameFor(model => model.Address)
 					</dt>
 					<dd class="col-sm-8 mt-2 link-primary clickable-row" onclick="openMap('@Model.Address')">
-						@Html.DisplayFor(model => model.Address)
+						<span data-bs-toggle="tooltip"
+							  data-bs-placement="right"
+							  title="Open Map">
+							@Html.DisplayFor(model => model.Address)
+						</span>
 					</dd>
 					<dt class="col-sm-4 mt-2">
 						@Html.DisplayNameFor(model => model.Phone)

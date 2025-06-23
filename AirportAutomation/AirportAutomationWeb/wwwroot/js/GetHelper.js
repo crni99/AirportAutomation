@@ -30,6 +30,7 @@
             });
             paginationInfo(data.data.pageNumber, data.data.totalPages, data.data.totalCount);
             updatePagination(data.data.pageNumber, data.data.lastPage);
+            $('[data-bs-toggle="tooltip"]').tooltip();
         },
         error: function (xhr, status, error) {
             console.error('Error:', status, error);
@@ -190,15 +191,15 @@ function createTableBody(item, tableBody, entityType) {
             idCell.text(item.id);
             row.append(idCell);
 
-            var cityCell = $('<td class="link-primary">');
-            cityCell.text(item.city);
+            var cityCell = $('<td class="link-primary clickable-row">');
+            cityCell.html('<span data-bs-toggle="tooltip" data-bs-placement="right" title="Open Map">' + item.city + '</span>');
             cityCell.on("click", function () {
                 openMap(item.city);
             });
             row.append(cityCell);
 
             var airportCell = $('<td class="link-primary clickable-row">');
-            airportCell.text(item.airport);
+            airportCell.html('<span data-bs-toggle="tooltip" data-bs-placement="right" title="Open Map">' + item.airport + '</span>');
             airportCell.on("click", function () {
                 openMap(item.airport);
             });
@@ -247,7 +248,7 @@ function createTableBody(item, tableBody, entityType) {
             row.append(passportCell);
 
             var addressCell = $('<td class="link-primary clickable-row">');
-            addressCell.text(item.address);
+            addressCell.html('<span data-bs-toggle="tooltip" data-bs-placement="right" title="Open Map">' + item.address + '</span>');
             addressCell.on("click", function () {
                 openMap(item.address);
             });
@@ -358,20 +359,38 @@ function generateActionButtons(id, entityType) {
 
     var buttons = `
         <div class="btn-group btn-group-sm" role="group">
-             <a href="${openUrl}" class="btn btn-icon-open me-3" target="_blank">
-                <i class="fa-solid fa-square-up-right fa-2xl"></i>
+             <a href="${openUrl}" 
+                 class="btn btn-icon-open me-3" 
+                 target="_blank"
+                 data-bs-toggle="tooltip"
+			     data-bs-placement="right"
+                 title="Open"
+             >
+                <i class="fa-solid fa-square-up-right fa-xl"></i>
             </a>`;
 
     if (currentUserRole !== 'User') {
         buttons += `
-             <a href="${editUrl}" class="btn btn-icon-edit me-3" target="_blank">
-                <i class="fa-solid fa-square-pen fa-2xl"></i>
+             <a href="${editUrl}" 
+                 class="btn btn-icon-edit me-3" 
+                 target="_blank"
+                 data-bs-toggle="tooltip"
+			     data-bs-placement="right"
+                 title="Edit"
+             >
+                <i class="fa-solid fa-square-pen fa-xl"></i>
             </a>`;
 
         if (entityType !== 'ApiUser') {
             buttons += `
-                <a href="${deleteUrl}" class="btn btn-icon-delete" target="_blank">
-                    <i class="fa-solid fa-trash-can fa-2xl"></i>
+                <a href="${deleteUrl}" 
+                    class="btn btn-icon-delete" 
+                    target="_blank"
+                    data-bs-toggle="tooltip"
+			        data-bs-placement="right"
+                    title="Delete"
+                >
+                    <i class="fa-solid fa-trash-can fa-xl"></i>
                 </a>`;
         }
     }

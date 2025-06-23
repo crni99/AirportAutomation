@@ -93,3 +93,11 @@ body {
 footer a {
     text-decoration: none;
 }
+
+.tooltip {
+    padding-left: 10px;
+}
+
+.tooltip-arrow {
+    padding-left: 17px;
+}

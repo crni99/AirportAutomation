@@ -39,16 +39,20 @@
 			@Html.DisplayNameFor(model => model.Passenger)
 		</dt>
 		<dd class="col-sm-10">
-			&nbsp;
+			<a href="@Url.Action("Details", "Passenger", new { id = Model.Passenger.Id })"
+			   target="_blank"
+			   class="btn-icon-open"
+			   data-bs-toggle="tooltip"
+			   data-bs-placement="right"
+			   title="Click for more details">
+				<i class="fa-solid fa-square-up-right fa-xl"></i>
+			</a>
 		</dd>
 		<dt class="col-sm-2">
 			@Html.DisplayNameFor(model => model.Passenger.Id)
 		</dt>
 		<dd class="col-sm-10">
-			@Html.ActionLink(Model.Passenger.Id.ToString(), "Details", "Passenger",
-			new { id = Model.Passenger.Id },
-			new { target = "_blank", @class = "btn btn-info", data_bs_toggle = "tooltip", data_bs_placement = "right", data_bs_title = "Click for more details." }
-			)
+			@Html.DisplayFor(model => model.Passenger.Id)
 		</dd>
 		<dt class="col-sm-2">
 			@Html.DisplayNameFor(model => model.Passenger.FirstName)
@@ -75,10 +79,7 @@
 			@Html.DisplayNameFor(model => model.TravelClass.Id)
 		</dt>
 		<dd class="col-sm-10">
-			<a href="@Url.Action("Index", "TravelClass")"
-			   target="_blank" class="btn btn-info" data-bs-toggle="tooltip" data-bs-placement="right" data-bs-title="Click for more details.">
-				@Model.TravelClass.Id
-			</a>
+			@Html.DisplayFor(model => model.TravelClass.Id)
 		</dd>
 		<dt class="col-sm-2">
 			@Html.DisplayNameFor(model => model.TravelClass.Type)
@@ -93,16 +94,20 @@
 			@Html.DisplayNameFor(model => model.Flight)
 		</dt>
 		<dd class="col-sm-10">
-			&nbsp;
+			<a href="@Url.Action("Details", "Flight", new { id = Model.Flight.Id })"
+			   target="_blank"
+			   class="btn-icon-open"
+			   data-bs-toggle="tooltip"
+			   data-bs-placement="right"
+			   title="Click for more details">
+				<i class="fa-solid fa-square-up-right fa-xl"></i>
+			</a>
 		</dd>
 		<dt class="col-sm-2">
 			@Html.DisplayNameFor(model => model.Flight.Id)
 		</dt>
 		<dd class="col-sm-10">
-			@Html.ActionLink(Model.Flight.Id.ToString(), "Details", "Flight",
-			new { id = Model.Flight.Id },
-			new { target = "_blank", @class = "btn btn-info", data_bs_toggle = "tooltip", data_bs_placement = "right", data_bs_title = "Click for more details." }
-			)
+			@Html.DisplayFor(model => model.Flight.Id)
 		</dd>
 		<dt class="col-sm-2">
 			@Html.DisplayNameFor(model => model.Flight.DepartureDate)
@@ -118,7 +123,7 @@
 		</dd>
 	</dl>
 </div>
-<hr />
+<br />
 @if (TempData["AlertMessage"] != null)
 {
 	@await Html.PartialAsync("_AlertPartial", TempData)
