@@ -1,9 +1,10 @@
 ﻿function fetchData(fetchURL, entityType, page = 1) {
-
     var requestURL = createURL(fetchURL, entityType, page);
 
     var tableHead = $('#tableHead');
     var tableBody = $('#tableBody');
+
+    $('#loadingSpinner').show();
 
     $.ajax({
         url: requestURL,
@@ -36,6 +37,9 @@
             console.error('Error:', status, error);
             console.error('Response:', xhr.responseText);
             showAlertInContainer('An error occurred while fetching data.', 'danger');
+        },
+        complete: function () {
+            $('#loadingSpinner').hide();
         }
     });
 }

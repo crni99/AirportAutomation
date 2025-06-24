@@ -1,4 +1,7 @@
 ﻿<div class="form-horizontal">
+	<div id="loadingSpinnerContainer">
+		@await Html.PartialAsync("_LoadingSpinner")
+	</div>
 	<div class="form-group" id="dataForm" style="display:none;">
 		<hr />
 		@await Html.PartialAsync("_TableLayout")

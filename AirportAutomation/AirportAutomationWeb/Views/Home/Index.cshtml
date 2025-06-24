@@ -35,11 +35,7 @@
 		</form>
 	</div>
 	<div class="col-md-4">
-		<div id="spinner" style="display:none; text-align: center; margin-top: 20px;">
-			<div class="spinner-border text-primary" style="width: 3rem; height: 3rem;" role="status">
-				<span class="visually-hidden">Loading...</span>
-			</div>
-		</div>
+		@await Html.PartialAsync("_LoadingSpinner")
 	</div>
 </div>
 <br />
@@ -60,7 +56,7 @@
 			setInterval(updateDateTime, 1000);
 
 			document.getElementById("loginForm").addEventListener("submit", function () {
-			document.getElementById("spinner").style.display = "block";
+			document.getElementById("loadingSpinner").style.display = "block";
 		});
 		};
 	</script>
