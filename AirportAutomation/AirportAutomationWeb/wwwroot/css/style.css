@@ -25,6 +25,14 @@ tr {
     z-index: 1000;
 }
 
+#rowsPerPage {
+    height: 41.6px;
+    padding: 8px 16px;
+    box-sizing: border-box;
+    border-radius: 6px;
+    vertical-align: middle;
+}
+
 body {
     padding-bottom: 60px;
 }

@@ -44,9 +44,26 @@
     });
 }
 
+function createPaginationParams(page) {
+    let storedPageSize = localStorage.getItem('pageSize');
+    let selectedPageSize = $('#rowsPerPage').val();
+    let pageSize = 10;
+
+    if (selectedPageSize) {
+        pageSize = selectedPageSize;
+        if (selectedPageSize !== storedPageSize) {
+            localStorage.setItem('pageSize', selectedPageSize);
+        }
+    } else if (storedPageSize) {
+        pageSize = storedPageSize;
+    }
+
+    return `page=${page}&pageSize=${pageSize}`;
+}
+
 function createURL(fetchURL, entityType, page) {
-    var pageSize = 10;
-    var paginationParams = `page=${page}&pageSize=${pageSize}`;
+   
+    var paginationParams = createPaginationParams(page);
 
     switch (entityType) {
 
