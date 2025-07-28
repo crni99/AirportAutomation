@@ -1,8 +1,9 @@
 
 # AirportAutomation <br /> [![.NET](https://github.com/crni99/AirportAutomation/actions/workflows/dotnet.yml/badge.svg)](https://github.com/crni99/AirportAutomation/actions/workflows/dotnet.yml) [![CodeQL](https://github.com/crni99/AirportAutomation/actions/workflows/github-code-scanning/codeql/badge.svg)](https://github.com/crni99/AirportAutomation/actions/workflows/github-code-scanning/codeql)
 
-## [AirportAutomationAPI](https://github.com/crni99/AirportAutomation/tree/main/AirportAutomation/Airport%D0%90utomationApi)
-In this project, I have undertaken the challenge of developing a full-fledged Web API. It involves several key components and practices that I believe are fundamental in building a successful API. Here's a brief overview of what you can expect to find in this project:
+In this project, I have designed and implemented a robust Web API as part of a full-stack application that includes both MVC and React frontends. Here's a brief overview of what you can expect to find in this project:
+
+## 🔧 Backend: [AirportAutomationAPI](https://github.com/crni99/AirportAutomation/tree/main/AirportAutomation/Airport%D0%90utomationApi)
 
 ### Creating the API and Returning Resources:
 - Establishing the foundation of the Web API and defining endpoints.
@@ -50,8 +51,7 @@ In this project, I have undertaken the challenge of developing a full-fledged We
 
 ___
 
-## [AirportAutomationWEB](https://github.com/crni99/AirportAutomation/tree/main/AirportAutomation/AirportAutomationWeb)
-
+## 🌐 Web Frontend (MVC): [AirportAutomationWEB](https://github.com/crni99/AirportAutomation/tree/main/AirportAutomation/AirportAutomationWeb)
 
 ### Consuming APIs with HttpClientFactory:
 - Implementing efficient API calls using HttpClientFactory for improved performance and resource management, ensuring seamless integration with external APIs while maintaining optimal usage of resources.
@@ -67,6 +67,26 @@ ___
 
 ### Ensuring Web Application Security:
 - Implementing security measures to protect against common web vulnerabilities, enforcing HTTPS, securing data transmission, and safeguarding against threats like Cross-Site Scripting (XSS), Cross-Site Request Forgery (CSRF) and Cross-Origin Resource Sharing (CORS).
+
+___
+
+## ⚛️ React Frontend: [AirportAutomationReact](https://github.com/crni99/AirportAutomationReact)  
+[![Node.js CI](https://github.com/crni99/AirportAutomationReact/actions/workflows/node.js.yml/badge.svg)](https://github.com/crni99/AirportAutomationReact/actions/workflows/node.js.yml)
+[![CodeQL](https://github.com/crni99/AirportAutomationReact/actions/workflows/github-code-scanning/codeql/badge.svg)](https://github.com/crni99/AirportAutomationReact/actions/workflows/github-code-scanning/codeql)
+[![Vercel](https://img.shields.io/badge/Vercel-Deploy-success?logo=vercel&logoColor=white)](https://airport-automation-react.vercel.app/)
+[![Netlify Status](https://api.netlify.com/api/v1/badges/8a260e13-1391-41a7-b0f0-17fdfad59a40/deploy-status)](https://airport-automation-react.netlify.app/)
+
+This React application provides a modern, responsive frontend that communicates directly with the [AirportAutomationAPI](https://github.com/crni99/AirportAutomation). It is designed to enhance user experience and facilitate intuitive interactions for flight booking, airport data management, and more.
+
+### Highlights:
+- Built with modern React (hooks, functional components).
+- State management with Context API or Redux.
+- API integration for live data fetching and updates.
+- Secure authentication with JWT and role-based access.
+- Dynamic routing with `React Router`.
+- Form handling with React Hook Form and validation.
+- Deployed on **[Vercel](https://airport-automation-react.vercel.app/)** and **[Netlify](https://airport-automation-react.netlify.app/)**.
+
 ___
 
 This project represents my commitment to learning and mastering various facets of web development, particularly in the realm of Web APIs. I hope that the knowledge and insights shared here prove valuable to fellow developers and enthusiasts who are embarking on similar journeys.
