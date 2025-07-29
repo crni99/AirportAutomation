@@ -30,13 +30,25 @@ In this project, I have designed and implemented a robust Web API as part of a f
 - Ensuring API security involves robust authentication and authorization mechanisms.
 - CORS is carefully configured to permit legitimate cross-origin requests while maintaining security against unauthorized access.
 
+### Role-Based Authorization:
+- Implemented role-based access control with policies:
+  - `RequireSuperAdminRole`
+  - `RequireAdminRole`
+  - `RequireUserRole`
+- Fine-grained endpoint access based on user roles ensures secure handling of sensitive data.
+
+### CORS Policy:
+- Enabled a global CORS policy (`_AllowAll`) to facilitate frontend-backend communication during development.
+- Consider configuring more restrictive CORS policies in production for enhanced security.
+
 ### Versioning and Documenting API with Swagger:
 - Managing API versions to maintain backward compatibility.
 - Documenting the API endpoints for easy consumption by developers.
 
 ### Logging and Exception Handling for Error Management:
-- Implementing comprehensive logging and exception handling mechanisms to track system activities, record errors, and manage unforeseen scenarios within the application.
-- This integrated approach ensures better visibility into the application's behavior, simplifies troubleshooting efforts and contributes to the overall maintainability and reliability of the API.
+- Integrated Serilog for structured, centralized logging with configuration read from app settings.
+- Added custom middleware (`RequestLogContextMiddleware`) to enrich logs with request context such as trace identifiers.
+- Implemented a global exception handler middleware (`GlobalExceptionHandler`) to ensure consistent error responses and to capture unhandled exceptions in logs.
 
 ### API Rate Limiting:
 - Implementing a rate limiter is crucial for Protecting API Resources by preventing abuse, fortifying the system against DDoS Attacks, and Enhancing API Performance.
@@ -48,7 +60,6 @@ In this project, I have designed and implemented a robust Web API as part of a f
 ### Monitoring Application Health with HealthChecks:
 - Monitoring the health of critical components, such as databases and external dependencies, to proactively identify and address potential issues.
 - Configuring health check endpoints to offer insights into the overall well-being of the application, and integrating these checks into the Swagger documentation for visibility and ease of access.
-
 ___
 
 ## 🌐 Web Frontend (MVC): [AirportAutomationWEB](https://github.com/crni99/AirportAutomation/tree/main/AirportAutomation/AirportAutomationWeb)
@@ -67,7 +78,6 @@ ___
 
 ### Ensuring Web Application Security:
 - Implementing security measures to protect against common web vulnerabilities, enforcing HTTPS, securing data transmission, and safeguarding against threats like Cross-Site Scripting (XSS), Cross-Site Request Forgery (CSRF) and Cross-Origin Resource Sharing (CORS).
-
 ___
 
 ## ⚛️ React Frontend: [AirportAutomationReact](https://github.com/crni99/AirportAutomationReact)  
@@ -86,7 +96,6 @@ This React application provides a modern, responsive frontend that communicates 
 - Dynamic routing with `React Router`.
 - Form handling with React Hook Form and validation.
 - Deployed on **[Vercel](https://airport-automation-react.vercel.app/)** and **[Netlify](https://airport-automation-react.netlify.app/)**.
-
 ___
 
 This project represents my commitment to learning and mastering various facets of web development, particularly in the realm of Web APIs. I hope that the knowledge and insights shared here prove valuable to fellow developers and enthusiasts who are embarking on similar journeys.
