@@ -30,6 +30,9 @@ builder.Services.AddControllers().AddJsonOptions(options =>
 	options.JsonSerializerOptions.Converters.Add(new TimeOnlyJsonConverter());
 });
 
+builder.Services.AddSession();
+builder.Services.AddAntiforgery();
+
 BinderConfiguration.Binders(builder.Services);
 
 var app = builder.Build();

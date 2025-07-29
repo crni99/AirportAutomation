@@ -40,7 +40,10 @@
 									</button>
 									<ul class="dropdown-menu">
 										<li><a class="dropdown-item" asp-area="" asp-controller="Passenger" asp-action="Index">All Passengers</a></li>
-										<li><a class="dropdown-item" asp-area="" asp-controller="Passenger" asp-action="Create">Add Passenger</a></li>
+										@if (ViewBag.ApiUserRole != "User")
+										{
+											<li><a class="dropdown-item" asp-area="" asp-controller="Passenger" asp-action="Create">Add Passenger</a></li>
+										}
 									</ul>
 								</div>
 							</li>
@@ -55,7 +58,10 @@
 									</button>
 									<ul class="dropdown-menu">
 										<li><a class="dropdown-item" asp-area="" asp-controller="Destination" asp-action="Index">All Destinations</a></li>
-										<li><a class="dropdown-item" asp-area="" asp-controller="Destination" asp-action="Create">Add Destination</a></li>
+										@if (ViewBag.ApiUserRole != "User")
+										{
+											<li><a class="dropdown-item" asp-area="" asp-controller="Destination" asp-action="Create">Add Destination</a></li>
+										}
 									</ul>
 								</div>
 							</li>
@@ -67,7 +73,10 @@
 									</button>
 									<ul class="dropdown-menu">
 										<li><a class="dropdown-item" asp-area="" asp-controller="Pilot" asp-action="Index">All Pilots</a></li>
-										<li><a class="dropdown-item" asp-area="" asp-controller="Pilot" asp-action="Create">Add Pilot</a></li>
+										@if (ViewBag.ApiUserRole != "User")
+										{
+											<li><a class="dropdown-item" asp-area="" asp-controller="Pilot" asp-action="Create">Add Pilot</a></li>
+										}
 									</ul>
 								</div>
 							</li>
@@ -79,7 +88,10 @@
 									</button>
 									<ul class="dropdown-menu">
 										<li><a class="dropdown-item" asp-area="" asp-controller="Airline" asp-action="Index">All Airlines</a></li>
-										<li><a class="dropdown-item" asp-area="" asp-controller="Airline" asp-action="Create">Add Airline</a></li>
+										@if (ViewBag.ApiUserRole != "User")
+										{
+											<li><a class="dropdown-item" asp-area="" asp-controller="Airline" asp-action="Create">Add Airline</a></li>
+										}
 									</ul>
 								</div>
 							</li>
@@ -91,7 +103,10 @@
 									</button>
 									<ul class="dropdown-menu">
 										<li><a class="dropdown-item" asp-area="" asp-controller="Flight" asp-action="Index">All Flights</a></li>
-										<li><a class="dropdown-item" asp-area="" asp-controller="Flight" asp-action="Create">Add Flight</a></li>
+										@if (ViewBag.ApiUserRole != "User")
+										{
+											<li><a class="dropdown-item" asp-area="" asp-controller="Flight" asp-action="Create">Add Flight</a></li>
+										}
 									</ul>
 								</div>
 							</li>
@@ -103,7 +118,10 @@
 									</button>
 									<ul class="dropdown-menu">
 										<li><a class="dropdown-item" asp-area="" asp-controller="PlaneTicket" asp-action="Index">All Plane Tickets</a></li>
-										<li><a class="dropdown-item" asp-area="" asp-controller="PlaneTicket" asp-action="Create">Add Plane Ticket</a></li>
+										@if (ViewBag.ApiUserRole != "User")
+										{
+											<li><a class="dropdown-item" asp-area="" asp-controller="PlaneTicket" asp-action="Create">Add Plane Ticket</a></li>
+										}
 									</ul>
 								</div>
 							</li>
