@@ -7,6 +7,7 @@ using AirportАutomation.Api.Helpers;
 using AspNetCoreRateLimit;
 using HealthChecks.UI.Client;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Versioning;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
@@ -38,6 +39,28 @@ builder.Services.AddControllers(
 		options => options.UseDateOnlyTimeOnlyStringConverters())
 	.AddJsonOptions(options => options.UseDateOnlyTimeOnlyStringConverters())
 	.AddNewtonsoftJson();
+
+builder.Services.Configure<ApiBehaviorOptions>(options =>
+{
+	options.InvalidModelStateResponseFactory = context =>
+	{
+		var problemDetails = new ValidationProblemDetails(context.ModelState)
+		{
+			Type = "https://tools.ietf.org/html/rfc9457",
+			Title = "Validation failed.",
+			Status = StatusCodes.Status400BadRequest,
+			Instance = context.HttpContext.Request.Path
+		};
+
+		problemDetails.Extensions["traceId"] = context.HttpContext.TraceIdentifier;
+
+		return new BadRequestObjectResult(problemDetails)
+		{
+			ContentTypes = { "application/problem+json", "application/json" }
+		};
+	};
+});
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(setupAction =>
 {
