@@ -32,6 +32,10 @@
             paginationInfo(data.data.pageNumber, data.data.totalPages, data.data.totalCount);
             updatePagination(data.data.pageNumber, data.data.lastPage);
             $('[data-bs-toggle="tooltip"]').tooltip();
+
+            if (entityType === 'TravelClass') {
+                $('#paginationContainer').hide();
+            }
         },
         error: function (xhr, status, error) {
             console.error('Error:', status, error);

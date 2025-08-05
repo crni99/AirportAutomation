@@ -50,25 +50,12 @@
 @await Html.PartialAsync("Index/_FormContainer")
 
 @section Scripts {
+	<script src="~/js/CommonFetch.js"> </script>
 	<script>
-		$(document).ready(function () {
-			var typeName = '@typeName';
-			var fetchUrl = '@Url.Action("GetPlaneTickets", typeName, new { area = "", name = "" })';
+		var typeName = '@typeName';
+		var fetchUrl = '@Url.Action("GetPlaneTickets", typeName, new { area = "", name = "" })';
 
-			$('#searchButton').on('click', function () {
-				fetchData(fetchUrl, typeName, 1);
-			});
-
-			fetchData(fetchUrl, typeName, 1);
-
-			$(document).on('click', '.page-link', function (e) {
-				e.preventDefault();
-				var page = $(this).data('page');
-				if (page) {
-					fetchData(fetchUrl, typeName, page);
-				}
-			});
-		});
+		initFetchControls(typeName, fetchUrl);
 	</script>
 	<script src="~/js/GetHelper.js"></script>
 	<script src="~/js/OpenHelper.js"></script>
